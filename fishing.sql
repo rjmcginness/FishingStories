@@ -165,3 +165,19 @@ ALTER TABLE outing_spots
 ADD CONSTRAINT fk_outing_spots_fishing_spots
 FOREIGN KEY(fishing_spot_id)
 REFERENCES fishing_spots(id);
+
+CREATE TABLE fish_caught (
+    angler_id INT NOT NULL
+    fish_id INT NOT NULL
+    PRIMARY KEY(angler_id, fish_id)
+);
+
+ALTER TABLE fish_caught
+ADD CONSTRAINT fk_fish_caught_fish
+FOREIGN KEY(fk_fish_id)
+REFERENCES fish(id)
+
+ALTER TABLE fish_caught
+ADD CONSTRAINT fk_fish_caught_anglers
+FOREIGN KEY(fk_angler_id)
+REFERENCES anglers(id)
