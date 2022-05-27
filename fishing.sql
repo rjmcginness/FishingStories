@@ -97,10 +97,9 @@ REFERENCES anglers(id);
 CREATE TABLE fishing_outings (
 	id SERIAL,
 	date TIMESTAMP NOT NULL,
-	type TEXT NOT NULL,
+	trip_type TEXT NOT NULL,
 	description TEXT,
-	salt_water BOOLEAN,
-	party_size INTEGER,
+	water TEXT,
 	PRIMARY KEY(id)
 );
 
@@ -122,6 +121,7 @@ REFERENCES fishing_outings(id);
 
 CREATE TABLE fishing_conditions (
 	id SERIAL,
+	timestamp TIMESTAMP NOT NULL,
 	weather TEXT NOT NULL,
 	tide_phase TEXT NOT NULL,
 	moon_phase TEXT,
@@ -131,6 +131,7 @@ CREATE TABLE fishing_conditions (
 	current_speed NUMERIC,
     pressure_today Numeric,
     pressure_yesterday Numeric,
+    fishing_spot_id INT NOT NULL
 	PRIMARY KEY(id)
 );
 
@@ -139,16 +140,13 @@ CREATE TABLE fishing_spots (
 	name TEXT NOT NULL,
 	gps_coordinates DECIMAL NOT NULL UNIQUE,
 	description TEXT,
-	time_in TIMESTAMP,
-	time_out TIMESTAMP,
 	PRIMARY KEY(id),
-	fishing_conditions_id INT NOT NULL
 );
 
-ALTER TABLE fishing_spots
-ADD CONSTRAINT fk_fishing_conditions_fishing_spot
-FOREIGN KEY(fishing_conditions_id)
-REFERENCES fishing_conditions(id);
+ALTER TABLE fishing_conditions
+ADD CONSTRAINT fk__fishing_spot
+FOREIGN KEY(fishing_spot_id)
+REFERENCES fishing_spots(id);
 
 CREATE TABLE outing_spots (
 	fishing_outing_id INT NOT NULL,
