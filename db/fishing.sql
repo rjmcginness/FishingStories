@@ -1,3 +1,24 @@
+-- kill other connections
+SELECT pg_terminate_backend(pg_stat_activity.pid)
+FROM pg_stat_activity
+WHERE pg_stat_activity.datname = 'fishing_stories' AND pid <> pg_backend_pid();
+-- (re)create the database
+DROP DATABASE IF EXISTS fishing_stories;
+CREATE DATABASE fishing_stories;
+-- connect via psql
+\c fishing_stories
+
+-- database configuration
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET default_tablespace = '';
+SET default_with_oids = false;
+
+
 CREATE TABLE fishing_gear (
 	id SERIAL,
 	rod TEXT NOT NULL,
@@ -21,12 +42,14 @@ CREATE TABLE baits (
 CREATE TABLE fishes (
 	id SERIAL,
 	species TEXT NOT NULL,
+	datetime_caught TIMESTAMP NOT NULL,
 	weight NUMERIC,
 	length NUMERIC,
 	description TEXT,
 	PRIMARY KEY(id),
 	bait_id INT NOT NULL,
-	fishing_gear_id INT NOT NULL
+	fishing_gear_id INT NOT NULL,
+	fishing_spot_id INT NOT NULL
 );
 
 ALTER TABLE fishes
@@ -131,7 +154,7 @@ CREATE TABLE fishing_conditions (
 	current_speed NUMERIC,
     pressure_today Numeric,
     pressure_yesterday Numeric,
-    fishing_spot_id INT NOT NULL
+    fishing_spot_id INT NOT NULL,
 	PRIMARY KEY(id)
 );
 
@@ -140,7 +163,7 @@ CREATE TABLE fishing_spots (
 	name TEXT NOT NULL,
 	gps_coordinates DECIMAL NOT NULL UNIQUE,
 	description TEXT,
-	PRIMARY KEY(id),
+	PRIMARY KEY(id)
 );
 
 ALTER TABLE fishing_conditions
@@ -164,18 +187,7 @@ ADD CONSTRAINT fk_outing_spots_fishing_spots
 FOREIGN KEY(fishing_spot_id)
 REFERENCES fishing_spots(id);
 
-CREATE TABLE fish_caught (
-    angler_id INT NOT NULL
-    fish_id INT NOT NULL
-    PRIMARY KEY(angler_id, fish_id)
-);
-
-ALTER TABLE fish_caught
-ADD CONSTRAINT fk_fish_caught_fish
-FOREIGN KEY(fk_fish_id)
-REFERENCES fish(id)
-
-ALTER TABLE fish_caught
-ADD CONSTRAINT fk_fish_caught_anglers
-FOREIGN KEY(fk_angler_id)
-REFERENCES anglers(id)
+ALTER TABLE fishes
+ADD CONSTRAINT fk_fishing_spot
+FOREIGN KEY(fishing_spot_id)
+REFERENCES fishing_spots(id)
