@@ -39,16 +39,14 @@ account_types = Table('account_type',
                       )
 
 # bridge table: account_type and priviledges
-account_priviledges = Table('account_priviledges',
+account_priviledges = Table('account_priviledge',
                             metadata_obj,
-                            Column('priviledge_id',
-                                   ForeignKey('priviledge.id'),
-                                   primary_key=True,
-                                   nullable=False),
                             Column('account_type_id',
                                    ForeignKey('account_type.id'),
-                                   primary_key=True,
-                                   nullable=False),
+                                   primary_key=True),
+                            Column('priviledge_id',
+                                   ForeignKey('priviledge.id'),
+                                   primary_key=True)
                             )
 
 anglers = Table('angler',
@@ -94,20 +92,6 @@ fishing_gear = Table('fishing_gear',
                      Column('leader', String)
                      )
 
-fishing_conditions = Table('fishing_conditions',
-                           metadata_obj,
-                           Column('id', Integer, primary_key=True),
-                           Column('weather', String, nullable=False),
-                           Column('tide_pahse', String, nullable=False),
-                           Column('current_flow', String),
-                           Column('current_speed', Numeric),
-                           Column('moon_phase', String),
-                           Column('wind_direction', String(3)),
-                           Column('wind_speed', Integer),
-                           Column('pressure_yesterday', Numeric),
-                           Column('pressure_today', Numeric)
-                           )
-
 fishing_spots = Table('fishing_spot',
                       metadata_obj,
                       Column('id', Integer, primary_key=True),
@@ -116,18 +100,30 @@ fishing_spots = Table('fishing_spot',
                              Numeric,
                              nullable=False,
                              unique=True),
-                      Column('time_in', DateTime, nullable=True),
-                      Column('time_out', DateTime, nullable=True),
-                      Column('description', String),
-                      Column('fishing_conditions_id',
-                             ForeignKey('fishing_conditions.id'),
-                             nullable=False)
+                      Column('description', String)
                       )
+
+fishing_conditions = Table('fishing_condition',
+                           metadata_obj,
+                           Column('id', Integer, primary_key=True),
+                           Column('timestamp', DateTime, nullable=False),
+                           Column('weather', String, nullable=False),
+                           Column('tide_phase', String, nullable=False),
+                           Column('current_flow', String),
+                           Column('current_speed', Numeric),
+                           Column('moon_phase', String),
+                           Column('wind_direction', String),
+                           Column('wind_speed', Integer),
+                           Column('pressure_yesterday', Numeric),
+                           Column('pressure_today', Numeric),
+                           Column('fishing_spot_id', ForeignKey('fishing_spot.id'))
+                           )
 
 fishes = Table('fish',
                metadata_obj,
                Column('id', Integer, primary_key=True),
                Column('species', String, nullable=False),
+               Column('datetime_caught', DateTime, nullable=False),
                Column('description', String),
                Column('weight', Numeric),
                Column('length', Numeric),
@@ -144,7 +140,7 @@ fishing_outings = Table('fishing_outing',
                         metadata_obj,
                         Column('id', Integer, primary_key=True),
                         Column('date', Date, nullable=False),
-                        Column('type', String, nullable=False),
+                        Column('trip_type', String, nullable=False),
                         Column('water', String),
                         Column('description', String)
                         )
@@ -184,3 +180,78 @@ fish_caught = Table('fish_caught',
                     )
 
 metadata_obj.create_all(engine)
+
+from sqlalchemy import insert
+from sqlalchemy import select
+from sqlalchemy import bindparam
+
+stmt = insert(baits).values(name='Tsunami Swimshad',
+                            artificial=False,
+                            size=6.0,
+                            color='black back',
+                            description='soft plastic')
+
+print(stmt)
+
+with engine.connect() as conn:
+    result = conn.execute(stmt)
+    print(result.inserted_primary_key)
+    result = conn.execute(insert(fishing_gear),
+                         [
+                             {'rod':"Penn Carnage II 10'",
+                              'leader':'Seaguar Gold 50lb'}
+                         ]
+                        )
+    print(result.inserted_primary_key)
+    conn.commit()
+    
+with engine.connect() as conn:
+    result = conn.execute(insert(priviledges),
+                          [
+                              {'name': 'attend outing'},
+                              {'name': 'view predictions'},
+                              {'name': 'add fish'}
+                          ]
+                         )
+    
+    result = conn.execute(insert(account_types),
+                          [
+                              {'name': 'Basic', 'price': 19.99},
+                              {'name': 'Intermediate', 'price': 39.99},
+                              {'name': 'Advanced', 'price': 79.99}
+                          ]
+                         )
+    
+    priviledge_subq = (select(priviledges.c.id).
+                   where(priviledges.c.name==bindparam('name')).
+                   scalar_subquery())
+    account_type_subq = (select(account_types.c.id).
+                         where(account_types.c.name=='Intermediate').
+                         scalar_subquery())
+    
+    result = conn.execute(insert(account_priviledges).
+                          values(priviledge_id=priviledge_subq,
+                                 account_type_id=account_type_subq),
+                          [
+                              {'name': 'attend outing'},
+                              {'name': 'add fish'}
+                          ]
+                         )
+    
+    print(result.inserted_primary_key_rows)
+    
+    
+    conn.commit()
+
+stmt = select(baits).where(baits.c.id == 1)
+with engine.connect() as conn:
+    for row in conn.execute(stmt):
+        print(row.name)
+        
+stmt = select(account_priviledges)
+with engine.connect() as conn:
+    for row in conn.execute(stmt):
+        print(row.account_type_id, row.priviledge_id)
+    
+        
+    

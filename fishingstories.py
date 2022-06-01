@@ -58,7 +58,7 @@ class UserAccount(Base):
     username = Column(String(30), nullable=False, unique=True)
     password = Column(String(20), nullable=False)
     account_type_id = Column(Integer, ForeignKey('account_types.id'))
-    account_id = Column(Integer, ForeignKey('account_types.id'))
+    angler_id = Column(Integer, ForeignKey('anglers.id'))
     
     account = relationship('AccountType', back_populates='children')
     angler = relationship('Angler',
@@ -134,6 +134,7 @@ class FishingOuting(Base):
     date = Column(Date, nullable=False)
     trip_type = Column(String, nullable=False)
     water = Column(String)
+    description = Column(String)
     
     fishing_spots = relationship('FishingSpot', secondary=fished_spots)
     anglers = relationship('Angler',
@@ -162,7 +163,7 @@ class FishingConditions(Base):
     id = Column(Integer, primary_key=True)
     weather = Column(String, nullable=False)
     tide_phase = Column(String, nullable=False)
-    time_stamp = Column(String, nullable=False)
+    time_stamp = Column(DateTime, nullable=False)
     current_flow = Column(String)
     current_speed = Column(Numeric)
     moon_phase = Column(String(20))
@@ -189,5 +190,8 @@ class Fish(Base):
     anglers = relationship('Angler', secondary=fish_caught_table)
 
 Base.metadata.create_all(engine)
-    
-    
+
+
+from sqlalchemy import insert
+
+stmt = insert()
