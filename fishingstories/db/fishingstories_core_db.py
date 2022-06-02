@@ -252,6 +252,12 @@ stmt = select(account_priviledges)
 with engine.connect() as conn:
     for row in conn.execute(stmt):
         print(row.account_type_id, row.priviledge_id)
+
+
+stmt = select(baits)
+with engine.connect() as conn:
+    for row in conn.execute(stmt):
+        print('>>>>>>>>', row.name)
     
         
     
