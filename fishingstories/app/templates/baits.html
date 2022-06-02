@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Fishing Stories - Baits</title>
+    <style>
+        h1 {
+            color: green;
+        }
+        td {
+            color: darkgreen;
+        }
+    </style>
+</head>
+<body>
+    <h1>Baits</h1>
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Artificial</th>
+            <th>Size</th>
+            <th>Color</th>
+            <th>Description</th>
+        </thead>
+        <tbody>
+            {% for bait in baits %}
+            <tr>
+                <td>{{ bait.name }}</td>
+                <td>{{ bait.artificial }}</td>
+                <td>{{ bait.size }}</td>
+                <td>{{ bait.color }}</td>
+                <td>{{ bait.description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
