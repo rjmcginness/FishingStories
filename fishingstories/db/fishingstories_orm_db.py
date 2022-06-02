@@ -60,9 +60,8 @@ class UserAccount(Base):
     account_type_id = Column(Integer, ForeignKey('account_types.id'))
     angler_id = Column(Integer, ForeignKey('anglers.id'))
     
-    account = relationship('AccountType', back_populates='children')
     angler = relationship('Angler',
-                          back_populates='user_accounts',
+                          back_populates='anglers',
                           uselist=False)
 
 fish_caught_table = Table('fish_caught',
@@ -178,7 +177,7 @@ class Fish(Base):
     
     id = Column(Integer, primary_key=True)
     species = Column(String, nullable=False)
-    when_caught = Column(DateTime, nullable=False)
+    datetime_caught = Column(DateTime, nullable=False)
     weight = Column(Numeric)
     length = Column(Numeric)
     description = Column(String)
@@ -194,4 +193,8 @@ Base.metadata.create_all(engine)
 
 from sqlalchemy import insert
 
-stmt = insert()
+tsunami = Bait(name='Tsunami Swimshad',
+               artificial=True,
+               size=6.0,
+               color='black back',
+               description='soft plastic')
