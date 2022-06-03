@@ -17,6 +17,8 @@ from . import config
 
 def get_db():
     if 'db' not in g:
+        ########FIX THIS NEED ONLY ONE CONNECTION TO DB.
+        print("!!!!####>>>>!!!! DB NOT IN G")
         g.db = create_engine(config.Config.DATABASE, echo=True, future=True)
         
         # faked for now with sqlite:///:memory:

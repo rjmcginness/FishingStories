@@ -17,3 +17,12 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
+    
+
+class AddBaitForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    artificial = BooleanField('Artificial', validators=[DataRequired()])
+    size = StringField('Size')
+    color = StringField('Color')
+    description = StringField('Description')
+    submit = SubmitField('Add Bait')
