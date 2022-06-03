@@ -9,23 +9,29 @@ import sqlite3
 from flask import current_app
 from flask import g
 from sqlalchemy import create_engine
+import click
+from flask.cli import with_appcontext
 
 from . import models
+from . import config
 
 def get_db():
     if 'db' not in g:
-        # g.db = sqlite3.connect(current_app.config['DATABASE'].
-        #                        detect_types=sqlite3.PARSE_DECLTYPES)
-        # g.db.row_factory = sqlite3.Row
-        g.db = create_engine('sqlite+pysqlite:///:memory:', echo=True, future=True)
+        g.db = create_engine(config.Config.DATABASE, echo=True, future=True)
+        
+        # faked for now with sqlite:///:memory:
+        # cannot get a connection to this db in another thread like in 
+        # Flask tutorial
         models.Base.metadata.create_all(g.db)
     
     return g.db
 
-def close_db():
+def close_db(e=None):
     db = g.pop('db', None)
     
     if db is not None:
-        db.close()
+        db.dispose()
 
 
+def init_app(app):
+    app.teardown_appcontext(close_db)

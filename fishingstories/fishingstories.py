@@ -34,6 +34,10 @@ def login():
         return redirect(url_for('index'))
     return render_template('fishingstories/login.html', title='Sign In', form=form)
 
+@bp.route('/baitsmenu')
+def baits_menu():
+    return render_template('fishingstories/baitsmenu.html')
+
 @bp.route('/baits')
 def baits():
     
