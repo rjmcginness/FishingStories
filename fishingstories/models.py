@@ -18,12 +18,13 @@ from sqlalchemy import Boolean
 from sqlalchemy import DateTime
 from sqlalchemy import Date
 
-from sqlalchemy.orm import declarative_base
+# from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
 
 # engine = create_engine('sqlite+pysqlite:///:memory:', echo=True, future=True)
 
-Base = declarative_base()
+# Base = declarative_base()
+from .db import Base
 
 account_priviledges = Table('account_priviledges',
                             Base.metadata,

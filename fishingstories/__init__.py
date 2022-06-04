@@ -6,8 +6,8 @@ Created on Wed Jun  1 14:48:24 2022
 """
 
 import os
-
 from flask import Flask
+
 
 def create_app(test_config=None):
     
@@ -15,8 +15,11 @@ def create_app(test_config=None):
     app.config.from_mapping(SECRET_KEY='bron_girl',
                             DATABASE=os.path.join(app.instance_path, 'fishingstories.sqlite'))
 
-    from . import db
-    db.init_app(app)
+    from fishingstories.db import db_session
+    from fishingstories.db import init_db
+    
+    app.session = db_session
+    init_db()
 
 
     if test_config is None:
@@ -35,4 +38,6 @@ def create_app(test_config=None):
     app.add_url_rule('/', endpoint='index')
 
     return app
+
+
         

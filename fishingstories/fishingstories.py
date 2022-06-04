@@ -4,6 +4,7 @@ Created on Wed Jun  1 15:12:01 2022
 
 @author: Robert J McGinness
 """
+from flask import current_app
 from flask import Blueprint
 from flask import render_template
 from flask import flash
@@ -13,11 +14,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 #from db import fishingstories_core_db as db
-
+from . import create_app
 from . import models
-from . import db
+from .db import Base
+from .db import engine
+from .db import db_session
 from .forms import LoginForm
 from .forms import AddBaitForm
+
 
 bp = Blueprint('fishingstories', __name__)
 
@@ -54,27 +58,23 @@ def add_bait():
         
         # add new bait to database
         ######IT WOULD BE GREAT TO KEEP name+size+color unique
-        dbase = db.get_db()
-        with Session(dbase) as session:
-            session.add(bait)
-            print('#########>>>>>>>>>>', session.new)
-            session.flush()
-            session.commit()
-            
+        current_app.session.add(bait)
+        print('#########>>>>>>>>>>', current_app.session.new)
+        current_app.session.flush()
+        current_app.session.commit()
+        
         flash('Added bait {}, size={}, color={}'.format(form.name.data,
                                                       form.size.data,
                                                       form.color.data))
-        return redirect('/baitsmenu')
+        return redirect('/baits')
     
     return render_template('fishingstories/addbait.html', title='Add Bait', form=form)
 
 @bp.route('/baits')
 def baits():
     
-    dbase = db.get_db()
+    baits = current_app.session.execute(select(models.Bait))
     
-    baits = None
-    with Session(dbase) as session:
-        baits = session.execute(select(models.Bait))
+    baits = [bait[0] for bait in baits]
     
-    return render_template('fishingstories/baits.html', baits=baits)
+    return render_template('fishingstories/baits.html', baits=list(baits))
