@@ -63,7 +63,8 @@ class CurrentArachnid(scrapy.Spider):
         coords = body[0].split(','.encode('utf-8'))
         latitude = coords[0].strip()
         longitude = coords[1].strip()
-        self.__data_sack.cooordinates = latitude, longitude
+        
+        self.__data_sack.coordinates = latitude, longitude
         self.__data_sack.data = body[1:]
         
 class TideCurrentData:
@@ -85,4 +86,6 @@ if __name__ == '__main__':
     
     data = tc_data.get_data(datetime.now())
     
-    print(data)
+    print(data[0])
+    for d in data[1]:
+        print(d.decode())
