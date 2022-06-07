@@ -9,6 +9,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import PasswordField
 from wtforms import BooleanField
+from wtforms import SelectField
 from wtforms import SubmitField
 from wtforms.validators import DataRequired
 
@@ -26,3 +27,18 @@ class AddBaitForm(FlaskForm):
     color = StringField('Color')
     description = StringField('Description')
     submit = SubmitField('Add Bait')
+    
+class AddGearForm(FlaskForm):
+    rod = StringField('Rod', validators=[DataRequired()])
+    reel = StringField('Reel')
+    line = StringField('Line')
+    hook = StringField('Hook')
+    leader = StringField('Leader')
+    submit = SubmitField('Add Gear')
+
+class CreateAnglerForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    submit = SubmitField('Add Gear')
+        
+    
+    
