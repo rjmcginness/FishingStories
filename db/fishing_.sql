@@ -46,16 +46,20 @@ CREATE TABLE fishes (
 	description TEXT,
 	bait_id INT NOT NULL,
 	fishing_gear_id INT NOT NULL,
-	fishing_spot_id INT NOT NULL,
-	CONSTRAINT fk_fishes_baits
-	FOREIGN KEY(bait_id)
-	REFERENCES baits(id)
-	ON DELETE SET NULL,
-	CONSTRAINT fk_fishes_fishing_gear
-	FOREIGN KEY(fishing_gear_id)
-	REFERENCES fishing_gear(id)
-	ON DELETE SET NULL
+	fishing_spot_id INT NOT NULL
 );
+
+ALTER TABLE fishes
+ADD CONSTRAINT fk_fishes_baits
+FOREIGN KEY(bait_id)
+REFERENCES baits(id)
+ON DELETE SET NULL;
+
+ALTER TABLE fishes
+ADD CONSTRAINT fk_fishes_fishing_gear
+FOREIGN KEY(fishing_gear_id)
+REFERENCES fishing_gear(id)
+ON DELETE SET NULL;
 
 CREATE TABLE priviledges (
     id SERIAL PRIMARY KEY,
@@ -72,47 +76,45 @@ CREATE TABLE account_types_priviledges (
     priviledge_id INT NOT NULL,
     account_type_id INT NOT NULL,
     PRIMARY KEY(priviledge_id, account_type_id)
-	CONSTRAINT fk_account_types_priviledges_priviledge
-	FOREIGN KEY(priviledge_id)
-	REFERENCES priviledges(id)
-	ON DELETE CASCADE,
-	CONSTRAINT fk_account_types_priviledges_account_type
-	FOREIGN KEY(account_type_id)
-	REFERENCES account_types(id)
-	ON DELETE CASCADE
 );
 
-CREATE TABLE ranks (
-	id SERIAL PRIMARY KEY,
-	name TEXT NOT NULL UNIQUE,
-	description TEXT NOT NULL
-);
+ALTER TABLE account_types_priviledges
+ADD CONSTRAINT fk_account_types_priviledges_priviledge
+FOREIGN KEY(priviledge_id)
+REFERENCES priviledges(id)
+ON DELETE CASCADE;
 
-CREATE TABLE anglers (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    rank_id INT NOT NULL,
-	CONSTRAINT fk_anglers_ranks
-	FOREIGN KEY(rank_id)
-	REFERENCES ranks(id)
-	ON DELETE CASCADE
-);
+ALTER TABLE account_types_priviledges
+ADD CONSTRAINT fk_account_types_priviledges_account_type
+FOREIGN KEY(account_type_id)
+REFERENCES account_types(id)
+ON DELETE CASCADE;
 
 CREATE TABLE user_accounts (
     id SERIAL PRIMARY KEY,
     username CHARACTER(30) NOT NULL UNIQUE,
     password CHARACTER(20) NOT NULL,
     account_type_id INT NOT NULL,
-    angler_id INT NOT NULL,
-	CONSTRAINT fk_account_type
-	FOREIGN KEY(account_type_id)
-	REFERENCES account_types(id)
-	ON DELETE CASCADE,
-	CONSTRAINT fk_angler
-	FOREIGN KEY(angler_id)
-	REFERENCES anglers(id)
-	ON DELETE CASCADE
+    angler_id INT NOT NULL
 );
+
+CREATE TABLE anglers (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    rank TEXT
+);
+
+ALTER TABLE user_accounts
+ADD CONSTRAINT fk_account_type
+FOREIGN KEY(account_type_id)
+REFERENCES account_types(id)
+ON DELETE CASCADE;
+
+ALTER TABLE user_accounts
+ADD CONSTRAINT fk_angler
+FOREIGN KEY(angler_id)
+REFERENCES anglers(id)
+ON DELETE CASCADE;
 
 CREATE TABLE fishing_outings (
 	id SERIAL PRIMARY KEY,
@@ -125,23 +127,20 @@ CREATE TABLE fishing_outings (
 CREATE TABLE anglers_outings (
     angler_id INT NOT NULL,
     fishing_outing_id INT NOT NULL,
-    PRIMARY KEY(angler_id, fishing_outing_id),
-	CONSTRAINT fk_anglers_outings_angler
-	FOREIGN KEY(angler_id)
-	REFERENCES anglers(id)
-	ON DELETE CASCADE,
-	CONSTRAINT fk_anglers_outings_outing
-	FOREIGN KEY(fishing_outing_id)
-	REFERENCES fishing_outings(id)
-	ON DELETE CASCADE
+    PRIMARY KEY(angler_id, fishing_outing_id)
 );
 
-CREATE TABLE fishing_spots (
-	id SERIAL PRIMARY KEY,
-	name TEXT NOT NULL,
-	gps_coordinates DECIMAL NOT NULL UNIQUE,
-	description TEXT
-);
+ALTER TABLE anglers_outings
+ADD CONSTRAINT fk_anglers_outings_angler
+FOREIGN KEY(angler_id)
+REFERENCES anglers(id)
+ON DELETE CASCADE;
+
+ALTER TABLE anglers_outings
+ADD CONSTRAINT fk_anglers_outings_outing
+FOREIGN KEY(fishing_outing_id)
+REFERENCES fishing_outings(id)
+ON DELETE CASCADE;
 
 CREATE TABLE fishing_conditions (
 	id SERIAL PRIMARY KEY,
@@ -155,26 +154,39 @@ CREATE TABLE fishing_conditions (
 	current_speed NUMERIC,
     pressure_today Numeric,
     pressure_yesterday Numeric,
-    fishing_spot_id INT NOT NULL,
-	CONSTRAINT fk__fishing_spot
-	FOREIGN KEY(fishing_spot_id)
-	REFERENCES fishing_spots(id)
-	ON DELETE CASCADE
+    fishing_spot_id INT NOT NULL
 );
+
+CREATE TABLE fishing_spots (
+	id SERIAL PRIMARY KEY,
+	name TEXT NOT NULL,
+	gps_coordinates DECIMAL NOT NULL UNIQUE,
+	description TEXT
+);
+
+ALTER TABLE fishing_conditions
+ADD CONSTRAINT fk__fishing_spot
+FOREIGN KEY(fishing_spot_id)
+REFERENCES fishing_spots(id)
+ON DELETE CASCADE;
 
 CREATE TABLE outing_spots (
 	fishing_outing_id INT NOT NULL,
 	fishing_spot_id INT NOT NULL,
-	PRIMARY KEY(fishing_outing_id, fishing_spot_id),
-	CONSTRAINT fk_outing_spots_finshing_outings
-	FOREIGN KEY(fishing_outing_id)
-	REFERENCES fishing_outings(id)
-	ON DELETE CASCADE,
-	CONSTRAINT fk_outing_spots_fishing_spots
-	FOREIGN KEY(fishing_spot_id)
-	REFERENCES fishing_spots(id)
-	ON DELETE CASCADE
+	PRIMARY KEY(fishing_outing_id, fishing_spot_id)
 );
+
+ALTER TABLE outing_spots
+ADD CONSTRAINT fk_outing_spots_finshing_outings
+FOREIGN KEY(fishing_outing_id)
+REFERENCES fishing_outings(id)
+ON DELETE CASCADE;
+
+ALTER TABLE outing_spots
+ADD CONSTRAINT fk_outing_spots_fishing_spots
+FOREIGN KEY(fishing_spot_id)
+REFERENCES fishing_spots(id)
+ON DELETE CASCADE;
 
 ALTER TABLE fishes
 ADD CONSTRAINT fk_fishing_spot

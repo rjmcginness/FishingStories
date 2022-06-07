@@ -21,6 +21,8 @@ from .db import engine
 from .db import db_session
 from .forms import LoginForm
 from .forms import AddBaitForm
+from .forms import AddGearForm
+from .forms import CreateAnglerForm
 
 
 bp = Blueprint('fishingstories', __name__)
@@ -31,6 +33,7 @@ bp = Blueprint('fishingstories', __name__)
 def index():
     return render_template('fishingstories/index.html')
 
+#move this and use hashing (werkzeug.security)
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -59,8 +62,6 @@ def add_bait():
         # add new bait to database
         ######IT WOULD BE GREAT TO KEEP name+size+color unique
         current_app.session.add(bait)
-        print('#########>>>>>>>>>>', current_app.session.new)
-        current_app.session.flush()
         current_app.session.commit()
         
         flash('Added bait {}, size={}, color={}'.format(form.name.data,
@@ -78,3 +79,34 @@ def baits():
     baits = [bait[0] for bait in baits]
     
     return render_template('fishingstories/baits.html', baits=list(baits))
+
+@bp.route('/gearmenu')
+def gear_menu():
+    return render_template('fishingstories/gearmenu.html')
+
+@bp.route('/create-gear', methods=['GET', 'POST'])
+def add_gear():
+    form = AddGearForm()
+    
+    if form.validate_on_submit():
+        gear_combo = models.FishingGear(rod=form.rod.data,
+                                 reel=form.reel.data,
+                                 line=form.line.data,
+                                 leader=form.leader.data,
+                                 hook=form.hook.data)
+        current_app.session.add(gear_combo)
+        current_app.session.commit()
+        flash('Added Gear Combo')
+        
+        return redirect('/gear')
+
+    return render_template('fishingstories/addgear.html', title='Add Gear Combo', form=form)
+
+@bp.route('/gear')
+def gear():
+    gear_combos = current_app.session.execute(select(models.FishingGear))
+    
+    # take the first element in the returned tuple
+    gear_combos = [gear[0] for gear in gear_combos]
+    
+    return render_template('fishingstories/gear.html', gear_list=gear_combos)
