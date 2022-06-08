@@ -7,7 +7,6 @@ Created on Thu Jun  2 15:12:30 2022
 
 
 
-from sqlalchemy import create_engine
 from sqlalchemy import Table
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
@@ -17,23 +16,23 @@ from sqlalchemy import Numeric
 from sqlalchemy import Boolean
 from sqlalchemy import DateTime
 from sqlalchemy import Date
+from sqlalchemy import UniqueConstraint
 
-# from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
 
-# engine = create_engine('sqlite+pysqlite:///:memory:', echo=True, future=True)
 
-# Base = declarative_base()
 from .db import Base
 
 account_priviledges = Table('account_priviledges',
                             Base.metadata,
                             Column('account_type_id',
-                                   ForeignKey('account_types.id'),
-                                   primary_key=True),
+                                    ForeignKey('account_types.id',
+                                              ondelete='CASCADE'),
+                                    primary_key=True),
                             Column('priviledge_id',
-                                   ForeignKey('priviledges.id'),
-                                   primary_key=True)
+                                    ForeignKey('priviledges.id',
+                                              ondelete='CASCADE'),
+                                    primary_key=True)
                             )
 
 class AccountType(Base):
@@ -67,38 +66,65 @@ class UserAccount(Base):
     password = Column(String(20), nullable=False)
     
     # many-to-one relationship with account_types (unidirectional)
-    account_type_id = Column(Integer, ForeignKey('account_types.id'))
+    account_type_id = Column(Integer,
+                              ForeignKey('account_types.id',
+                                        ondelete='CASCADE'),
+                              nullable=False)
     
     
     # one-to-one relationship with anglers (this is the child)
-    angler_id = Column(Integer, ForeignKey('anglers.id'))
+    angler_id = Column(Integer,
+                        ForeignKey('anglers.id',
+                                  ondelete='CASCADE'),
+                        nullable=False)
     
     anglers = relationship('Angler', back_populates='user_accounts')
 
 fish_caught = Table('fish_caught',
                     Base.metadata,
-                    Column('anglers_id', ForeignKey('anglers.id'),
-                           primary_key=True),
-                    Column('fishes_id', ForeignKey('fishes.id'),
-                           primary_key=True)
+                    Column('anglers_id',
+                            ForeignKey('anglers.id',
+                                      ondelete='CASCADE'),
+                            primary_key=True),
+                    Column('fishes_id',
+                            ForeignKey('fishes.id',
+                                      ondelete='CASCADE'),
+                            primary_key=True)
                     )
 
 outings_fished = Table('outings_fished',
-                       Base.metadata,
-                       Column('fishing_outing_id',
-                              ForeignKey('fishing_outings.id'),
+                        Base.metadata,
+                        Column('fishing_outing_id',
+                              ForeignKey('fishing_outings.id',
+                                          ondelete='CASCADE'),
                               primary_key=True),
-                       Column('angler_id',
-                              ForeignKey('anglers.id'),
+                        Column('angler_id',
+                              ForeignKey('anglers.id',
+                                          ondelete='CASCADE'),
                               primary_key=True)
-                       )
+                        )
+
+class Rank(Base):
+    __tablename__ = 'ranks'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+    rank_number = Column(Integer, nullable=False, unique=True)
+    description = Column(String, nullable=False)
+    
 
 class Angler(Base):
     __tablename__ = 'anglers'
     
     id = Column(Integer, primary_key=True)
     name = Column(String(30), nullable=False, unique=True)
-    rank = Column(String(40))
+    # rank = Column(String(40))
+    rank_id = Column(Integer,
+                      ForeignKey('ranks.id',
+                                ondelete='CASCADE'),
+                      nullable=False)
+    
+    # many-to-one relationship with ranks(unidirectional)
     
     # one-to-one relationship with user_accounts
     #(unidirectional- this is parent)
@@ -131,18 +157,20 @@ class Bait(Base):
     color = Column(String)
     description = Column(String)
     
+    __table_args__ = (UniqueConstraint('name', 'size', 'color'),)
+    
     fishes = relationship('Fish')
 
 
 fished_spots = Table('fished_spots',
-                     Base.metadata,
-                     Column('fishing_outing_id',
+                      Base.metadata,
+                      Column('fishing_outing_id',
                             ForeignKey('fishing_outings.id'),
                             primary_key=True),
-                     Column('fishing_spot_id',
+                      Column('fishing_spot_id',
                             ForeignKey('fishing_spots.id'),
                             primary_key=True)
-                     )
+                      )
 
 class FishingOuting(Base):
     __tablename__ = 'fishing_outings'
@@ -187,7 +215,10 @@ class FishingConditions(Base):
     wind_speed = Column(Integer)
     pressure_yesterday = Column(Numeric)
     pressure_today = Column(Numeric)
-    fishing_spot_id = Column(Integer, ForeignKey('fishing_spots.id'))
+    fishing_spot_id = Column(Integer,
+                              ForeignKey('fishing_spots.id',
+                                        ondelete='CASCADE'),
+                              nullable=False)
 
 class Fish(Base):
     __tablename__ = 'fishes'
@@ -200,8 +231,9 @@ class Fish(Base):
     description = Column(String)
     
     bait_id = Column(Integer, ForeignKey('baits.id'))
-    fishing_gear_id = Column(Integer, ForeignKey('fishing_gear.id'))
-    fishing_spot_id = Column(Integer, ForeignKey('fishing_spots.id'))
+    fishing_gear_id = Column(Integer,
+                              ForeignKey('fishing_gear.id', ondelete='SET NULL'))
+    fishing_spot_id = Column(Integer,ForeignKey('fishing_spots.id'))
     
     anglers = relationship('Angler', secondary=fish_caught)
     

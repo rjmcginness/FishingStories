@@ -18,27 +18,11 @@ engine = create_engine(config.Config.DATABASE, echo=True, future=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
+
+# need to declare this before models is imported
 Base = declarative_base()
 
 def init_db():
+    # need to import models so that tables will be created
+    from . import models
     Base.metadata.create_all(engine)
-
-# def get_db():
-#     if 'db' not in g:
-#         ########FIX THIS NEED ONLY ONE CONNECTION TO DB.
-        
-#         g.db = db
-        
-#     return g.db
-
-# def close_db(e=None):
-#     db = g.pop('db', None)
-    
-#     if db is not None:
-#         db.dispose()
-
-# def init_db():
-#     models.Base.metadata.create_all(engine)
-
-# def init_app(app):
-#     app.teardown_appcontext(close_db)

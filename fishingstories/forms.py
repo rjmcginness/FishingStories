@@ -11,6 +11,7 @@ from wtforms import PasswordField
 from wtforms import BooleanField
 from wtforms import SelectField
 from wtforms import SubmitField
+from wtforms import IntegerField
 from wtforms.validators import DataRequired
 
 class LoginForm(FlaskForm):
@@ -28,6 +29,13 @@ class AddBaitForm(FlaskForm):
     description = StringField('Description')
     submit = SubmitField('Add Bait')
     
+    def clear(self) -> None:
+        self.name.data = ''
+        self.artificial.data = ''
+        self.size.data = ''
+        self.color.data = ''
+        self.description.data = ''
+    
 class AddGearForm(FlaskForm):
     rod = StringField('Rod', validators=[DataRequired()])
     reel = StringField('Reel')
@@ -39,6 +47,15 @@ class AddGearForm(FlaskForm):
 class CreateAnglerForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     submit = SubmitField('Add Gear')
-        
     
+class RankForm(FlaskForm):
+    name = StringField('Rank', validators=[DataRequired()])
+    rank_number = IntegerField('Rank Number (must be unique)',
+                              validators=[DataRequired()])
+    description = StringField('Description', validators=[DataRequired()])
+    submit = SubmitField('Create Rank')
     
+    def clear(self) -> None:
+        self.name.data = ''
+        self.rank_number.data = ''
+        self.description.data = ''

@@ -10,19 +10,13 @@ from flask import render_template
 from flask import flash
 from flask import redirect
 from flask import url_for
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
-#from db import fishingstories_core_db as db
-from . import create_app
 from . import models
-from .db import Base
-from .db import engine
-from .db import db_session
 from .forms import LoginForm
 from .forms import AddBaitForm
 from .forms import AddGearForm
-from .forms import CreateAnglerForm
 
 
 bp = Blueprint('fishingstories', __name__)
@@ -61,8 +55,18 @@ def add_bait():
         
         # add new bait to database
         ######IT WOULD BE GREAT TO KEEP name+size+color unique
-        current_app.session.add(bait)
-        current_app.session.commit()
+        try:
+            current_app.session.add(bait)
+            current_app.session.commit()
+        except IntegrityError:
+            ###### HOW DO I CLEAR THIS????? session.pop('_flashes', None)????
+            flash('Bait {} size={} color={} already exists'.format(form.name.data,
+                                                          form.size.data,
+                                                          form.color.data))
+            
+            form.clear()
+            
+            return render_template('fishingstories/addbait.html', title='Add Bait', form=form)
         
         flash('Added bait {}, size={}, color={}'.format(form.name.data,
                                                       form.size.data,
