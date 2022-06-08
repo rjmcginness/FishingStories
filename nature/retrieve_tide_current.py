@@ -13,6 +13,7 @@ from datetime import date
 from datetime import time
 from typing import List
 from typing import Tuple
+from typing import Optional
 from dataclasses import dataclass
 
 @dataclass
@@ -45,7 +46,7 @@ class TideRelatedEvents:
     def __init__(self, date: date, latitude: float, longitude: float) -> None:
         self.__date = date
         self.__coordinates = GlobalPosition(latitude, longitude)
-        self.__water_events: List[WaterState] = []
+        self.__water_states: List[WaterState] = []
         self.__sun = SunDetails(date)
         self.__moon = MoonDetails(date)
     
@@ -65,8 +66,13 @@ class TideRelatedEvents:
     def water(self) -> Tuple[WaterState]:
         return tuple(self.__water_events)
     
-    def add_water_event(self, w_event: WaterState) -> None:
-        self.__water_events.append(w_event)
+    def add_water_state(self, water_state: WaterState) -> None:
+        self.__water_states.append(water_state)
+    
+    def __repr__(self) -> str:
+        return ('Coordinates: {}, Moon Data: {}, Sun Data: {}, Water: {}'.
+                format(self.__coordinates, self.__moon, self.__sun, self.__water_states))
+                
     
 
 class TideDataSack:
@@ -80,7 +86,13 @@ class TideDataSack:
     
     @coordinates.setter
     def coordinates(self, coords: tuple) -> None:
-        self.__coordinates = coords
+        
+        latitude, longitude = coords
+        
+        latitude = self.__parse_coordinate(latitude)
+        longitude = self.__parse_coordinate(longitude)
+        
+        self.__coordinates = latitude, longitude
     
     @property
     def data(self) -> List[TideRelatedEvents]:
@@ -89,6 +101,13 @@ class TideDataSack:
     @data.setter
     def data(self, tc_data: List[str]) -> None:
         self.__parse_tc_data(tc_data)
+        
+    def __parse_coordinate(self, coordinate: str) -> Optional[float]:
+        ''' Removes undecodeable parts of coordinate string
+            and converts to float
+            Returns: float representation of coordinate
+        '''
+        return float(coordinate[:-3].decode())
     
     def __parse_tc_data(self, data: List[str]) -> None:
         ''' Receives data from scrapy.Spider subclass for
@@ -102,6 +121,7 @@ class TideDataSack:
         '''
         dates = {}
         
+        # parse each line in tide/current data
         for line in data:
             parts = [part for part in line.split(' ') if
                                              not part.isspace() and part != '']
@@ -111,10 +131,23 @@ class TideDataSack:
             if parts[0] not in dates: # check if the date, parts[0], in dates
                 dates[parts[0]] = TideRelatedEvents(date_time.date(),
                                                     *self.__coordinates)
+                
+            self.__parse_date_events(parts, date_time, dates)
+        
+        # add the TideRelatedEvents to the self.__tc_data list
+        for tc_events in dates.values():
+            self.__tc_data.append(tc_events)
                     
     def __parse_date_events(self, dated_data: List[str],
                                                       date_time: datetime,
                                                       dates_map: dict) -> None:
+        ''' Arguments:
+            - dated_data is a list of strings derived from each line
+              of tide/current data.
+            - date_time is the time stamp for the tide/current data.
+            - dates_map is a dictionary with date strings as keys
+              and a TideRelatedEvents object as the value
+        '''
         
         # dated_data[0] is the date 
         data_tuple = dated_data, dates_map[dated_data[0]]
@@ -122,7 +155,7 @@ class TideDataSack:
         # if 4 elements, it is moon or sun data 
         if len(dated_data) == 4:
             # last element contains reference to moon or sun
-            if 'moon' in dated_data[3].lower():  
+            if 'moon' in dated_data:  
                 self.__parse_details(*data_tuple, date_time)
                 return 
             self.__parse_details(*data_tuple, date_time, is_moon=False)
@@ -136,24 +169,51 @@ class TideDataSack:
         
         self.__parse_water_state(*data_tuple, date_time)
                     
-    def __parse_details(self, details: str,
+    def __parse_details(self, details: List[str],
                                    tide_events: TideRelatedEvents,
                                    date_time: datetime,
                                    is_moon=True) -> None:
         
         detail_obj = tide_events.moon if is_moon else tide_events.sun
         
-        if 'rise' in details[-1].lower():
+        if 'rise' in details[-1]:
             detail_obj.rise_time = date_time.time()
             return
         
         detail_obj.set_time = date_time.time()
         
     
-    def __parse_water_state(self, details: str,
+    def __parse_water_state(self, details: List[str],
                                     tide_events: TideRelatedEvents,
                                     date_time: datetime) -> None:
-        pass
+        
+        current_flow = 'slack'
+        incoming = True
+        slack = False
+        if 'slack' in details:
+            slack = True
+        else:
+            if 'ebb' in details:
+                current_flow = 'ebb'
+                incoming = False
+            else:
+                current_flow = 'flood'
+        
+        water_state = WaterState(date_time,
+                                 current_flow,
+                                 incoming=incoming,
+                                 slack=slack)
+        
+        for part in details:
+            try:
+                water_state.current_speed = float(part)
+                break
+            except:
+                pass
+        
+        tide_events.add_water_state(water_state)
+        
+        
         
 
 class CurrentArachnid(scrapy.Spider):
@@ -191,8 +251,8 @@ class CurrentArachnid(scrapy.Spider):
         longitude = coords[1].strip()
         
         self.__data_sack.coordinates = latitude, longitude
-        self.__data_sack.data = [line.decode().strip() for line in body[1:]
-                                 if line != ''.encode('utf-8')]
+        self.__data_sack.data = [line.decode().strip().lower() for line in body[1:]
+                                                 if line != ''.encode('utf-8')]
         
 class TideCurrentData:
     def __init__(self, location: str, scraper_class: CurrentArachnid) -> None:
@@ -212,6 +272,8 @@ if __name__ == '__main__':
     tc_data = TideCurrentData(None, CurrentArachnid)
     
     data = tc_data.get_data(datetime.now())
+    
+    print(data)
     
     # print(data[0])
     # for d in data[1]:
