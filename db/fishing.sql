@@ -34,7 +34,8 @@ CREATE TABLE baits (
 	atrificial BOOLEAN NOT NULL,
 	size TEXT,
 	color TEXT,
-	description TEXT
+	description TEXT,
+	UNIQUE (name, size, color)
 );
 
 CREATE TABLE fishes (
@@ -45,12 +46,12 @@ CREATE TABLE fishes (
 	length NUMERIC,
 	description TEXT,
 	bait_id INT NOT NULL,
-	fishing_gear_id INT NOT NULL,
+	fishing_gear_id INT,
 	fishing_spot_id INT NOT NULL,
 	CONSTRAINT fk_fishes_baits
 	FOREIGN KEY(bait_id)
 	REFERENCES baits(id)
-	ON DELETE SET NULL,
+	ON DELETE CASCADE,
 	CONSTRAINT fk_fishes_fishing_gear
 	FOREIGN KEY(fishing_gear_id)
 	REFERENCES fishing_gear(id)
@@ -71,7 +72,7 @@ CREATE TABLE account_types (
 CREATE TABLE account_types_priviledges (
     priviledge_id INT NOT NULL,
     account_type_id INT NOT NULL,
-    PRIMARY KEY(priviledge_id, account_type_id)
+    PRIMARY KEY(priviledge_id, account_type_id),
 	CONSTRAINT fk_account_types_priviledges_priviledge
 	FOREIGN KEY(priviledge_id)
 	REFERENCES priviledges(id)
@@ -85,6 +86,7 @@ CREATE TABLE account_types_priviledges (
 CREATE TABLE ranks (
 	id SERIAL PRIMARY KEY,
 	name TEXT NOT NULL UNIQUE,
+	rank_number INT NOT NULL UNIQUE,
 	description TEXT NOT NULL
 );
 
