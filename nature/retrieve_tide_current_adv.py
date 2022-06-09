@@ -39,7 +39,7 @@ class SunDetails:
     
 @dataclass
 class GlobalPosition:
-    latitide: float
+    latitude: float
     longitude: float
     
 class TideRelatedEvents:
@@ -302,12 +302,12 @@ class TideCurrentData:
         self.__scraper_class = scraper_class
         self.__tc_data = TideDataSack()
         
-    def get_data(self, date_time: datetime) -> tuple:
+    def get_data(self, date_time: datetime) -> TideDataSack:
         process = CrawlerProcess()
         process.crawl(self.__scraper_class, data_sack=self.__tc_data, date_time=date_time)
         process.start()
         
-        return self.__tc_data.coordinates, self.__tc_data.data
+        return self.__tc_data.data
 
 
 if __name__ == '__main__':
