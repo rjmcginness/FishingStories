@@ -12,7 +12,10 @@ from wtforms import BooleanField
 from wtforms import SelectField
 from wtforms import SubmitField
 from wtforms import IntegerField
+from wtforms import HiddenField
+from wtforms import DecimalField
 from wtforms.validators import DataRequired
+from wtforms.widgets import HiddenInput
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -59,3 +62,14 @@ class RankForm(FlaskForm):
         self.name.data = ''
         self.rank_number.data = ''
         self.description.data = ''
+
+class FishingSpotViewForm(FlaskForm):
+    spot_name = HiddenField('spot_name')
+    submit = SubmitField('Go')
+    
+class AddFishingSpotForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    latitude = DecimalField('Latitude', validators=[DataRequired()])
+    longitude = DecimalField('Longitude', validators=[DataRequired()])
+    description = StringField('Description')
+    submit = SubmitField('Add Spot')

@@ -39,6 +39,9 @@ def create_app(test_config=None):
     
     from . import admin
     app.register_blueprint(admin.bp)
+    
+    from . import fishing_spots
+    app.register_blueprint(fishing_spots.bp)
 
     return app
 
