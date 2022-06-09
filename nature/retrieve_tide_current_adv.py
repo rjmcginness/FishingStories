@@ -15,6 +15,7 @@ from typing import List
 from typing import Tuple
 from typing import Optional
 from dataclasses import dataclass
+from scrapy.selector import Selector
 
 @dataclass
 class WaterState:
