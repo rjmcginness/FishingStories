@@ -49,8 +49,8 @@
                     <td>{{ spot.latitude }}</td>
                     <td>{{ spot.longitude }}</td>
                     <td>
-                        <form method="post" action="" id="{{ spot.name }}" novalidate>
-                            {{ view_form.spot_name(label=spot.name) }}
+                        <form method="post" action="" novalidate>
+                            {{ view_form.spot_name(value=spot.name) }}
                             {{ view_form.submit() }}
                         </form>
                     </td>
