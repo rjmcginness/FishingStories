@@ -3,9 +3,23 @@
 
 {% block content %}
     <h1>{{ spot_name }}</h1>
-    <h3>{{ tide_currents[0].latitude }} N, {{ tide_currents[0].longitude }} W</h3>
+    <h3>{{ tide_currents.coordinates[0] }} N, {{ tide_currents.coordinates[1] }} W</h3>
+    <h3>Sun Rise: {{ tide_currents.data[0].sun.rise_time }} Sun Set: {{ tide_currents.data[0].sun.set_time }} </h3>
+    <h3>Moon Rise: {{ tide_currents.data[0].moon.rise_time }} Moon Set: {{ tide_currents.data[0].moon.set_time }} </h3>
     <table>
-        {% for tc_data in tide_currents %}
+        <thead>
+            <th>Date</th>
+            <th>Swell Height</th>
+            <th>Swell Direction</th>
+            <th>Wave Height</th>
+            <th>Wave Period</th>
+            <th>Wind Speed</th>
+            <th>Wind Direction</th>
+            <th>Weather</th>
+            <th>Air Temp</th>
+            <th>Water Temp</th>
+        </thead>
+        {% for tc_data in tide_currents.data %}
             
         {% endfor %}
     </table>
