@@ -12,30 +12,35 @@ from scrapy.selector import Selector
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List
+from typing import Optional
 from calendar import isleap
+from calendar import month_abbr
 
 @dataclass
 class SeaConditions:
     date_time: datetime
-    high_tide_height: float
-    low_tide_height: float
     swell_height: float
     swell_direction: str
     wave_height: int
     wave_period: int
     wind_speed: int
     wind_direction: str
-    water_temperature: int
     weather_state: str
     temperature: int
     wind_chill: int
+    water_temperature: int
+    water_temp_units: str
+    high_tide_height: Optional[float] = None
+    low_tide_height: Optional[float] = None
     
 
 
 class WeatherArachnid(Spider):
     name = 'weather'
     
-    
+    def __init__(self, weather_sea_conditions: List[SeaConditions]) -> None:
+        self.__weather_sea_conditions = weather_sea_conditions
+        
     def start_requests(self) -> Request:
         urls = [
                 'https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest'
@@ -59,8 +64,8 @@ class WeatherArachnid(Spider):
         
         date_times = self.__make_date_time(date, times, am_pms)
         
-        swell = response.xpath('//text[@class="swell-icon__val"]/text()').getall()
-        swell_dir = response.xpath('//div[@class="swell-icon__letters"]/text()').getall()
+        swells = response.xpath('//text[@class="swell-icon__val"]/text()').getall()
+        swell_directions = response.xpath('//div[@class="swell-icon__letters"]/text()').getall()
         wave_heights = response.xpath('//span[@class="height"]/text()').getall()
         period_row = response.xpath('//tr[contains(.,"Period (s)")]').get()
         periods = Selector(text=period_row).xpath('//td/text()').getall()
@@ -83,51 +88,118 @@ class WeatherArachnid(Spider):
         wind_chill_row = response.xpath('//tr[contains(., "Chill")]').get()
         wind_chills = Selector(text=wind_chill_row).xpath('//span[@class="temp"]/text()').getall()
         
+        self.__weather_sea_conditions += [SeaConditions(*args,
+                                                       water_temperature=water_temp,
+                                                       water_temp_units=water_temp_units)
+                                              for args in  zip(date_times,
+                                                               swells,
+                                                               swell_directions,
+                                                               wave_heights,
+                                                               periods,
+                                                               wind_speeds,
+                                                               wind_directions,
+                                                               weather_states,
+                                                               air_temps,
+                                                               wind_chills
+                                                            )]
         
-        print('TIMES', times)
-        print('AM PMS', am_pms)
-        print('SWELL', swell)
-        print('SWELL DIRS', swell_dir)
-        print('WAVE', wave_heights)
-        print('PERIODS', periods)
-        print('WIND SPEEDS', wind_speeds)
-        print('WIND DIRS', wind_directions)
-        print('WATER TEMP', water_temp)
-        print('WATER TEMP UNITS', water_temp_units)
-        print('WEATHER STATES', weather_states)
-        print('AIR TEMPS', air_temps)
-        print('WIND CHILLS', wind_chills)
-        print("DATE", date)
-        print("DATE TIMES", date_times)
+        # print([SeaConditions(*args,
+        #                                                water_temperature=water_temp,
+        #                                                water_temp_units=water_temp_units)
+        #                                       for args in  zip(date_times,
+        #                                                        swells,
+        #                                                        swell_directions,
+        #                                                        wave_heights,
+        #                                                        periods,
+        #                                                        wind_speeds,
+        #                                                        wind_directions,
+        #                                                        weather_states,
+        #                                                        air_temps,
+        #                                                        wind_chills
+        #                                                     )])
         
-    def __make_date_time(date: str,
-                         times: List[str],
-                         am_pms: List[str]) -> List[datetime]:
+        
+        # print('TIMES', times)
+        # print('AM PMS', am_pms)
+        # print('SWELL', swell)
+        # print('SWELL DIRS', swell_dir)
+        # print('WAVE', wave_heights)
+        # print('PERIODS', periods)
+        # print('WIND SPEEDS', wind_speeds)
+        # print('WIND DIRS', wind_directions)
+        # print('WATER TEMP', water_temp)
+        # print('WATER TEMP UNITS', water_temp_units)
+        # print('WEATHER STATES', weather_states)
+        # print('AIR TEMPS', air_temps)
+        # print('WIND CHILLS', wind_chills)
+        # print("DATE", date)
+        # print("DATE TIMES", date_times)
+        
+    def __make_date_time(self, date: str,
+                               times: List[str],
+                               am_pms: List[str]) -> List[datetime]:
         
         year, month, day = date.split('-')
         
-        time_tups = tuple(zip(times, am_pms))
-        twenty_four_hour_times = [time[0] if time[1] == 'AM' 
-                              else str(int(time[0]+ 12)) for time in time_tups]
+        year, day = int(year), int(day) # convert to int for processing below
+        
+        times_24 = [time[0] if time[1] == 'AM' 
+                            else str(int(time[0])+ 12)
+                                  for time in zip(times, am_pms)]
+        
+        date_time_list = []
+        
+        # first date (does not need to check if next day)
+        date_time_list.append(datetime.strptime(date + '-' + str(times_24[0]),
+                                                                '%Y-%b-%d-%H'))
         
         last_am_pm = am_pms[0]
+        time24_idx = 1 # to get 24 hour time 
+        
+        # adjust for change of day in loop (compare when am_pm changes
+        # from PM to AM)
         for am_pm in am_pms[1:]:
+            # divisors are one higher than days in month (for modulus calc)
             if last_am_pm == 'PM' and am_pm == 'AM':
-                divisor = 31
+                divisor = 32
                 if month in ['Apr', 'Jun', 'Sep', 'Nov']:
-                    divisor = 30
+                    divisor = 31
                 elif month == 'Feb':
                     if isleap(year):
-                        divisor = 29
+                        divisor = 30
                     else:
-                        divisor = 28
-                        
-                day = (day + 1) // divisor + (day + 1) % divisor 
+                        divisor = 29
+                
+                # day modulus divisor for month length
+                day = (day + 1) % divisor
+                if day == 1:
+                    month = month_abbr[month_abbr.find(month)]
+                    if month == 'Jan':
+                        year += 1
+            
+            # create and append an adjusted datetime object
+            date_time_list.append(datetime.strptime(str(year) +
+                                                    '-' + 
+                                                    month + 
+                                                    '-' +
+                                                    str(day) +
+                                                    '-' +
+                                                    times_24[time24_idx],
+                                                    '%Y-%b-%d-%H'))
+            
+            time24_idx += 1 # increment to next time
+            last_am_pm = am_pm # set last_am_pm to this one
         
+        return date_time_list
         
 
 if __name__ == '__main__':
+    conditions = []
+    
     process = CrawlerProcess()
-    process.crawl(WeatherArachnid)
+    process.crawl(WeatherArachnid, weather_sea_conditions=conditions)
     process.start()
+    
+    for condition in conditions:
+        print(condition)
         
