@@ -141,8 +141,10 @@ CREATE TABLE anglers_outings (
 CREATE TABLE fishing_spots (
 	id SERIAL PRIMARY KEY,
 	name TEXT NOT NULL,
-	gps_coordinates DECIMAL NOT NULL UNIQUE,
-	description TEXT
+	latitude DECIMAL NOT NULL,
+	longitude DECIMAL NOT NULL,
+	description TEXT,
+	UNIQUE (latitude, longitude)
 );
 
 CREATE TABLE fishing_conditions (

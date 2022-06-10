@@ -192,9 +192,12 @@ class FishingSpot(Base):
     __tablename__ = 'fishing_spots'
     
     id = Column(Integer, primary_key=True)
-    gps_coordinates = Column(Numeric, nullable=False, unique=True)
+    latitude = Column(Numeric, nullable=False)
+    longitude = Column(Numeric, nullable=False)
     name = Column(String, nullable=False)
     description = Column(String)
+    
+    __table_args__ = (UniqueConstraint('latitude', 'longitude'),)
     
     fishing_conditions = relationship('FishingConditions')
     fishes = relationship('Fish')
