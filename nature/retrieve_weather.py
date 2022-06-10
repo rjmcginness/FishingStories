@@ -124,9 +124,10 @@ def make_date_time(date: str,
                     divisor = 29
             
             # day modulus divisor for month length
-            day = (day + 1) % divisor
+            day = (day + 1) % divisor + (day + 1) // divisor
             if day == 1:
-                month = month_abbr[(month_abbr.find(month) + 1) % 12]
+                month_num = month_abbr.find(month)
+                month = month_abbr[(month_num + 1) % 13 + (month_num + 1) // 13]
                 if month == 'Jan':
                     year += 1
         
@@ -146,4 +147,19 @@ def make_date_time(date: str,
     return date_time_list
 
 if __name__ == '__main__':
-    print(retrieve_weather('https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest'))
+    exit()
+    '''TEST DATE MODULUS ALGORITHM'''
+    # days28 = list(range(1, 29))
+    # days29 = list(range(1, 30))
+    # days30 = list(range(1, 31))
+    # days31 = list(range(1, 32))
+    # month_numbers = list(range(1,13))
+    
+    # print('28 Days:', [(day + 1) % 29 + (day + 1) // 29 for day in days28])
+    # print('29 Days:', [(day + 1) % 30 + (day + 1) // 30 for day in days29])
+    # print('30 Days:', [(day + 1) % 31 + (day + 1) // 31 for day in days30])
+    # print('31 Days:', [(day + 1) % 32 + (day + 1) // 32 for day in days31])
+    # print('Months:', [(month_num + 1) % 13 + (month_num + 1) // 13 for month_num in month_numbers])
+    
+    '''TEST SCRAPE'''
+    # print(retrieve_weather('https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest'))

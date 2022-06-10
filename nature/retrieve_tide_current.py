@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun  6 13:23:26 2022
+Created on Fri Jun 10 09:43:57 2022
 
 @author: Robert J McGinness
 """
 
-import scrapy
-import logging
-from scrapy.crawler import CrawlerProcess
+import requests
 from datetime import datetime
+from scrapy.selector import Selector
 from datetime import date
 from datetime import time
 from typing import List
 from typing import Tuple
 from typing import Optional
 from dataclasses import dataclass
+
 
 @dataclass
 class WaterState:
@@ -39,7 +39,7 @@ class SunDetails:
     
 @dataclass
 class GlobalPosition:
-    latitide: float
+    latitude: float
     longitude: float
     
 class TideRelatedEvents:
@@ -72,9 +72,7 @@ class TideRelatedEvents:
     def __repr__(self) -> str:
         return ('Coordinates: {}, Moon Data: {}, Sun Data: {}, Water: {}'.
                 format(self.__coordinates, self.__moon, self.__sun, self.__water_states))
-                
     
-
 class TideDataSack:
     def __init__(self) -> None:
         self.__coordinates = None
@@ -107,7 +105,7 @@ class TideDataSack:
             and converts to float
             Returns: float representation of coordinate
         '''
-        return float(coordinate[:-3].decode())
+        return float(coordinate[:-3])
     
     def __parse_tc_data(self, data: List[str]) -> None:
         ''' Receives data from scrapy.Spider subclass for
@@ -212,69 +210,63 @@ class TideDataSack:
                 pass
         
         tide_events.add_water_state(water_state)
-        
-        
-        
 
-class CurrentArachnid(scrapy.Spider):
-    name = 'currents'
-    
-    def __init__(self, data_sack: TideDataSack) -> None:
-        super().__init__()
-        self.__data_sack = data_sack
-        logging.getLogger('scrapy').setLevel(logging.WARNING)
-    
-    def start_requests(self) -> scrapy.Request:
-        urls = [
-                #'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=Newburyport+%28Merrimack+River%29%2C+Massachusetts+Current'
-                'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=Newburyport+%28Merrimack+River%29%2C+Massachusetts+Current'
-               ]
-        
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-    
-    def parse(self, response) -> None:
-        body = response.body
-        
-        start_idx = None
-        end_idx = None
-        try:
-            start_idx = body.index('<pre>'.encode('utf-8')) + 5
-            end_idx = body.index('</pre>'.encode('utf-8'))
-        except ValueError:
-            return
-        
-        body = body[start_idx:end_idx].split('\n'.encode('utf-8'))
-        
-        coords = body[0].split(','.encode('utf-8'))
-        latitude = coords[0].strip()
-        longitude = coords[1].strip()
-        
-        self.__data_sack.coordinates = latitude, longitude
-        self.__data_sack.data = [line.decode().strip().lower() for line in body[1:]
-                                                 if line != ''.encode('utf-8')]
-        
-class TideCurrentData:
-    def __init__(self, location: str, scraper_class: CurrentArachnid) -> None:
-        self.__location = location
-        self.__scraper_class = scraper_class
-        self.__tc_data = TideDataSack()
-        
-    def get_data(self, date_time: datetime) -> tuple:
-        process = CrawlerProcess()
-        process.crawl(self.__scraper_class, data_sack=self.__tc_data)
-        process.start()
-        
-        return self.__tc_data.coordinates, self.__tc_data.data
+def retrieve_tide_currents(url: str, date_time: datetime, site: str) -> TideDataSack:
+    formdata={
+                'sitesave': site,
+                'glen': '1',
+                'year': str(date_time.year),
+                'month': str(date_time.month),
+                'day': str(date_time.day)}
+
+    r = requests.post(url, data=formdata)
 
 
+    selector = Selector(text=r.content)
+
+    body = selector.xpath('//pre/text()').get()
+    
+    # body = body[start_idx:end_idx].split('\n'.encode('utf-8'))
+    body = body.split('\n')
+    
+    coords = body[0].split(',')
+    latitude = coords[0].strip()
+    longitude = coords[1].strip()
+    
+    tc_data = TideDataSack()
+    
+    tc_data.coordinates = latitude, longitude
+    tc_data.data = [line.strip().lower() for line in body[1:] if line != '']
+    
+    return tc_data
+    
 if __name__ == '__main__':
-    tc_data = TideCurrentData(None, CurrentArachnid)
+    exit()
+    # url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
+
+    # date_time = datetime(year=2022, month=6, day=11)
+
+
+    # formdata={
+    #             'sitesave': 'Newburyport (Merrimack River), Massachusetts Current',
+    #             'glen': '1',
+    #             'year': str(date_time.year),
+    #             'month': str(date_time.month),
+    #             'day': str(date_time.day)}
     
-    data = tc_data.get_data(datetime.now())
+    '''Preliminary test to send form data to site'''
+    # r = requests.post(url, data=formdata)
+
+
+    # selector = Selector(text=r.content)
+
+    # data = selector.xpath('//pre/text()').get()
+
+    # print(data)
     
-    print(data)
+    '''Test retrieve_tide_currents function'''
+    # tc_data = retrieve_tide_currents(url, date_time,'Newburyport (Merrimack River), Massachusetts Current')
+    # print(tc_data.coordinates)
+    # for data in tc_data.data:
+    #     print(data)
     
-    # print(data[0])
-    # for d in data[1]:
-    #     print(d.decode())
