@@ -41,7 +41,7 @@ def my_spots():
     view_form = ViewFishingSpotForm()
     
     if view_form.spot_name.data:
-        weather = scrape_with_crochet()
+        weather = retrieve_weather('https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest')
         flash(weather)
         return render_template('fishing_spots/spot-view.html',
                                spot_name=view_form.spot_name.data,
