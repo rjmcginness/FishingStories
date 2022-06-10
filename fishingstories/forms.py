@@ -14,6 +14,7 @@ from wtforms import SubmitField
 from wtforms import IntegerField
 from wtforms import HiddenField
 from wtforms import DecimalField
+from wtforms import FormField
 from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 
@@ -63,7 +64,7 @@ class RankForm(FlaskForm):
         self.rank_number.data = ''
         self.description.data = ''
 
-class FishingSpotViewForm(FlaskForm):
+class ViewFishingSpotForm(FlaskForm):
     spot_name = HiddenField('spot_name')
     submit = SubmitField('Go')
     
@@ -73,3 +74,4 @@ class AddFishingSpotForm(FlaskForm):
     longitude = DecimalField('Longitude', validators=[DataRequired()])
     description = StringField('Description')
     submit = SubmitField('Add Spot')
+    

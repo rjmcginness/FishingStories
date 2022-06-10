@@ -10,12 +10,18 @@ from flask import current_app
 from flask import render_template
 from flask import flash
 from flask import get_flashed_messages
+from flask import request
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import PendingRollbackError
+
+import crochet
+crochet.setup()
 
 from .forms import AddFishingSpotForm
-from .forms import FishingSpotViewForm
+from .forms import ViewFishingSpotForm
 from . import models
+from nature.retrieve_weather import retrieve_weather
 
 
 
@@ -32,12 +38,14 @@ def fishing_spots():
 @bp.route('/myspots', methods = ['GET', 'POST'])
 def my_spots():
     add_form = AddFishingSpotForm()
-    view_form = FishingSpotViewForm()
+    view_form = ViewFishingSpotForm()
     
-    if not view_form.spot_name.label == 'spot_name':
-        flash(view_form.spot_name.label)
+    if view_form.spot_name.data:
+        weather = scrape_with_crochet()
+        flash(weather)
         return render_template('fishing_spots/spot-view.html',
-                               spot_name=view_form.spot_name.label)
+                               spot_name=view_form.spot_name.data,
+                               weather_conditions=weather)
     
     if add_form.validate_on_submit():
         fishing_spot = models.FishingSpot(name=add_form.name.data,
@@ -51,10 +59,15 @@ def my_spots():
         except IntegrityError:
             flash('Duplicate Spot: latitude {}, longitude {} already exists'.
                   format(add_form.latitude, add_form.longitude))
-            
-    spots = current_app.session.execute(select(models.FishingSpot))
-    spots = [spot[0] for spot in spots]
+            current_app.session.rollback()
     
+    spots = []
+    try:
+        spots = current_app.session.execute(select(models.FishingSpot))
+        spots = [spot[0] for spot in spots]
+    except PendingRollbackError as e:
+        flash(e)
+        
     return render_template('fishing_spots/user-spots.html',
                            add_form=add_form,
                            view_form=view_form,
@@ -70,3 +83,7 @@ def group_spots():
     flash('RESTRICTED')
     
     return render_template('fishing_spots/main.html')
+
+@crochet.wait_for(timeout=60.0)
+def scrape_with_crochet():
+    return retrieve_weather()
