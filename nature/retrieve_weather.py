@@ -7,7 +7,10 @@ Created on Thu Jun  9 09:44:04 2022
 
 from scrapy import Spider
 from scrapy import Request
-from scrapy.crawler import CrawlerProcess
+from scrapy import signals
+# from scrapy.crawler import CrawlerProcess
+from scrapy.signalmanager import dispatcher
+from scrapy.crawler import CrawlerRunner
 from scrapy.selector import Selector
 from dataclasses import dataclass
 from datetime import datetime
@@ -15,6 +18,8 @@ from typing import List
 from typing import Optional
 from calendar import isleap
 from calendar import month_abbr
+from twisted.internet import reactor
+
 
 @dataclass
 class SeaConditions:
@@ -104,6 +109,8 @@ class WeatherArachnid(Spider):
                                                                wind_chills
                                                             )]
         
+        # yield self.__weather_sea_conditions
+        
         # print([SeaConditions(*args,
         #                                                water_temperature=water_temp,
         #                                                water_temp_units=water_temp_units)
@@ -174,7 +181,7 @@ class WeatherArachnid(Spider):
                 # day modulus divisor for month length
                 day = (day + 1) % divisor
                 if day == 1:
-                    month = month_abbr[(month_abbr.find(month) +1 ) % 12]
+                    month = month_abbr[(month_abbr.find(month) + 1) % 12]
                     if month == 'Jan':
                         year += 1
             
@@ -192,15 +199,30 @@ class WeatherArachnid(Spider):
             last_am_pm = am_pm # set last_am_pm to this one
         
         return date_time_list
+    
+def retrieve_weather() -> List[SeaConditions]:
+    conditions = []
+    
+    process = CrawlerRunner()
+    
+    def fake(item, response, spider):
+        conditions.append(item)
+    dispatcher.connect(fake, signal=signals.item_scraped)
+    d = process.crawl(WeatherArachnid)
+    d.addBoth(lambda _: reactor.stop())
+    reactor.run()# process.start()
+    
+    return conditions
         
 
 if __name__ == '__main__':
-    conditions = []
+    exit()
+    # conditions = []
     
-    process = CrawlerProcess()
-    process.crawl(WeatherArachnid, weather_sea_conditions=conditions)
-    process.start()
+    # process = CrawlerProcess()
+    # process.crawl(WeatherArachnid, weather_sea_conditions=conditions)
+    # process.start()
     
-    for condition in conditions:
-        print(condition)
+    # for condition in conditions:
+    #     print(condition)
         
