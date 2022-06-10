@@ -39,6 +39,7 @@ class WeatherArachnid(Spider):
     name = 'weather'
     
     def __init__(self, weather_sea_conditions: List[SeaConditions]) -> None:
+        super().__init__()
         self.__weather_sea_conditions = weather_sea_conditions
         
     def start_requests(self) -> Request:
@@ -173,7 +174,7 @@ class WeatherArachnid(Spider):
                 # day modulus divisor for month length
                 day = (day + 1) % divisor
                 if day == 1:
-                    month = month_abbr[month_abbr.find(month)]
+                    month = month_abbr[(month_abbr.find(month) +1 ) % 12]
                     if month == 'Jan':
                         year += 1
             
