@@ -3,12 +3,42 @@
 
 {% block content %}
     <h1>{{ spot_name }}</h1>
-    {% for condition in weather_conditions %}
-    
-    {% endfor %}
-    
-    {% for tc in tide_currents %}
-    
-    {% endfor %}
+    <h3>{{ tide_currents[0].latitude }} N, {{ tide_currents[0].longitude }} W</h3>
+    <table>
+        {% for tc_data in tide_currents %}
+            
+        {% endfor %}
+    </table>
+    <table>
+        <thead>
+            <th>Date</th>
+            <th>Swell Height</th>
+            <th>Swell Direction</th>
+            <th>Wave Height</th>
+            <th>Wave Period</th>
+            <th>Wind Speed</th>
+            <th>Wind Direction</th>
+            <th>Weather</th>
+            <th>Air Temp</th>
+            <th>Water Temp</th>
+        </thead>
+        <tbody>
+        {% for condition in weather %}
+            <tr>
+                <td>{{ condition.date_time }}</td>
+                <td>{{ condition.swell_height }}</td>
+                <td>{{ condition.swell_direction }}</td>
+                <td>{{ condition.wave_height }}</td>
+                <td>{{ condition.wave_period }}</td>
+                <td>{{ condition.wind_speed }}</td>
+                <td>{{ condition.wind_direction }}</td>
+                <td>{{ condition.weather_state }}</td>
+                <td>{{ condition.temperature }}</td>
+                <td>{{ condition.wind_chill }}</td>
+                <td>{{ condition.water_temperature }} {{ condition.water_temp_units }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
     <img src="{{ spot_name }}.jpg" alt="image {{ spot_name }}"/>
 {% endblock %}
