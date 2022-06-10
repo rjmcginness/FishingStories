@@ -3,5 +3,12 @@
 
 {% block content %}
     <h1>{{ spot_name }}</h1>
-    <img src="{{ spot_name }}.jpg" alt="{{ spot_name }}"
+    {% for condition in weather_conditions %}
+    
+    {% endfor %}
+    
+    {% for tc in tide_currents %}
+    
+    {% endfor %}
+    <img src="{{ spot_name }}.jpg" alt="image {{ spot_name }}"/>
 {% endblock %}
