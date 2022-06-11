@@ -16,16 +16,18 @@
         </thead>
         <tbody>
         {% for tc_data in tide_currents.water %}
-            <td>{{ tc_data.date_time.time() }}</td>
-            <td>{{ tc_data.current_flow }}</td>
-            <td>{{ tc_data.current_speed }}</td>
-            {% if tc_data.slack %}
-            <td></td>
-            {% elif tc_data.incoming %}
-            <td>Incoming</td>
-            {% else %}
-            <td>Outgoing</td>
-            {% endif %}
+            <tr>
+                <td>{{ tc_data.date_time.time() }}</td>
+                <td>{{ tc_data.current_flow }}</td>
+                <td>{{ tc_data.current_speed }}</td>
+                {% if tc_data.slack %}
+                <td></td>
+                {% elif tc_data.incoming %}
+                <td>Incoming</td>
+                {% else %}
+                <td>Outgoing</td>
+                {% endif %}
+            </tr>
         {% endfor %}
         </tbody>
     </table>
