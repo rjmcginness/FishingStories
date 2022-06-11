@@ -47,8 +47,6 @@ class TideDataParser:
         self.__raw_data = [[part.strip().lower() for part in line.strip().split(' ') if part != '']
          for line in raw_data.split('\n') if not line.isspace() and line != '']
         
-        print('>>>>>>>>>\n', self.__raw_data)
-        
         self.coordinates = self.__parse_coordinates()
         self.water = self.__parse_water_data()
         self.sun, self.moon = self.__parse_sun_moon_data()
@@ -81,9 +79,9 @@ class TideDataParser:
                 else:
                     current_flow = 'flood'
             
-            dt_str = ' '.join(water_data[:3])
+            dt_str = ' '.join(water_data[:2])
                     
-            date_time = datetime.strptime(dt_str, '%Y-%m-%d %H:%M %Z')
+            date_time = datetime.strptime(dt_str, '%Y-%m-%d %H:%M')
             
             water_state = WaterState(date_time,
                                      current_flow,
@@ -101,17 +99,23 @@ class TideDataParser:
         return water_states
     
     def __parse_sun_moon_data(self) -> tuple:
+        
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>',  self.__raw_data[1:])
         # get only lines with moon or sun data
         sm_raw_data = [part for part in self.__raw_data[1:]
                                            if 'moon' in part or 'sun' in part]
+        
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>',  self.__raw_data[1:])
         
         sun = SunDetails(self.__date)
         moon = MoonDetails(self.__date)
         for sm_data in sm_raw_data:
             
-            t_str = ' '.join(sm_data[1:3])
+            
+            
+            t_str = ' '.join(sm_data[1])
                     
-            sm_time = time.strptime(t_str, '%H:%M %Z')
+            sm_time = time.strptime(t_str, '%H:%M')
             
             # moon phase line has 5 parts in raw data
             if len(sm_data) == 5:
