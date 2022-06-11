@@ -20,7 +20,7 @@ from .forms import ViewFishingSpotForm
 from . import models
 from nature.retrieve_weather import retrieve_weather
 from nature.retrieve_tide_current import retrieve_tide_currents
-import datetime
+from datetime import datetime
 
 
 
@@ -45,10 +45,10 @@ def my_spots():
         tc_url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
         tide_currents = retrieve_tide_currents(tc_url, datetime.now(),'Newburyport (Merrimack River), Massachusetts Current')
         flash(weather)
-        flash(tide_currents)
+        flash(tide_currents.water)
         return render_template('fishing_spots/spot-view.html',
                                spot_name=view_form.spot_name.data,
-                               weather_conditions=weather,
+                               weather=weather,
                                tide_currents=tide_currents)
     
     if add_form.validate_on_submit():
