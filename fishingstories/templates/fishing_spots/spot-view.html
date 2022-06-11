@@ -3,25 +3,31 @@
 
 {% block content %}
     <h1>{{ spot_name }}</h1>
-    <h3>{{ tide_currents.coordinates[0] }} N, {{ tide_currents.coordinates[1] }} W</h3>
-    <h3>Sun Rise: {{ tide_currents.data[0].sun.rise_time }} Sun Set: {{ tide_currents.data[0].sun.set_time }} </h3>
-    <h3>Moon Rise: {{ tide_currents.data[0].moon.rise_time }} Moon Set: {{ tide_currents.data[0].moon.set_time }} </h3>
+    <h3>{{ tide_currents.coordinates.latitude }} N, {{ tide_currents.coordinates.longitude }} W</h3>
+    <h3>Sun Rise: {{ tide_currents.sun.rise_time }} Sun Set: {{ tide_currents.sun.set_time }} </h3>
+    <h3>Moon Rise: {{ tide_currents.moon.rise_time }} Moon Set: {{ tide_currents.moon.set_time }} {{ tide_currents.moon.phase }}</h3>
     <table>
         <thead>
-            <th>Date</th>
-            <th>Swell Height</th>
-            <th>Swell Direction</th>
-            <th>Wave Height</th>
-            <th>Wave Period</th>
-            <th>Wind Speed</th>
-            <th>Wind Direction</th>
-            <th>Weather</th>
-            <th>Air Temp</th>
-            <th>Water Temp</th>
+            <tr>{{ tide_currents.date }}</tr>
+            <th>Time</th>
+            <th>Current Flow</th>
+            <th>Currrent Speed</th>
+            <th>Tide Direction</th>
         </thead>
-        {% for tc_data in tide_currents.data %}
-            
+        <tbody>
+        {% for tc_data in tide_currents.water %}
+            <td>{{ tc_data.date_time.time() }}</td>
+            <td>{{ tc_data.current_flow }}</td>
+            <td>{{ tc_data.current_speed }}</td>
+            {% if tc_data.slack %}
+            <td></td>
+            {% elif tc_data.incoming %}
+            <td>Incoming</td>
+            {% else %}
+            <td>Outgoing</td>
+            {% endif %}
         {% endfor %}
+        </tbody>
     </table>
     <table>
         <thead>
