@@ -10,18 +10,17 @@ from flask import current_app
 from flask import render_template
 from flask import flash
 from flask import get_flashed_messages
-from flask import request
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import PendingRollbackError
 
-import crochet
-crochet.setup()
 
 from .forms import AddFishingSpotForm
 from .forms import ViewFishingSpotForm
 from . import models
 from nature.retrieve_weather import retrieve_weather
+from nature.retrieve_tide_current import retrieve_tide_currents
+from datetime import datetime
 
 
 
@@ -42,10 +41,15 @@ def my_spots():
     
     if view_form.spot_name.data:
         weather = retrieve_weather('https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest')
+        
+        tc_url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
+        tide_currents = retrieve_tide_currents(tc_url, datetime.now(),'Newburyport (Merrimack River), Massachusetts Current')
         flash(weather)
+        flash(tide_currents.water)
         return render_template('fishing_spots/spot-view.html',
                                spot_name=view_form.spot_name.data,
-                               weather_conditions=weather)
+                               weather=weather,
+                               tide_currents=tide_currents)
     
     if add_form.validate_on_submit():
         fishing_spot = models.FishingSpot(name=add_form.name.data,
@@ -83,7 +87,3 @@ def group_spots():
     flash('RESTRICTED')
     
     return render_template('fishing_spots/main.html')
-
-@crochet.wait_for(timeout=60.0)
-def scrape_with_crochet():
-    return retrieve_weather()
