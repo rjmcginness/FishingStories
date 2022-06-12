@@ -113,8 +113,8 @@ class TideDataParser:
         # for water data lines)
         # This is one way to do it, could also join the parts and search for
         # 'moon' or 'sun'
-        sm_raw_data = [line for line in self.__raw_data[1:]
-                          if list(filter(lambda part: 'moon' in part or 'sun' in part, line))]
+        # sm_raw_data = [line for line in self.__raw_data[1:]
+        #                   if list(filter(lambda part: 'moon' in part or 'sun' in part, line))]
         
         
         moon_lines = [line for line in self.__raw_data[1:]
@@ -122,34 +122,6 @@ class TideDataParser:
         
         sun_lines = [line for line in self.__raw_data[1:]
                           if list(filter(lambda part: 'sun' in part, line))]
-        
-        sm_raw_data = {
-                        'moon': (MoonDetails, moon_lines),
-                        'sun': (SunDetails, sun_lines)
-                      }
-        
-        print(">>>>MOON_DATA", moon_lines)
-        print(">>>>SUN_DATA", sun_lines)
-        
-        # sun = SunDetails(self.__date)
-        # moon = MoonDetails(self.__date)
-        # for sm_data in sm_raw_data:
-            
-        #     t_str = ' '.join(sm_data[:2])
-                    
-        #     sm_time = datetime.strptime(t_str, '%Y-%m-%d %H:%M').time().strftime('%I:%M %p')
-            
-            
-            
-        #     sm_obj = moon
-        #     if 'sun' in sm_data:
-        #         sm_obj = sun
-            
-        #     # set sun/moon rise or set time
-        #     if 'rise' in sm_data:
-        #         sm_obj.rise_time = sm_time
-        #     else:
-        #         sm_obj.set_time = sm_time
         
         return (self.__parse_celestial_body(SunDetails, sun_lines),
                         self.__parse_celestial_body(MoonDetails, moon_lines))
