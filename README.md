@@ -20,4 +20,12 @@ in the view_form is not None.  Also, added the value=spot.name to the hidden fil
 
 The web scraping works well, pulling a lot of great data from two web sites.  Need to implement location changing for these.
 Also want to implement the entry of coordinates (perhaps from a google map search on a place), from which near by locations
-with tidal data can be determined.  
+with tidal data can be determined.
+
+6/11/2022
+Fixed bugs with scraping data and transferring it to objects.  Changed the object model in retrieve_tide_current to do this.
+Still need to get high, low tide info from retrieve_weather.  Still need to get time zone (ex. EDT) from
+retrieve_tide_current.  spot-view.html template renders all of the available data now.  Need to start and finish other
+interfaces to completely load interact with db across the model.  Want to implement hashed password authentication.  If time,
+may check out OAuth.  To complete, pattern recognition of fishing data related to weather and tide_current data/location.
+Would be nice to pretty this up with css and js scripts.
