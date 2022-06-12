@@ -131,31 +131,32 @@ class TideDataParser:
         print(">>>>MOON_DATA", moon_lines)
         print(">>>>SUN_DATA", sun_lines)
         
-        sun = SunDetails(self.__date)
-        moon = MoonDetails(self.__date)
-        for sm_data in sm_raw_data:
+        # sun = SunDetails(self.__date)
+        # moon = MoonDetails(self.__date)
+        # for sm_data in sm_raw_data:
             
-            t_str = ' '.join(sm_data[:2])
+        #     t_str = ' '.join(sm_data[:2])
                     
-            sm_time = datetime.strptime(t_str, '%Y-%m-%d %H:%M').time().strftime('%I:%M %p')
+        #     sm_time = datetime.strptime(t_str, '%Y-%m-%d %H:%M').time().strftime('%I:%M %p')
             
             
             
-            sm_obj = moon
-            if 'sun' in sm_data:
-                sm_obj = sun
+        #     sm_obj = moon
+        #     if 'sun' in sm_data:
+        #         sm_obj = sun
             
-            # set sun/moon rise or set time
-            if 'rise' in sm_data:
-                sm_obj.rise_time = sm_time
-            else:
-                sm_obj.set_time = sm_time
+        #     # set sun/moon rise or set time
+        #     if 'rise' in sm_data:
+        #         sm_obj.rise_time = sm_time
+        #     else:
+        #         sm_obj.set_time = sm_time
         
-        return sun, moon
+        return (self.__parse_celestial_body(SunDetails, sun_lines),
+                        self.__parse_celestial_body(MoonDetails, moon_lines))
     
-    def __parse_celestial_body(self, orb_data: tuple) -> object:
-        orb_cls = orb_data[0] # contains the class for MoonDetails or SunDetails
-        sm_raw_data = orb_data[1] # contains the data lines for moon or sun
+    def __parse_celestial_body(self, *args: tuple) -> object:
+        orb_cls = args[0] # contains the class for MoonDetails or SunDetails
+        sm_raw_data = args[1] # contains the data lines for moon or sun
         
         sm_obj = orb_cls(self.__date) # create moon or sun
         
@@ -172,7 +173,13 @@ class TideDataParser:
             else:
                 sm_obj.set_time = sm_time
             
-        
+            ###### NEED MORE DATA TO VERIFY THIS
+            # last two parts in a line of 5 parts is moon phase
+            if len(sm_data) == 5:
+                # using duck typing, as is has to be the moon
+                sm_obj.moon_phase = ' '.join(sm_data[-2:])
+                
+        return sm_obj
                 
         
                 
