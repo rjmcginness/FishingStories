@@ -60,17 +60,21 @@ class TideDataParser:
     
     def __parse_water_data(self) -> List[WaterState]:
         
-        # a water data line has no reference to moon or sun
-        raw_water_data = [data for data in self.__raw_data[1:]
-                                  if 'moon' not in data and 'sun' not in data]
+        # If 'moon' or 'sun' is a substring of any strings in a line, we do not
+        # that line (filter for those lines, then choose not to include those
+        # lines in the list comprehension)
+        water_raw_data = [line for line in self.__raw_data[1:]
+                          if  not list(filter(lambda part: 'moon' in part or
+                                                           'sun' in part, line))]
         
+        # parse each line of water data
         water_states = []
-        for water_data in raw_water_data:
+        for water_data in water_raw_data:
             
             current_flow = 'slack'
             incoming = True
             slack = False
-            if 'slack,' in water_data:
+            if 'slack,' in water_data: # parse for slack tide (data includes the ,)
                 slack = True
             else:
                 if 'ebb' in water_data:
@@ -79,18 +83,20 @@ class TideDataParser:
                 else:
                     current_flow = 'flood'
             
+            # parse time from water data line
             dt_str = ' '.join(water_data[:2])
-                    
             date_time = datetime.strptime(dt_str, '%Y-%m-%d %H:%M')
             
+            # create WaterState object
             water_state = WaterState(date_time,
                                      current_flow,
                                      incoming=incoming,
                                      slack=slack)
             try:
-                # get float current_speed
-                water_state.current_speed = [float(part.strip()) for part in water_data
-                                                     if '.' in water_data][0]
+                # get float current_speed (a little hard codey, but
+                # would need list comprehension or string manipulation)
+                ######BIT OF A POTENTIAL FAILURE POINT
+                water_state.current_speed = float(water_data[3])
             except:
                 pass
             
@@ -99,28 +105,41 @@ class TideDataParser:
         return water_states
     
     def __parse_sun_moon_data(self) -> tuple:
+        ''' Builds both the Moon and Sun details objects by 
+            parsing raw data
+        '''
         
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>',  self.__raw_data[1:])
-        # get only lines with moon or sun data
-        sm_raw_data = [part for part in self.__raw_data[1:]
-                                           if 'moon' in part or 'sun' in part]
+        # get only lines with moon or sun data (used similar approach above
+        # for water data lines)
+        # This is one way to do it, could also join the parts and search for
+        # 'moon' or 'sun'
+        sm_raw_data = [line for line in self.__raw_data[1:]
+                          if list(filter(lambda part: 'moon' in part or 'sun' in part, line))]
         
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>',  self.__raw_data[1:])
+        
+        moon_lines = [line for line in self.__raw_data[1:]
+                          if list(filter(lambda part: 'moon' in part, line))]
+        
+        sun_lines = [line for line in self.__raw_data[1:]
+                          if list(filter(lambda part: 'sun' in part, line))]
+        
+        sm_raw_data = {
+                        'moon': (MoonDetails, moon_lines),
+                        'sun': (SunDetails, sun_lines)
+                      }
+        
+        print(">>>>MOON_DATA", moon_lines)
+        print(">>>>SUN_DATA", sun_lines)
         
         sun = SunDetails(self.__date)
         moon = MoonDetails(self.__date)
         for sm_data in sm_raw_data:
             
-            
-            
-            t_str = ' '.join(sm_data[1])
+            t_str = ' '.join(sm_data[:2])
                     
-            sm_time = time.strptime(t_str, '%H:%M')
+            sm_time = datetime.strptime(t_str, '%Y-%m-%d %H:%M').time().strftime('%I:%M %p')
             
-            # moon phase line has 5 parts in raw data
-            if len(sm_data) == 5:
-                moon.phase = ' '.join(sm_data[-2:])
-                continue
+            
             
             sm_obj = moon
             if 'sun' in sm_data:
@@ -133,6 +152,29 @@ class TideDataParser:
                 sm_obj.set_time = sm_time
         
         return sun, moon
+    
+    def __parse_celestial_body(self, orb_data: tuple) -> object:
+        orb_cls = orb_data[0] # contains the class for MoonDetails or SunDetails
+        sm_raw_data = orb_data[1] # contains the data lines for moon or sun
+        
+        sm_obj = orb_cls(self.__date) # create moon or sun
+        
+        for sm_data in sm_raw_data:
+    
+            # parse and format time
+            t_str = ' '.join(sm_data[:2])
+            sm_time = datetime.strptime(t_str, '%Y-%m-%d %H:%M').time().strftime('%H:%M %p')
+            
+            # set sun/moon rise or set time
+            # look for 'rise' in joined parts of data
+            if 'rise' in ''.join(sm_data): 
+                sm_obj.rise_time = sm_time
+            else:
+                sm_obj.set_time = sm_time
+            
+        
+                
+        
                 
         
 class TideData:
