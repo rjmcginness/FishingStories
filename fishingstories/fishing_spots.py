@@ -44,8 +44,8 @@ def my_spots():
         
         tc_url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
         tide_currents = retrieve_tide_currents(tc_url, datetime.now(),'Newburyport (Merrimack River), Massachusetts Current')
-        flash(weather)
-        flash(tide_currents.water)
+        # flash(weather)
+        # flash(tide_currents.water)
         return render_template('fishing_spots/spot-view.html',
                                spot_name=view_form.spot_name.data,
                                weather=weather,

@@ -10,11 +10,12 @@ from flask import render_template
 from flask import flash
 from flask import redirect
 from flask import url_for
+from flask_login import current_user
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from . import models
-from .forms import LoginForm
+# from .forms import LoginForm
 from .forms import AddBaitForm
 from .forms import AddGearForm
 
@@ -25,17 +26,10 @@ bp = Blueprint('fishingstories', __name__)
 @bp.route('/')
 @bp.route('/index')
 def index():
-    return render_template('fishingstories/index.html')
-
-#move this and use hashing (werkzeug.security)
-@bp.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        flash('Login requested for user {}, remember_me={}'.format(
-                form.username.data, form.remember_me.data))
-        return redirect(url_for('index'))
-    return render_template('fishingstories/login.html', title='Sign In', form=form)
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth'))
+    
+    return render_template('fishingstories/index.html', authenticated=True)
 
 @bp.route('/baitsmenu')
 def baits_menu():
