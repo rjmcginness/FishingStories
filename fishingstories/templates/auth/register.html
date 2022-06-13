@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h3>Sign In</h3>
+    <h3>Register</h3>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
@@ -18,7 +18,17 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+        <p>
+            {{ form.password_repeat.label }}<br>
+            {{ form.password_repeat(size=32) }}
+            {% for error in form.password_repeat.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.account_types.label }}<br>
+            {{ form.account_types(size=32) }}
+        </p>
         <p>{{ form.submit() }}</p>
     </form>
     <div><div>
