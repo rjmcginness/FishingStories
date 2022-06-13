@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+    {% if authenticated %}
     <h1>Welcome!</h1>
     <div>
         <a href="/fishing-spots">fishing spots</a>
@@ -15,5 +16,6 @@
     <div></div>
     <hr>
     <a href="admin">admin login</a>
+    {% endif %}
 {% endblock %}
 
