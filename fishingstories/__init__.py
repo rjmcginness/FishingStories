@@ -7,13 +7,22 @@ Created on Wed Jun  1 14:48:24 2022
 
 import os
 from flask import Flask
+from flask_login import LoginManager
+
+login_manager = LoginManager()
 
 
 def create_app(test_config=None):
     
     app = Flask(__name__, instance_relative_config=True)
+    
+    ###### THIS IS TEMPORARY
     app.config.from_mapping(SECRET_KEY='bron_girl',
                             DATABASE=os.path.join(app.instance_path, 'fishingstories.sqlite'))
+    
+    
+    
+    app.login_manager = login_manager
 
     from fishingstories.db import db_session
     from fishingstories.db import init_db
@@ -42,6 +51,11 @@ def create_app(test_config=None):
     
     from . import fishing_spots
     app.register_blueprint(fishing_spots.bp)
+    
+    from .auth import auth
+    app.register_blueprint(auth.bp)
+    app.add_url_rule('/auth', 'auth')
+    app.add_url_rule('/register', 'register')
 
     return app
 

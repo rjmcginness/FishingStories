@@ -133,6 +133,13 @@ class TideDataParser:
         sm_obj = orb_cls(self.__date) # create moon or sun
         
         for sm_data in sm_raw_data:
+            
+            ###### NEED MORE DATA TO VERIFY THIS
+            # last two parts in a line of 5 parts is moon phase
+            if len(sm_data) == 5:
+                # using duck typing, as is has to be the moon
+                sm_obj.moon_phase = ' '.join(sm_data[-2:])
+                continue
     
             # parse and format time
             t_str = ' '.join(sm_data[:2])
@@ -145,15 +152,7 @@ class TideDataParser:
             else:
                 sm_obj.set_time = sm_time
             
-            ###### NEED MORE DATA TO VERIFY THIS
-            # last two parts in a line of 5 parts is moon phase
-            if len(sm_data) == 5:
-                # using duck typing, as is has to be the moon
-                sm_obj.moon_phase = ' '.join(sm_data[-2:])
-                
         return sm_obj
-                
-        
                 
         
 class TideData:
@@ -191,113 +190,6 @@ class TideData:
     def raw_data(self) -> str:
         return self.__raw_data
     
-    
-
-        
-    
-    # def __parse_tc_data(self, data: List[str]) -> None:
-    #     ''' Receives data from scrapy.Spider subclass for
-    #         tide and current data.  Parses pertinent data
-    #         and creates a TideRelatedEvent object.  Data
-    #         are parses for date, WaterStates, MoonDetails,
-    #         SunDetails, and GlobalCoordinates.
-            
-    #         Returns: None (TideRelatedEvents are stored as
-    #                  elements of list attribute)
-    #     '''
-    #     dates = {}
-        
-    #     # parse each line in tide/current data
-    #     for line in data:
-    #         parts = [part for part in line.split(' ') if
-    #                                          not part.isspace() and part != '']
-            
-    #         date_time = datetime.fromisoformat(' '.join(parts[:2]))
-            
-    #         if parts[0] not in dates: # check if the date, parts[0], in dates
-    #             dates[parts[0]] = TideRelatedEvents(date_time.date(),
-    #                                                 *self.__coordinates)
-                
-    #         self.__parse_date_events(parts, date_time, dates)
-        
-    #     # add the TideRelatedEvents to the self.__tc_data list
-    #     for tc_events in dates.values():
-    #         self.__tc_data.append(tc_events)
-                    
-    # def __parse_date_events(self, dated_data: List[str],
-    #                                                   date_time: datetime,
-    #                                                   dates_map: dict) -> None:
-    #     ''' Arguments:
-    #         - dated_data is a list of strings derived from each line
-    #           of tide/current data.
-    #         - date_time is the time stamp for the tide/current data.
-    #         - dates_map is a dictionary with date strings as keys
-    #           and a TideRelatedEvents object as the value
-    #     '''
-        
-    #     # dated_data[0] is the date 
-    #     data_tuple = dated_data, dates_map[dated_data[0]]
-                
-    #     # if 4 elements, it is moon or sun data 
-    #     if len(dated_data) == 4:
-    #         # last element contains reference to moon or sun
-    #         if 'moon' in dated_data:  
-    #             self.__parse_details(*data_tuple, date_time)
-    #             return 
-    #         self.__parse_details(*data_tuple, date_time, is_moon=False)
-    #         return
-        
-    #     # if lengths is 5, this is a moon phase
-    #     if len(dated_data) == 5:
-    #         # data_tuple[1] is the TideRelatedEvents object for this date
-    #         data_tuple[1].moon.phase = ' '.join(dated_data[-2:-1])
-    #         return
-        
-    #     self.__parse_water_state(*data_tuple, date_time)
-                    
-    # def __parse_details(self, details: List[str],
-    #                                tide_events: TideRelatedEvents,
-    #                                date_time: datetime,
-    #                                is_moon=True) -> None:
-        
-    #     detail_obj = tide_events.moon if is_moon else tide_events.sun
-        
-    #     if 'rise' in details[-1]:
-    #         detail_obj.rise_time = date_time.time()
-    #         return
-        
-    #     detail_obj.set_time = date_time.time()
-        
-    
-    # def __parse_water_state(self, details: List[str],
-    #                                 tide_events: TideRelatedEvents,
-    #                                 date_time: datetime) -> None:
-        
-    #     current_flow = 'slack'
-    #     incoming = True
-    #     slack = False
-    #     if 'slack' in details:
-    #         slack = True
-    #     else:
-    #         if 'ebb' in details:
-    #             current_flow = 'ebb'
-    #             incoming = False
-    #         else:
-    #             current_flow = 'flood'
-        
-    #     water_state = WaterState(date_time,
-    #                              current_flow,
-    #                              incoming=incoming,
-    #                              slack=slack)
-        
-    #     for part in details:
-    #         try:
-    #             water_state.current_speed = float(part)
-    #             break
-    #         except:
-    #             pass
-        
-    #     tide_events.add_water_state(water_state)
 
 def retrieve_tide_currents(url: str, date_time: datetime, site: str) -> TideData:
     formdata={
@@ -309,23 +201,9 @@ def retrieve_tide_currents(url: str, date_time: datetime, site: str) -> TideData
 
     r = requests.post(url, data=formdata)
 
-
     selector = Selector(text=r.content)
 
     body = selector.xpath('//pre/text()').get()
-    
-    # # body = body[start_idx:end_idx].split('\n'.encode('utf-8'))
-    # body = body.split('\n')
-    # body = [part for part in body if not part.isspace() and part != '']
-    
-    # for part in body:
-    #     print(part)
-    
-    # coords = body[0].split(',')
-    # latitude = coords[0][:-3].strip()
-    # longitude = coords[1][:-3].strip()
-    
-    # print(latitude, longitude)
     
     return TideData(date_time.date(), body)
     

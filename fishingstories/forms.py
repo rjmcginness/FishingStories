@@ -18,11 +18,11 @@ from wtforms import FormField
 from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 
-class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember_me = BooleanField('Remember Me')
-    submit = SubmitField('Sign In')
+# class LoginForm(FlaskForm):
+#     username = StringField('Username', validators=[DataRequired()])
+#     password = PasswordField('Password', validators=[DataRequired()])
+#     remember_me = BooleanField('Remember Me')
+#     submit = SubmitField('Sign In')
     
 
 class AddBaitForm(FlaskForm):

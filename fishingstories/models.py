@@ -20,6 +20,11 @@ from sqlalchemy import UniqueConstraint
 
 from sqlalchemy.orm import relationship
 
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
+
+from flask_login import UserMixin
+
 
 from .db import Base
 
@@ -35,7 +40,7 @@ account_priviledges = Table('account_priviledges',
                                     primary_key=True)
                             )
 
-class AccountType(Base):
+class AccountType(UserMixin, Base):
     __tablename__ = 'account_types'
     
     id = Column(Integer, primary_key=True)
@@ -64,6 +69,14 @@ class UserAccount(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String(30), nullable=False, unique=True)
     password = Column(String(20), nullable=False)
+    
+    def set_password(self, password) -> None:
+        self.password = generate_password_hash(password)
+        
+    def check_password(self, password) -> bool:
+        return check_password_hash(self.password, password)
+    
+    
     
     # many-to-one relationship with account_types (unidirectional)
     account_type_id = Column(Integer,
