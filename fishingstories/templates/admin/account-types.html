@@ -1,23 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Create Account Type</h1>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.name.label }}<br>
-            {{ form.name() }}
-            {% for error in form.name.errors %}
-            <span style="color: red;">[{{ error }}]</span>
+    <h1>Account Types</h1>
+    <table>
+        <thead>
+            <th>Account Type Name</h>
+            <th>Price</th>
+            <th>Priviledges</th>
+        </thead>
+        <tbody>
+            {% for account_type in account_types %}
+                <tr>
+                    <td>{{ account_type.name }}</td>
+                    <td>{{ account_type.price }}</td>
+                    <td>
+                        {% for priviledge in account_type.priviledges %}
+                        {{ priviledge.name }}
+                        {% endfor %}
+                    </td>
+                </tr>
             {% endfor %}
-        </p>
-        <p>
-            {{ form.priviledges.label }}<br>
-            {{ form.priviledges() }}
-            {% for error in form.priviledges.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+        </tbody>
+    </table>
 {% endblock %}
