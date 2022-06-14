@@ -15,6 +15,7 @@ from wtforms import IntegerField
 from wtforms import HiddenField
 from wtforms import DecimalField
 from wtforms import FormField
+from wtforms import SelectMultipleField
 from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 
@@ -74,4 +75,9 @@ class AddFishingSpotForm(FlaskForm):
     longitude = DecimalField('Longitude', validators=[DataRequired()])
     description = StringField('Description')
     submit = SubmitField('Add Spot')
+    
+class CreateAccountTypeForm(FlaskForm):
+    name = StringField('Account Type Name', validators=[DataRequired()])
+    priviledges = SelectMultipleField('Select Priviledges')
+    submit = SubmitField('Add Account Type')
     

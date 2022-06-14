@@ -9,6 +9,7 @@ from flask import current_app
 from flask import Blueprint
 from flask import render_template
 from flask import flash
+from flask import redirect
 from flask_login import login_required
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -16,6 +17,7 @@ from sqlalchemy.exc import IntegrityError
 from ..db import models
 from .forms import RankForm
 from .forms import CreateAnglerForm
+from .forms import CreateAccountTypeForm
 
 
 bp = Blueprint('admin', __name__)
@@ -64,7 +66,21 @@ def ranks():
             
     return render_template('admin/ranks.html', form=form, ranks=ranks, authenticated=True)
 
-            
+@bp.route('/account_types', methods=['GET', 'POST'])
+@login_required
+def account_types():
+    form = CreateAccountTypeForm()
+    priviledges = current_app.session.execute(select(models.Priviledge))
+    form.priviledges.choices = [priviledge[0].name for priviledge in priviledges]
+    if form.validate_on_submit():
+        ######get priviledges
+        ###### create account type
+        ###### back populate
+        flash('{} {}'.format(form.priviledges.data, form.name.data))
+        redirect('admin/index.html')
+    
+    
+    return render_template('admin/account-types.html', form=form)
 
 @bp.route('/create-anglers')
 @login_required
