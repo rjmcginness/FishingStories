@@ -48,6 +48,10 @@ def create_app(test_config=None):
     except OSError:
         pass
     
+    ######this has to be moved to a separate app on the same db.
+    from .db.db import init_admin
+    init_admin()
+    
     from . import fishingstories
     app.register_blueprint(fishingstories.bp)
     app.add_url_rule('/', endpoint='index')
@@ -62,6 +66,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth.bp)
     app.add_url_rule('/auth', 'auth')
     app.add_url_rule('/register', 'register')
+    
 
     return app
 

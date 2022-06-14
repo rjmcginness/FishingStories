@@ -13,6 +13,7 @@ from flask import flash
 from flask import redirect
 from flask import url_for
 from flask_login import current_user
+from flask_login import login_required
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
@@ -33,10 +34,12 @@ def index():
     return render_template('fishingstories/index.html', authenticated=True)
 
 @bp.route('/baitsmenu')
+@login_required
 def baits_menu():
-    return render_template('fishingstories/baitsmenu.html')
+    return render_template('fishingstories/baitsmenu.html', authenticated=True)
 
 @bp.route('/create-bait', methods=['GET', 'POST'])
+@login_required
 def add_bait():
     form = AddBaitForm()
     if form.validate_on_submit():
@@ -61,29 +64,32 @@ def add_bait():
             
             form.clear()
             
-            return render_template('fishingstories/addbait.html', title='Add Bait', form=form)
+            return render_template('fishingstories/addbait.html', title='Add Bait', form=form, authenticated=True)
         
         flash('Added bait {}, size={}, color={}'.format(form.name.data,
                                                       form.size.data,
                                                       form.color.data))
         return redirect('/baits')
     
-    return render_template('fishingstories/addbait.html', title='Add Bait', form=form)
+    return render_template('fishingstories/addbait.html', title='Add Bait', form=form, authenticated=True)
 
 @bp.route('/baits')
+@login_required
 def baits():
     
     baits = current_app.session.execute(select(models.Bait))
     
     baits = [bait[0] for bait in baits]
     
-    return render_template('fishingstories/baits.html', baits=list(baits))
+    return render_template('fishingstories/baits.html', baits=list(baits), authenticated=True)
 
 @bp.route('/gearmenu')
+@login_required
 def gear_menu():
-    return render_template('fishingstories/gearmenu.html')
+    return render_template('fishingstories/gearmenu.html', authenticated=True)
 
 @bp.route('/create-gear', methods=['GET', 'POST'])
+@login_required
 def add_gear():
     form = AddGearForm()
     
@@ -99,13 +105,14 @@ def add_gear():
         
         return redirect('/gear')
 
-    return render_template('fishingstories/addgear.html', title='Add Gear Combo', form=form)
+    return render_template('fishingstories/addgear.html', title='Add Gear Combo', form=form, authenticated=True)
 
 @bp.route('/gear')
+@login_required
 def gear():
     gear_combos = current_app.session.execute(select(models.FishingGear))
     
     # take the first element in the returned tuple
     gear_combos = [gear[0] for gear in gear_combos]
     
-    return render_template('fishingstories/gear.html', gear_list=gear_combos)
+    return render_template('fishingstories/gear.html', gear_list=gear_combos, authenticated=True)
