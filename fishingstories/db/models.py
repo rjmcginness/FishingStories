@@ -63,6 +63,13 @@ class Priviledge(Base):
     
     account_types = relationship('AccountType', secondary=account_priviledges, back_populates='priviledges')
     
+    def serialize(self) -> dict:
+        return {
+                'id': self.id,
+                'name': self.name
+                #'account_types': self.account_types
+               }
+    
 
 
 
