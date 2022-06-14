@@ -35,4 +35,7 @@ Major changes to app structure.  Now uses alembic to migrate db, generating init
 class that faked SQLAlchemy from Flask-SQLAlchemy.  Did this to remain independent from Flask-SQLAlchemy to be able to use
 sqlalchemy directly.  Added the requirements.txt file.  Changed initial page to login page.  Added password hashing to UserAccount
 class.  Still need to complete implementation of login.  Plan to break apart api more.  Need to test db relations.  I think I have
-to add some relations to the models classes to allow for joins.  
+to add some relations to the models classes to allow for joins.
+
+Login and password hashing is implemented.  Appropriate pages require login.  Still need to implement registration.  Added basic cs
+to base.html.  
