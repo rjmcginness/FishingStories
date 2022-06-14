@@ -24,9 +24,9 @@ body {
     padding-left: 5px;
 }
 
-.left-bottom>div {
-    background-color: white;
-}
+//.left-bottom>div {
+//    background-color: white;
+//}
 
 .right-top {
     width: calc(25vw - 3px);
@@ -92,11 +92,11 @@ section[class="left-top"]>div {
 }
 
 section[class="left-bottom"]>a {
-    color:gold;
+    color:antiquewhite;
 }
 
 a:visited {
-    color:rgb(202, 19, 89);
+    color:gold;
 }
 
 section[class="left-bottom"]{
