@@ -10,6 +10,7 @@ from flask import current_app
 from flask import render_template
 from flask import flash
 from flask import get_flashed_messages
+from flask_login import login_required
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import PendingRollbackError
@@ -17,7 +18,7 @@ from sqlalchemy.exc import PendingRollbackError
 
 from .forms import AddFishingSpotForm
 from .forms import ViewFishingSpotForm
-from . import models
+from ..db import models
 from nature.retrieve_weather import retrieve_weather
 from nature.retrieve_tide_current import retrieve_tide_currents
 from datetime import datetime
@@ -29,12 +30,14 @@ bp = Blueprint('fishing_spots', __name__)
 
 
 @bp.route('/fishing-spots')
+@login_required
 def fishing_spots():
     get_flashed_messages().clear()
     
-    return render_template('fishing_spots/main.html')
+    return render_template('fishing_spots/main.html', authenticated=True)
 
 @bp.route('/myspots', methods = ['GET', 'POST'])
+@login_required
 def my_spots():
     add_form = AddFishingSpotForm()
     view_form = ViewFishingSpotForm()
@@ -75,15 +78,18 @@ def my_spots():
     return render_template('fishing_spots/user-spots.html',
                            add_form=add_form,
                            view_form=view_form,
-                           spots=spots)
+                           spots=spots,
+                           authenticated=True)
         
 
 @bp.route('/public-spots')
+@login_required
 def public_spots():
-    return render_template('fishing_spots/public-spots.html')
+    return render_template('fishing_spots/public-spots.html', authenticated=True)
 
 @bp.route('/group-spots')
+@login_required
 def group_spots():
     flash('RESTRICTED')
     
-    return render_template('fishing_spots/main.html')
+    return render_template('fishing_spots/main.html', authenticated=True)

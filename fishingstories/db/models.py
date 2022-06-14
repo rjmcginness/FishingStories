@@ -28,6 +28,8 @@ from flask_login import UserMixin
 
 from .db import Base
 
+from .. import login_manager
+
 account_priviledges = Table('account_priviledges',
                             Base.metadata,
                             Column('account_type_id',
@@ -40,35 +42,36 @@ account_priviledges = Table('account_priviledges',
                                     primary_key=True)
                             )
 
-class AccountType(UserMixin, Base):
+class AccountType(Base):
     __tablename__ = 'account_types'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False, unique=True)
     price = Column(Numeric, nullable=False)
     
     # many-to-many relationship with priviledges
-    priviledges = relationship('Priviledge', secondary=account_priviledges)
+    priviledges = relationship('Priviledge', secondary=account_priviledges, back_populates='account_types')
     
     # one-to-many relationship with user accounts
-    user_accounts = relationship('UserAccount')
+    user_accounts = relationship('UserAccount', back_populates='account_type')
 
 class Priviledge(Base):
     __tablename__ = 'priviledges'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False, unique=True)
     
-    # account_types = relationship('AccountType', secondary=account_priviledges)
+    account_types = relationship('AccountType', secondary=account_priviledges, back_populates='priviledges')
+    
 
 
 
-class UserAccount(Base):
+class UserAccount(UserMixin, Base):
     __tablename__ = 'user_accounts'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(30), nullable=False, unique=True)
-    password = Column(String(20), nullable=False)
+    password = Column(String(256), nullable=False)
     
     def set_password(self, password) -> None:
         self.password = generate_password_hash(password)
@@ -84,12 +87,13 @@ class UserAccount(Base):
                                         ondelete='CASCADE'),
                               nullable=False)
     
+    account_type = relationship('AccountType', back_populates='user_accounts')
+    
     
     # one-to-one relationship with anglers (this is the child)
     angler_id = Column(Integer,
                         ForeignKey('anglers.id',
-                                  ondelete='CASCADE'),
-                        nullable=False)
+                                  ondelete='CASCADE'))
     
     anglers = relationship('Angler', back_populates='user_accounts')
 
@@ -120,7 +124,7 @@ outings_fished = Table('outings_fished',
 class Rank(Base):
     __tablename__ = 'ranks'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False, unique=True)
     rank_number = Column(Integer, nullable=False, unique=True)
     description = Column(String, nullable=False)
@@ -129,7 +133,7 @@ class Rank(Base):
 class Angler(Base):
     __tablename__ = 'anglers'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(30), nullable=False, unique=True)
     # rank = Column(String(40))
     rank_id = Column(Integer,
@@ -151,7 +155,7 @@ class Angler(Base):
 class FishingGear(Base):
     __tablename__ = 'fishing_gear'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     rod = Column(String, nullable=False)
     reel = Column(String)
     line = Column(String)
@@ -163,7 +167,7 @@ class FishingGear(Base):
 class Bait(Base):
     __tablename__ = 'baits'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     artificial = Column(Boolean, nullable=False)
     size = Column(Numeric)
@@ -188,7 +192,7 @@ fished_spots = Table('fished_spots',
 class FishingOuting(Base):
     __tablename__ = 'fishing_outings'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
     trip_type = Column(String, nullable=False)
     water = Column(String)
@@ -204,7 +208,7 @@ class FishingOuting(Base):
 class FishingSpot(Base):
     __tablename__ = 'fishing_spots'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     latitude = Column(Numeric, nullable=False)
     longitude = Column(Numeric, nullable=False)
     name = Column(String, nullable=False)
@@ -220,7 +224,7 @@ class FishingSpot(Base):
 class FishingConditions(Base):
     __tablename__ = 'fishing_conditions'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     weather = Column(String, nullable=False)
     tide_phase = Column(String, nullable=False)
     time_stamp = Column(DateTime, nullable=False)
@@ -239,7 +243,7 @@ class FishingConditions(Base):
 class Fish(Base):
     __tablename__ = 'fishes'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     species = Column(String, nullable=False)
     datetime_caught = Column(DateTime, nullable=False)
     weight = Column(Numeric)
@@ -253,14 +257,5 @@ class Fish(Base):
     
     anglers = relationship('Angler', secondary=fish_caught)
     
+    
 
-# Base.metadata.create_all(engine)
-
-
-# from sqlalchemy import insert
-
-# tsunami = Bait(name='Tsunami Swimshad',
-#                artificial=True,
-#                size=6.0,
-#                color='black back',
-#                description='soft plastic')

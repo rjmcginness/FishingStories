@@ -29,3 +29,10 @@ retrieve_tide_current.  spot-view.html template renders all of the available dat
 interfaces to completely load interact with db across the model.  Want to implement hashed password authentication.  If time,
 may check out OAuth.  To complete, pattern recognition of fishing data related to weather and tide_current data/location.
 Would be nice to pretty this up with css and js scripts.
+
+6/13/2022
+Major changes to app structure.  Now uses alembic to migrate db, generating initial db from model.  Used duck typing with a
+class that faked SQLAlchemy from Flask-SQLAlchemy.  Did this to remain independent from Flask-SQLAlchemy to be able to use
+sqlalchemy directly.  Added the requirements.txt file.  Changed initial page to login page.  Added password hashing to UserAccount
+class.  Still need to complete implementation of login.  Plan to break apart api more.  Need to test db relations.  I think I have
+to add some relations to the models classes to allow for joins.  
