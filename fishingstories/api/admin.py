@@ -10,6 +10,7 @@ from flask import Blueprint
 from flask import render_template
 from flask import flash
 from flask import redirect
+from flask import jsonify
 from flask_login import login_required
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -18,6 +19,7 @@ from ..db import models
 from .forms import RankForm
 from .forms import CreateAnglerForm
 from .forms import CreateAccountTypeForm
+from .forms import CreatePriviledgeForm
 
 
 bp = Blueprint('admin', __name__)
@@ -80,7 +82,46 @@ def account_types():
         redirect('admin/index.html')
     
     
-    return render_template('admin/account-types.html', form=form)
+    return render_template('admin/account-types.html', form=form, authenticated=True)
+
+@bp.route('/manage-priviledges', methods=['GET'])
+@login_required
+def manage_priviledges():
+    return render_template('admin/priviledges-menu.html')
+
+@bp.route('/priviledges', methods=['GET', 'POST'])
+@login_required
+def create_priviledge():
+    form = CreatePriviledgeForm()
+    if form.validate_on_submit():
+        
+        ###### CONSIDER WRITING A VALIDATOR
+        if not form.name.data or form.name.data.isspace() or form.name.data == '':
+            flash('Blank Priviledge name entered')
+        else:
+        
+            priviledge = models.Priviledge(name=form.name.data)
+            try:
+                current_app.session.add(priviledge)
+                current_app.session.commit()
+            except IntegrityError:
+                flash(f'Priviledge name {form.name.data} already exists')
+                current_app.session.rollback()
+            else:
+                return redirect('/priviledges-all')
+    
+    
+    return render_template('admin/create-priviledge.html', form=form, authenticated=True)
+
+@bp.route('/priviledges-all', methods=['GET'])
+@login_required
+def priviledges():
+    priviledges = current_app.session.execute(select(models.Priviledge))
+    
+    
+    priviledge_names = [priviledge[0].serialize() for priviledge in priviledges]
+    
+    return render_template('admin/priviledges.html', priviledges=priviledge_names, authenticated=True)
 
 @bp.route('/create-anglers')
 @login_required

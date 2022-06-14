@@ -78,6 +78,11 @@ class AddFishingSpotForm(FlaskForm):
     
 class CreateAccountTypeForm(FlaskForm):
     name = StringField('Account Type Name', validators=[DataRequired()])
+    price = DecimalField('Price', validators=[DataRequired()])
     priviledges = SelectMultipleField('Select Priviledges')
     submit = SubmitField('Add Account Type')
+
+class CreatePriviledgeForm(FlaskForm):
+    name = StringField('Priviledge Name', validators=[DataRequired()])
+    submit = SubmitField('Add Priviledge')
     
