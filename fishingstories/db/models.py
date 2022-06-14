@@ -28,6 +28,8 @@ from flask_login import UserMixin
 
 from .db import Base
 
+from .. import login_manager
+
 account_priviledges = Table('account_priviledges',
                             Base.metadata,
                             Column('account_type_id',
@@ -40,7 +42,7 @@ account_priviledges = Table('account_priviledges',
                                     primary_key=True)
                             )
 
-class AccountType(UserMixin, Base):
+class AccountType(Base):
     __tablename__ = 'account_types'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -48,10 +50,10 @@ class AccountType(UserMixin, Base):
     price = Column(Numeric, nullable=False)
     
     # many-to-many relationship with priviledges
-    priviledges = relationship('Priviledge', secondary=account_priviledges)
+    priviledges = relationship('Priviledge', secondary=account_priviledges, back_populates='account_types')
     
     # one-to-many relationship with user accounts
-    user_accounts = relationship('UserAccount')
+    user_accounts = relationship('UserAccount', back_populates='account_type')
 
 class Priviledge(Base):
     __tablename__ = 'priviledges'
@@ -59,16 +61,17 @@ class Priviledge(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False, unique=True)
     
-    # account_types = relationship('AccountType', secondary=account_priviledges)
+    account_types = relationship('AccountType', secondary=account_priviledges, back_populates='priviledges')
+    
 
 
 
-class UserAccount(Base):
+class UserAccount(UserMixin, Base):
     __tablename__ = 'user_accounts'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(30), nullable=False, unique=True)
-    password = Column(String(20), nullable=False)
+    password = Column(String(256), nullable=False)
     
     def set_password(self, password) -> None:
         self.password = generate_password_hash(password)
@@ -84,12 +87,13 @@ class UserAccount(Base):
                                         ondelete='CASCADE'),
                               nullable=False)
     
+    account_type = relationship('AccountType', back_populates='user_accounts')
+    
     
     # one-to-one relationship with anglers (this is the child)
     angler_id = Column(Integer,
                         ForeignKey('anglers.id',
-                                  ondelete='CASCADE'),
-                        nullable=False)
+                                  ondelete='CASCADE'))
     
     anglers = relationship('Angler', back_populates='user_accounts')
 
@@ -253,14 +257,5 @@ class Fish(Base):
     
     anglers = relationship('Angler', secondary=fish_caught)
     
+    
 
-# Base.metadata.create_all(engine)
-
-
-# from sqlalchemy import insert
-
-# tsunami = Bait(name='Tsunami Swimshad',
-#                artificial=True,
-#                size=6.0,
-#                color='black back',
-#                description='soft plastic')

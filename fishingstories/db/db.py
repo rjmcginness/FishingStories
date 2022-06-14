@@ -9,6 +9,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.exc import IntegrityError
+from werkzeug.security import generate_password_hash
 
 
 from .. import config
@@ -36,4 +38,36 @@ def init_db():
             return self.engine
     
     return FakeFlaskSQLAlchemy(engine, Base.metadata)
+
+def init_admin():
+    from .models import Priviledge
+    from .models import AccountType
+    from .models import UserAccount
+    
+    priviledge = Priviledge(name='Administrator')
+    
+    account_type = AccountType(name='Admin',
+                               price=0.0)
+    
+    account_type.priviledges.append(priviledge)
+    
+    
+    user_account = UserAccount(username='admin',
+                               password=generate_password_hash('bron-girl9'))
+    
+    user_account.account_type = account_type
+    
+    db_session.add(user_account)
+    
+    try:
+        db_session.commit()
+    except IntegrityError:
+        db_session.rollback()
+        pass
+    
+    
+    
+    
+    
+    
 
