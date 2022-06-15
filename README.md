@@ -40,8 +40,15 @@ to add some relations to the models classes to allow for joins.
 Login and password hashing is implemented.  Appropriate pages require login.  Still need to implement registration.  Added basic cs
 to base.html.
 
+Modified data model, changing relationship between user_accounts and anglers such that user_accounts does not require a foreign
+key to an angler record.  This is to accommodate Administrator user_accounts, which may not actually be an angler.  Thus, the
+foreign key, angler_id, is no longer NOT NULL (ie is now nullable=True).
+
 6/14/2022
 Login with hashing working.  User registration working, which required the addition of entry of priviledges, account_types, and ranks
 to be completed.  Changed css slightly to make the login centered and put a light background on tables to overlay the bocy background.
 Tables with class="data-display-table" will do this.  Database with foreign keys and relationships working for Priviledges, AccountType,
-UserAccount, Angler, Rank.  Angler may still need some adjustment to relationships with further relations.  
+UserAccount, Angler, Rank.  Angler may still need some adjustment to relationships with further relations.
+
+Design accommodates the addition of a new user on registration and separate addition of administrators.  The register endpoint will
+create and angler record and associate this with the new user.  A separate management app can be built to register administrators.
