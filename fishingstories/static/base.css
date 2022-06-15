@@ -79,6 +79,10 @@ h1 {
     border-bottom: none;
 }
 
+h2 {
+    color: antiquewhite;
+}
+
 li {
     font-size:large;
 }
@@ -120,4 +124,16 @@ section[class="right-bottom"] ul {
 
 .link-img {
     width: 20vw;
+}
+
+.data-display-table {
+    background: antiquewhite;
+    color: rgb(11, 11, 42);
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    border: solid 1px;
+    border-radius: 4px;
+}
+
+table[class="data-display-table"] th {
+    border-bottom: solid 1px;
 }
