@@ -62,7 +62,7 @@ def create_app(test_config=None):
     from .api import fishing_spots
     app.register_blueprint(fishing_spots.bp)
     
-    from .api.auth import auth
+    from .api import auth
     app.register_blueprint(auth.bp)
     app.add_url_rule('/auth', 'auth')
     app.add_url_rule('/register', 'register')

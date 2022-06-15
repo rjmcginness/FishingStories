@@ -24,6 +24,10 @@ body {
     padding-left: 5px;
 }
 
+//.left-bottom>div {
+//    background-color: white;
+//}
+
 .right-top {
     width: calc(25vw - 3px);
     height: 18vh;
@@ -75,6 +79,10 @@ h1 {
     border-bottom: none;
 }
 
+h2 {
+    color: antiquewhite;
+}
+
 li {
     font-size:large;
 }
@@ -88,11 +96,11 @@ section[class="left-top"]>div {
 }
 
 section[class="left-bottom"]>a {
-    color:gold;
+    color:antiquewhite;
 }
 
 a:visited {
-    color:rgb(202, 19, 89);
+    color:gold;
 }
 
 section[class="left-bottom"]{
@@ -116,4 +124,16 @@ section[class="right-bottom"] ul {
 
 .link-img {
     width: 20vw;
+}
+
+.data-display-table {
+    background: antiquewhite;
+    color: rgb(11, 11, 42);
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    border: solid 1px;
+    border-radius: 4px;
+}
+
+table[class="data-display-table"] th {
+    border-bottom: solid 1px;
 }
