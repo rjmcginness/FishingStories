@@ -10,7 +10,6 @@ from flask import Blueprint
 from flask import render_template
 from flask import flash
 from flask import redirect
-from flask import jsonify
 from flask_login import login_required
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -68,26 +67,67 @@ def ranks():
             
     return render_template('admin/ranks.html', form=form, ranks=ranks, authenticated=True)
 
-@bp.route('/account_types', methods=['GET', 'POST'])
+@bp.route('/manage-account-types', methods=['GET'])
 @login_required
-def account_types():
+def manage_account_types():
+    return render_template('admin/account-types-menu.html')
+
+@bp.route('/account-types', methods=['GET', 'POST'])
+@login_required
+def create_account_type():
     form = CreateAccountTypeForm()
-    priviledges = current_app.session.execute(select(models.Priviledge))
+    
+    # pull available priviledges from db as selections for new account_type
+    # EXCEPT Administrator
+    priviledges = current_app.session.execute(select(models.Priviledge).
+                                              where(models.Priviledge.name != 'Administrator'))
+    
     form.priviledges.choices = [priviledge[0].name for priviledge in priviledges]
     if form.validate_on_submit():
-        ######get priviledges
-        ###### create account type
-        ###### back populate
-        flash('{} {}'.format(form.priviledges.data, form.name.data))
-        redirect('admin/index.html')
+        # create new account_type
+        account_type = models.AccountType(name=form.name.data,
+                                          price=form.price.data,
+                                          )
+        
+        #get priviledges
+        selected_priviledges = form.priviledges.data
+        
+        # have to hit db to get selected priviledges again :(
+        priviledges = current_app.session.execute(select(models.Priviledge).
+                                                  where(models.Priviledge.name.in_(selected_priviledges)))
+        
+        # create relationship between account_type and priviledges     
+        for priviledge in priviledges:
+            account_type.priviledges.append(priviledge[0])
+        
+        # try to add to the database, if fails rollback
+        try:
+            current_app.session.add(account_type)
+            current_app.session.commit()
+        except IntegrityError as e:    
+            flash(f'Unable to create Account Type {account_type.name}')
+            current_app.logger.info(e)
+            current_app.session.rollback()
+        else:
+            return redirect('/account-types-all')
     
+    return render_template('admin/create-account-type.html', form=form, authenticated=True)
+
+@bp.route('/account-types-all', methods=['GET'])
+@login_required
+def account_types():
+    account_types = current_app.session.execute(select(models.AccountType).
+                                                where(models.AccountType.name != 'Admin').
+                                                order_by(models.AccountType.price))
     
-    return render_template('admin/account-types.html', form=form, authenticated=True)
+    account_types = [account_type[0] for account_type in account_types]
+    
+    return render_template('admin/account-types.html', account_types=account_types, authenticated=True)
 
 @bp.route('/manage-priviledges', methods=['GET'])
 @login_required
 def manage_priviledges():
-    return render_template('admin/priviledges-menu.html')
+    return render_template('admin/priviledges-menu.html', authenticated=True)
 
 @bp.route('/priviledges', methods=['GET', 'POST'])
 @login_required
@@ -95,20 +135,18 @@ def create_priviledge():
     form = CreatePriviledgeForm()
     if form.validate_on_submit():
         
-        ###### CONSIDER WRITING A VALIDATOR
-        if not form.name.data or form.name.data.isspace() or form.name.data == '':
-            flash('Blank Priviledge name entered')
-        else:
+        # cate new Priviledge object
+        priviledge = models.Priviledge(name=form.name.data)
         
-            priviledge = models.Priviledge(name=form.name.data)
-            try:
-                current_app.session.add(priviledge)
-                current_app.session.commit()
-            except IntegrityError:
-                flash(f'Priviledge name {form.name.data} already exists')
-                current_app.session.rollback()
-            else:
-                return redirect('/priviledges-all')
+        # attempt to add to database
+        try:
+            current_app.session.add(priviledge)
+            current_app.session.commit()
+        except IntegrityError:
+            flash(f'Priviledge name {form.name.data} already exists')
+            current_app.session.rollback()
+        else:
+            return redirect('/priviledges-all')
     
     
     return render_template('admin/create-priviledge.html', form=form, authenticated=True)
