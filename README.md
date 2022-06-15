@@ -38,4 +38,10 @@ class.  Still need to complete implementation of login.  Plan to break apart api
 to add some relations to the models classes to allow for joins.
 
 Login and password hashing is implemented.  Appropriate pages require login.  Still need to implement registration.  Added basic cs
-to base.html.  
+to base.html.
+
+6/14/2022
+Login with hashing working.  User registration working, which required the addition of entry of priviledges, account_types, and ranks
+to be completed.  Changed css slightly to make the login centered and put a light background on tables to overlay the bocy background.
+Tables with class="data-display-table" will do this.  Database with foreign keys and relationships working for Priviledges, AccountType,
+UserAccount, Angler, Rank.  Angler may still need some adjustment to relationships with further relations.  
