@@ -136,6 +136,8 @@ class Rank(Base):
     rank_number = Column(Integer, nullable=False, unique=True)
     description = Column(String, nullable=False)
     
+    anglers = relationship('Angler', back_populates='rank')
+    
 
 class Angler(Base):
     __tablename__ = 'anglers'
@@ -148,7 +150,8 @@ class Angler(Base):
                                 ondelete='CASCADE'),
                       nullable=False)
     
-    # many-to-one relationship with ranks(unidirectional)
+    # many-to-one relationship with ranks
+    rank = relationship('Rank', back_populates='anglers')
     
     # one-to-one relationship with user_accounts
     #(unidirectional- this is parent)
