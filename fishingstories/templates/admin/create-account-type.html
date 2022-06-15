@@ -2,6 +2,8 @@
 
 {% block content %}
     <h1>Create Account Type</h1>
+    <a href="{{ url_for('admin.manage_account_types') }}">back</a>
+    <div></div>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
@@ -20,7 +22,7 @@
         </p>
         <p>
             {{ form.priviledges.label }}<br>
-            {{ form.priviledges() }}
+            {{ form.priviledges(size=4) }}
             {% for error in form.priviledges.errors %}
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}

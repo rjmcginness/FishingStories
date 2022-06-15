@@ -2,7 +2,9 @@
 
 {% block content %}
     <h1>Account Types</h1>
-    <table>
+    <a href="{{ url_for('admin.manage_account_types') }}">back</a>
+    <div></div>
+    <table class="data-display-table">
         <thead>
             <th>Account Type Name</h>
             <th>Price</th>
@@ -15,7 +17,7 @@
                     <td>{{ account_type.price }}</td>
                     <td>
                         {% for priviledge in account_type.priviledges %}
-                        {{ priviledge.name }}
+                        {{ priviledge.name }}<br>
                         {% endfor %}
                     </td>
                 </tr>
