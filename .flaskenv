@@ -1,2 +1,0 @@
-FLASK_APP=fishingstories
-FLASK_ENV=development
