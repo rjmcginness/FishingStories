@@ -1,1 +1,68 @@
-
+<!DOCTYPE html>
+<!--base html layout-->
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    {% if title %}
+    <title>{{ title }}</title>
+    {% else %}
+    <title>Fishing Stories</title>
+    {% endif %}
+    <link rel="stylesheet" href="../static/base.css"/>
+</head>
+<body>
+    <!--Introduction section with heading, image and audio-->
+    <section class="left-top">
+        <div>
+            <h1>Fishing Stories</h1>
+            {% if authenticated %}
+            <div>
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('/auth.logout') }}">Logout</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    <section class="right-top">
+        <h2>Links</h2>
+    </section>
+    <section class="left-bottom">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </section><!--end left bottom-->
+    <section class="right-bottom">
+        <ul>
+            <li><a href="https://ceps.unh.edu/chemistry"><img src="/images/logo_ceps.svg" alt="UNH image icon" class="link-img"/></a></li>
+            <li><a href="https://www.jandh.com/"><img src="/images/J&HTackle.png" alt="J&H Tackle Logo image icon" class="link-img"/></a></li>
+            <li><a href="https://www.maa.org/press/maa-reviews/principles-of-mathematical-analysis"><img src="/images/maa.png" alt="MAA logo image icon" class="link-img"/></a></li>
+            <li><a href="https://stackoverflow.com/"><img src="/images/stack.png" alt="Stack Overflow image icon" class="link-img"/></a></li>
+            <li><a href="https://math.stackexchange.com/"><img src="/images/math.svg" alt="Math Stack Exchange image icon" class="link-img"/></a></li>
+            <li><a href="https://plumislandsurfcasters.org".com/">PISC</a></li>
+        </ul>
+        <div></div>
+        <section class="search-style">
+            <form target="_blank" action="https://www.google.com/search" method="get">
+                <input type="text" name="q" id="search" placeholder="Search Google"/>
+                <input type="submit" value="Go!"/>
+            </form>
+            
+        </section>
+        <div></div>
+        <address class="my-address-style">
+            100 Python Way<br/>
+            CodeVille, NH 03000<br/>
+            <a href="tel:1+603-555-5555">(603) 555-5555</a><br/>
+            <a href="mailto:rjm@developersbeach.com">rob@codelife.com</a>
+        </address>
+    </section>
+</body>
+</html>
