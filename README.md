@@ -52,3 +52,14 @@ UserAccount, Angler, Rank.  Angler may still need some adjustment to relationshi
 
 Design accommodates the addition of a new user on registration and separate addition of administrators.  The register endpoint will
 create and angler record and associate this with the new user.  A separate management app can be built to register administrators.
+
+6/15/2022
+Major change.  Split up admin and frontend.  Changes layout to accommodate this, placing db, model, etc in src folder.  This change is
+accompanied by the addition of werkzeug.middleware.dispatcher.DispatcherMiddleware to allow routing to the admin or frontend apps.
+This will facilitate the differences in functionality of a regular user and admin.  The current implementation works for starting
+both apps on a development werkzeug wsgi server.  Administrator endpoints will be prefixed with /admin.  Need to finalize this change
+by being able to navigate back to frontend on logout of admin app.  Then need to build, build, build endpoints.  Plan had been to
+ensure relationships in data model were all functioning correctly today.  The admin app will be used to do this, since the frontend
+functionality will be largely a subset of the admin functionality.  The 6/14/2022 branch is the last containing a single app
+implementation.  Once the version with middleware is completed, the 6/14/2022 branch could be fully implemented with the frontend.
+Their functionality should be identical, except for the routing to admin in the middleware-containing version.
