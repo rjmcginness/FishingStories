@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Add Gear</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.rod.label }}<br>
+            {{ form.rod() }}
+            {% for error in form.rod.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.reel.label }}<br>
+            {{ form.reel() }}
+        </p>
+        <p>
+            {{ form.line.label }}<br>
+            {{ form.line() }}
+        </p>
+        <p>
+            {{ form.hook.label }}<br>
+            {{ form.hook() }}
+        </p>
+        <p>
+            {{ form.leader.label }}<br>
+            {{ form.leader() }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
