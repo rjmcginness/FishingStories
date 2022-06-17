@@ -42,6 +42,8 @@ def admin_required(forbidden):
         return decorates
     return wrapper
 
+
+######Does not have to be an endpoint, could be a function
 @bp.route('/forbidden')
 def forbidden(redirect_url):
     flash('Access forbiden')
@@ -188,7 +190,7 @@ def anglers():
     
     render_template('/admin/anglers.html', anglers=anglers, authenticated=True)
 
-@bp.route('/angler/edit', methods=['PATCH'])
+@bp.route('/anglers/<int:angler_id>/edit', methods=['PATCH'])
 @login_required
 @admin_required(forbidden)
 def angler_edit():
@@ -197,7 +199,7 @@ def angler_edit():
         
         angler = models.Angler()
 
-@bp.route('/angler/<int:id>', methods=['GET'])
+@bp.route('/anglers/<int:id>', methods=['GET'])
 @login_required
 @admin_required(forbidden)
 def angler(id: int):
@@ -217,3 +219,35 @@ def angler(id: int):
 def statistics():
     return render_template('admin/statistics.html', authenticated=True)
 
+@bp.route('/users', methods=['GET'])
+@login_required
+@admin_required(forbidden)
+def users():
+    users = current_app.session.scalars(select(models.UserAccount).
+                                        order_by(models.UserAccount.username))
+    
+    users = [user[0] for user in users]
+    
+    return render_template('admin/users.html', users=users, authenticated=True)
+
+@bp.route('/users/<int:user_id>', methods=['GET'])
+@login_required
+@admin_required(forbidden)
+def users(user_id: int):
+    user = current_app.session.execute(select(models.UserAccount).
+                                       where(models.UserAccount.id == user_id))
+    
+    user = user[0][0]
+    
+    return render_template('admin/user.html', user=user, authenticated=True)
+
+@bp.route('/users/<int:user_id>/edit', methods=['GET'])
+@login_required
+@admin_required(forbidden)
+def users(user_id: int):
+    user = current_app.session.execute(select(models.UserAccount).
+                                       where(models.UserAccount.id == user_id))
+    
+    user = user[0][0]
+    
+    return render_template('admin/edit_user.html', user=user, authenticated=True)
