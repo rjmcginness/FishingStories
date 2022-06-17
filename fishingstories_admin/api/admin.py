@@ -11,9 +11,13 @@ from flask import render_template
 from flask import flash
 from flask import redirect
 from flask import url_for
+from flask import request
 from flask_login import login_required
+from flask_login import current_user
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+
+from functools import wraps
 
 from src.db import models
 from .forms import RankForm
@@ -25,18 +29,27 @@ from .forms import CreatePrivilegeForm
 bp = Blueprint('admin', __name__)#, url_prefix='/admin')
 
 
-# @bp.route('/')
-# @login_required
-# def admin():
-#     return render_template('admin/index.html', authenticated=True)
+def admin_required(forbidden):
+    def wrapper(endpoint_handler):
+        @wraps(endpoint_handler)
+        def decorates(*args, **kwargs):
+            try: 
+                if current_user.account_type.name != 'Admin':
+                    raise AttributeError('NOT an ADMIN')
+            except (AttributeError, KeyError):
+                return forbidden(request.referrer)
+            return endpoint_handler(*args, **kwargs)
+        return decorates
+    return wrapper
 
-
-
-
-
+@bp.route('/forbidden')
+def forbidden(redirect_url):
+    flash('Access forbiden')
+    return redirect(redirect_url)
 
 @bp.route('/ranks/create', methods = ['GET', 'POST'])
 @login_required
+@admin_required(forbidden)
 def ranks_create():
     form = RankForm()
     ranks = current_app.session.execute(select(models.Rank))
@@ -62,11 +75,13 @@ def ranks_create():
 
 @bp.route('/manage_account_types', methods=['GET'])
 @login_required
+@admin_required(forbidden)
 def manage_account_types():
     return render_template('admin/account-types-menu.html', authenticated=True)
 
 @bp.route('/account_types/create', methods=['GET', 'POST'])
 @login_required
+@admin_required(forbidden)
 def account_type_create():
     form = CreateAccountTypeForm()
     
@@ -108,6 +123,7 @@ def account_type_create():
 
 @bp.route('/account_types', methods=['GET'])
 @login_required
+@admin_required(forbidden)
 def account_types():
     account_types = current_app.session.execute(select(models.AccountType).
                                                 order_by(models.AccountType.price))
@@ -118,11 +134,13 @@ def account_types():
 
 @bp.route('/manage_privileges', methods=['GET'])
 @login_required
+@admin_required(forbidden)
 def manage_privileges():
     return render_template('admin/privileges-menu.html', authenticated=True)
 
 @bp.route('/privileges/create', methods=['GET', 'POST'])
 @login_required
+@admin_required(forbidden)
 def privilege_create():
     form = CreatePrivilegeForm()
     if form.validate_on_submit():
@@ -145,6 +163,7 @@ def privilege_create():
 
 @bp.route('/privileges', methods=['GET'])
 @login_required
+@admin_required(forbidden)
 def privileges():
     privileges = current_app.session.execute(select(models.Privilege))
     
@@ -155,11 +174,13 @@ def privileges():
 
 @bp.route('/manage_anglers')
 @login_required
+@admin_required(forbidden)
 def manage_anglers():
     return render_template('admin/anglermenu.html', authenticated=True)
 
 @bp.route('/anglers', methods=['GET'])
 @login_required
+@admin_required(forbidden)
 def anglers():
     anglers = models.Angler.query.all()
     
@@ -169,6 +190,7 @@ def anglers():
 
 @bp.route('/angler/edit', methods=['PATCH'])
 @login_required
+@admin_required(forbidden)
 def angler_edit():
     form = CreateAnglerForm()
     if form.validate_on_submit():
@@ -177,6 +199,7 @@ def angler_edit():
 
 @bp.route('/angler/<int:id>', methods=['GET'])
 @login_required
+@admin_required(forbidden)
 def angler(id: int):
     angler = models.Angler.query.get(id)
 
@@ -190,6 +213,7 @@ def angler(id: int):
         
 @bp.route('/statistics', methods=['GET'])
 @login_required
+@admin_required(forbidden)
 def statistics():
     return render_template('admin/statistics.html', authenticated=True)
 
