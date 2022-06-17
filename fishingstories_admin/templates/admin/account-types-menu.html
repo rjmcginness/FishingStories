@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Manage Account Types</h1>
+    <div>
+        <a href="{{ url_for('admin.account_types') }}">show account types</a>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.account_type_create') }}">create account type</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Manage Privileges</h1>
+    <div>
+        <a href="{{ url_for('admin.privileges') }}">show privileges</a>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.privilege_create') }}">create privilege</a>
+    </div>
+{% endblock %}
