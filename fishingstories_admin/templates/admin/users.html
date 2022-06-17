@@ -16,9 +16,10 @@
             <tr>
                 <td>{{ user.primary_key }}</td>
                 <td>{{ user.username }}</td>
+                <td>{{ user.account_type.name }}</td>
                 <td>{{ user.is_active }}</td>
                 <td>
-                    {% for privilge in user.privileges %}
+                    {% for privilege in user.account_type.privileges %}
                     {{ privilege.name }}<br>
                     {% endfor %}
                 </td>
