@@ -9,7 +9,7 @@
         {% set form_method='post' %}
     {% else %}
         {% set form_method='get' %}
-    {% endif %}
+    { endif %}
     <form method="{{ form_method }}" action="{{ target_url }}">
         <table>
             <tr>
@@ -37,7 +37,7 @@
                 {% if form.is_editable %}
                 <td>{{ form.submit() }}</td>
                 {% else %}
-                <td><button type="button" value="Edit" onclick="window.location.href='/admin/anglers/{{ form.angler_id.data }}/edit'"/></td>
+                <td>{{ form.submit(value='Edit') }}</td>
                 {% endif %}
             </tr>
         </table>

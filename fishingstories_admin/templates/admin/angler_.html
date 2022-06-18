@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Angler - {{ angler.name }}</h1>
+    
+    <table class="data-display-table">
+        <tr>
+            <td>Name</td>
+            <td>{{ angler.name }}</td>
+        </tr>
+        <tr>
+            <td>Rank</td>
+            <td>{{ angler.rank.name }}</td>
+        </tr>
+        <tr>
+            <td>ID</td>
+            <td>{{ angler.id }}</td>
+        </tr>
+        <tr>
+            <td>Account Type</td>
+            <td>{{ angler.user_accounts.account_type.name }}</td>
+        </tr>
+        <tr>
+            <td>privileges</td>
+            <td>
+                {% for privilege in angler.user_accounts.account_type.privileges %}
+                {{ privilege.name }}<br>
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+    <div>
+        <form method='put' action="{{ target_url }}">
+            <input type="submit" value="Edit"/>
+        </form>
+    </div>
+{% endblock %}

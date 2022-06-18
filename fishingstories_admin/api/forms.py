@@ -58,7 +58,7 @@ class AnglerForm(FlaskForm):
     rank = SelectField('Rank', validators=[DataRequired()], render_kw={'readonly': True})
     account_type = StringField('Account Type', render_kw={'readonly': True})
     privileges = SelectMultipleField('Privleges', render_kw={'readonly': True})
-    submit = SubmitField('Edit')
+    submit = SubmitField('Update')
     is_editable: bool = False
     
     

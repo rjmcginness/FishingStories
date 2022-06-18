@@ -202,7 +202,7 @@ def anglers():
     
     return render_template('admin/anglers.html', anglers=anglers, authenticated=True)
 
-@bp.route('/anglers/<int:angler_id>/edit', methods=['GET', 'PATCH'])
+@bp.route('/anglers/<int:angler_id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_required(forbidden)
 def angler_edit(angler_id: int):
@@ -227,7 +227,14 @@ def angler_edit(angler_id: int):
     if form.validate_on_submit():
         
         # get new rank from database
-        rank = current_app.session.query(models.Rank).filter(form.rank.data)
+        # rank = current_app.session.query(models.Rank).filter(name=form.rank.data)
+        rank = current_app.session.execuste(select(models.Rank).
+                                            where(models.Rank.name == form.rank.data)).first()
+        
+        rank = rank[0]
+        
+        flash(rank.id)
+        print('RANK ID', rank.id)
         
         # select angler from database again
         angler = current_app.session.execute(update(models.Angler).
@@ -240,9 +247,11 @@ def angler_edit(angler_id: int):
             print(e)
             current_app.session.rollback()
         
-        return redirect('admin/anglers/' + str(angler.id))
+        return redirect(url_for('admin.angler'), angler_id=angler.id)
     
-    return render_template('admin/angler.html', title=angler.name, form=form, authenticated=True)
+    
+    
+    return render_template('admin/angler.html', title=angler.name, form=form, target_url='', authenticated=True)
 
 @bp.route('/anglers/<int:angler_id>', methods=['GET'])
 @login_required
@@ -260,7 +269,11 @@ def angler(angler_id: int):
     privileges = angler.user_accounts.account_type.privileges
     form.privileges.choices = [privilege.name for privilege in privileges]
     
-    return render_template('admin/angler.html', title=angler.name, form=form, authenticated=True)
+    return render_template('admin/angler.html',
+                           title=angler.name,
+                           form=form,
+                           target_url=url_for('admin.angler_edit', angler_id=angler.id),
+                           authenticated=True)
 
 # <div>
 #      <a href="{{ url_for('admin.angler_edit') }}">edit angler</a>
