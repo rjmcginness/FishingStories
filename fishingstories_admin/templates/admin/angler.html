@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Angler - {{ form.name.data }}</h1>
+    {{ form.hidden_tag() }}
+    
+    {% if form.is_editable %}
+        {% set form_method='PATCH' %}
+        {% set form_action='/admin/anglers/' + form.angler_id.data|string %}
+    {% else %}
+        {% set form_method='GET' %}
+        {% set form_action='/admin/anglers/' + form.angler_id.data|string + '/edit' %}
+    {% endif %}
+    {% if form.is_editable %}
+    <form method="{{ form_method }}" action="{{ form_action }}">
+    {% else %}
+    <form method="{{ form_method }}" action="">
+    {% endif %}
+        <table>
+            <tr>
+                <td>{{ form.name.label }}</td>
+                <td>{{ form.name() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.rank.label }}</td>
+                <td>{{ form.rank(size=1) }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.angler_id.label }}</td>
+                <td>{{ form.angler_id() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.account_type.label }}</td>
+                <td>{{ form.account_type() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.privileges.label }}</td>
+                <td>{{ form.privileges() }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                {% if form.is_editable %}
+                <td>{{ form.submit() }}</td>
+                {% else %}
+                <td><input type="button" onclick="window.location.href='{{ form_action }}'" value="Edit" />
+                {% endif %}
+            </tr>
+        </table>
+    </form>
+{% endblock %}

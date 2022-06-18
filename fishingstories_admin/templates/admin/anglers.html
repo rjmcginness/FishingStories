@@ -12,9 +12,10 @@
         <tbody>
             {% for angler in anglers %}
             <tr>
-                <td>{{ angler.primary_key }}</td>
-                <td>{{ angler.name }}</td>
-                <td>{{ angler.rank }}</td>
+                <td>{{ angler.id }}</td>
+                {% set angler_url = '/admin/anglers/' + angler.id|string %}
+                <td><a href="{{ angler_url }}">{{ angler.name }}</a></td>
+                <td>{{ angler.rank.name }}</td>
             </tr>
             {% endfor %}
         </tbody>

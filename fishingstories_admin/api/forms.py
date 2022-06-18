@@ -19,6 +19,8 @@ from wtforms import SelectMultipleField
 from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 
+from typing import List
+
 # class LoginForm(FlaskForm):
 #     username = StringField('Username', validators=[DataRequired()])
 #     password = PasswordField('Password', validators=[DataRequired()])
@@ -48,7 +50,26 @@ class AddGearForm(FlaskForm):
     hook = StringField('Hook')
     leader = StringField('Leader')
     submit = SubmitField('Add Gear')
-
+    
+class AnglerForm(FlaskForm):
+    angler_id = StringField("ID", render_kw={'readonly': True})
+    name = StringField('Name', render_kw={'readonly': True})
+    # rank = StringField('Rank', render_kw={'readonly': True})
+    rank = SelectField('Rank', validators=[DataRequired()], render_kw={'readonly': True})
+    account_type = StringField('Account Type', render_kw={'readonly': True})
+    privileges = SelectMultipleField('Privleges', render_kw={'readonly': True})
+    submit = SubmitField('Edit')
+    is_editable: bool = False
+    
+    
+    def make_editable(self, ranks: List[str]) -> None:
+        self.is_editable = True
+        self.rank.render_kw['readonly'] = False
+        self.rank.choices = ranks
+        self.submit.data = 'Submit Change'
+        
+    
+    
 class CreateAnglerForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     submit = SubmitField('Add Gear')

@@ -15,7 +15,9 @@ from flask import request
 from flask_login import login_required
 from flask_login import current_user
 from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import OperationalError
 
 from functools import wraps
 
@@ -24,30 +26,40 @@ from .forms import RankForm
 from .forms import CreateAnglerForm
 from .forms import CreateAccountTypeForm
 from .forms import CreatePrivilegeForm
+from .forms import AddBaitForm
+from .forms import AddGearForm
+from .forms import AnglerForm
 
 
 bp = Blueprint('admin', __name__)#, url_prefix='/admin')
 
 
+######Does not have to be an endpoint, could be a function
+# @bp.route('/forbidden')
+def forbidden(redirect_url):
+    flash('Access forbiden')
+    return redirect(redirect_url)
+
 def admin_required(forbidden):
     def wrapper(endpoint_handler):
         @wraps(endpoint_handler)
         def decorates(*args, **kwargs):
-            try: 
+            # attempt to check account_type name against admin
+            try:
                 if current_user.account_type.name != 'Admin':
-                    raise AttributeError('NOT an ADMIN')
-            except (AttributeError, KeyError):
+                    raise ValueError('NOT an ADMIN')
+            except (AttributeError, KeyError, ValueError):
+                # check if logged in, if so, send to forbidden
+                # if current_user.is_authorized:
                 return forbidden(request.referrer)
+            # otherwise 1. not logged in (for case of login credentials fail)
+            # or is admin
             return endpoint_handler(*args, **kwargs)
         return decorates
     return wrapper
 
 
-######Does not have to be an endpoint, could be a function
-@bp.route('/forbidden')
-def forbidden(redirect_url):
-    flash('Access forbiden')
-    return redirect(redirect_url)
+
 
 @bp.route('/ranks/create', methods = ['GET', 'POST'])
 @login_required
@@ -184,27 +196,71 @@ def manage_anglers():
 @login_required
 @admin_required(forbidden)
 def anglers():
-    anglers = models.Angler.query.all()
+    anglers = current_app.session.execute(select(models.Angler))
     
     anglers = [angler[0] for angler in anglers]
     
-    render_template('/admin/anglers.html', anglers=anglers, authenticated=True)
+    return render_template('admin/anglers.html', anglers=anglers, authenticated=True)
 
-@bp.route('/anglers/<int:angler_id>/edit', methods=['PATCH'])
+@bp.route('/anglers/<int:angler_id>/edit', methods=['GET', 'PATCH'])
 @login_required
 @admin_required(forbidden)
-def angler_edit():
-    form = CreateAnglerForm()
+def angler_edit(angler_id: int):
+    form = AnglerForm()
+    
+    angler = current_app.session.execute(select(models.Angler).
+                                          where(models.Angler.id==angler_id)).first()
+    
+    angler = angler[0]
+    
+    form.angler_id.data = angler.id
+    form.name.data = angler.name
+    form.account_type.data = angler.user_accounts.account_type.name
+    privileges = angler.user_accounts.account_type.privileges
+    form.privileges.choices = [privilege.name for privilege in privileges]
+    
+    ranks = current_app.session.execute(select(models.Rank).
+                                        order_by(models.Rank.rank_number))
+    ranks = [rank[0].name for rank in ranks]
+    
+    form.make_editable(ranks)
     if form.validate_on_submit():
         
-        angler = models.Angler()
+        # get new rank from database
+        rank = current_app.session.query(models.Rank).filter(form.rank.data)
+        
+        # select angler from database again
+        angler = current_app.session.execute(update(models.Angler).
+                                             where(models.Angler.id == angler_id).
+                                             values(rank_id=rank.id))
+        
+        try:
+            current_app.session.commit()
+        except (IntegrityError, OperationalError) as e:
+            print(e)
+            current_app.session.rollback()
+        
+        return redirect('admin/anglers/' + str(angler.id))
+    
+    return render_template('admin/angler.html', title=angler.name, form=form, authenticated=True)
 
-@bp.route('/anglers/<int:id>', methods=['GET'])
+@bp.route('/anglers/<int:angler_id>', methods=['GET'])
 @login_required
 @admin_required(forbidden)
-def angler(id: int):
-    angler = models.Angler.query.get(id)
+def angler(angler_id: int):
+    form = AnglerForm()
+    angler = current_app.session.execute(select(models.Angler).
+                                          where(models.Angler.id==angler_id)).first()
 
+    angler = angler[0]
+    form.angler_id.data = angler.id
+    form.name.data = angler.name
+    form.rank.choices = [angler.rank.name]
+    form.account_type.data = angler.user_accounts.account_type.name
+    privileges = angler.user_accounts.account_type.privileges
+    form.privileges.choices = [privilege.name for privilege in privileges]
+    
+    return render_template('admin/angler.html', title=angler.name, form=form, authenticated=True)
 
 # <div>
 #      <a href="{{ url_for('admin.angler_edit') }}">edit angler</a>
@@ -233,7 +289,7 @@ def users():
 @bp.route('/users/<int:user_id>', methods=['GET'])
 @login_required
 @admin_required(forbidden)
-def users(user_id: int):
+def user(user_id: int):
     user = current_app.session.execute(select(models.UserAccount).
                                        where(models.UserAccount.id == user_id))
     
@@ -244,10 +300,95 @@ def users(user_id: int):
 @bp.route('/users/<int:user_id>/edit', methods=['GET'])
 @login_required
 @admin_required(forbidden)
-def users(user_id: int):
+def user_edit(user_id: int):
     user = current_app.session.execute(select(models.UserAccount).
                                        where(models.UserAccount.id == user_id))
     
     user = user[0][0]
     
     return render_template('admin/edit_user.html', user=user, authenticated=True)
+
+
+@bp.route('/baitsmenu')
+@login_required
+def baits_menu():
+    return render_template('fishingstories_admin/baitsmenu.html', authenticated=True)
+
+@bp.route('/baits/create', methods=['GET', 'POST'])
+@login_required
+def add_bait():
+    form = AddBaitForm()
+    if form.validate_on_submit():
+        
+        ###### ADDRESS THE CONVERSION TO FLOAT (MAYBE ANOTHER TYPE OF FIELD)
+        bait = models.Bait(name=form.name.data,
+                           artificial=form.artificial.data,
+                           size=form.size.data,
+                           color=form.color.data,
+                           description=form.description.data)
+        
+        # add new bait to database
+        ######IT WOULD BE GREAT TO KEEP name+size+color unique
+        try:
+            current_app.session.add(bait)
+            current_app.session.commit()
+        except IntegrityError:
+            ###### HOW DO I CLEAR THIS????? session.pop('_flashes', None)????
+            flash('Bait {} size={} color={} already exists'.format(form.name.data,
+                                                          form.size.data,
+                                                          form.color.data))
+            
+            form.clear()
+            
+            return render_template('fishingstories/addbait.html', title='Add Bait', form=form, authenticated=True)
+        
+        flash('Added bait {}, size={}, color={}'.format(form.name.data,
+                                                      form.size.data,
+                                                      form.color.data))
+        return redirect('/baits')
+    
+    return render_template('fishingstories/addbait.html', title='Add Bait', form=form, authenticated=True)
+
+@bp.route('/baits')
+@login_required
+def baits():
+    
+    baits = current_app.session.execute(select(models.Bait))
+    
+    baits = [bait[0] for bait in baits]
+    
+    return render_template('fishingstories/baits.html', baits=list(baits), authenticated=True)
+
+@bp.route('/gearmenu')
+@login_required
+def gear_menu():
+    return render_template('fishingstories/gearmenu.html', authenticated=True)
+
+@bp.route('/create-gear', methods=['GET', 'POST'])
+@login_required
+def add_gear():
+    form = AddGearForm()
+    
+    if form.validate_on_submit():
+        gear_combo = models.FishingGear(rod=form.rod.data,
+                                 reel=form.reel.data,
+                                 line=form.line.data,
+                                 leader=form.leader.data,
+                                 hook=form.hook.data)
+        current_app.session.add(gear_combo)
+        current_app.session.commit()
+        flash('Added Gear Combo')
+        
+        return redirect('/gear')
+
+    return render_template('fishingstories/addgear.html', title='Add Gear Combo', form=form, authenticated=True)
+
+@bp.route('/gear')
+@login_required
+def gear():
+    gear_combos = current_app.session.execute(select(models.FishingGear))
+    
+    # take the first element in the returned tuple
+    gear_combos = [gear[0] for gear in gear_combos]
+    
+    return render_template('fishingstories/gear.html', gear_list=gear_combos, authenticated=True)
