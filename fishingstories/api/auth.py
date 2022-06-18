@@ -49,8 +49,11 @@ def authenticate():
         else:
             login_user(user[0], remember=form.remember_me.data)
         
-        if current_user.account_type.name == 'Admin':
-            return redirect(url_for('admin/index'))
+        try:
+            if current_user.account_type.name == 'Admin':
+                return redirect(url_for('admin/index'))
+        except AttributeError:
+            pass
         
         return redirect(url_for('index'))
     return render_template('/auth/login.html', title='Sign In', form=form)
