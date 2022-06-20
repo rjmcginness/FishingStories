@@ -15,7 +15,6 @@ from flask import request
 from flask_login import login_required
 from flask_login import current_user
 from sqlalchemy import select
-from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import OperationalError
 
@@ -23,12 +22,12 @@ from functools import wraps
 
 from src.db import models
 from .forms import RankForm
-from .forms import CreateAnglerForm
 from .forms import CreateAccountTypeForm
 from .forms import CreatePrivilegeForm
 from .forms import AddBaitForm
 from .forms import AddGearForm
 from .forms import AnglerForm
+from .forms import AnglerEditForm
 
 
 bp = Blueprint('admin', __name__)#, url_prefix='/admin')
@@ -202,16 +201,36 @@ def anglers():
     
     return render_template('admin/anglers.html', anglers=anglers, authenticated=True)
 
-@bp.route('/anglers/<int:angler_id>/edit', methods=['GET', 'POST'])
+@bp.route('/anglers/<int:angler_id>/edit', methods=['GET', 'PATCH'])
 @login_required
 @admin_required(forbidden)
 def angler_edit(angler_id: int):
-    form = AnglerForm()
+    form = AnglerEditForm()
     
-    angler = current_app.session.execute(select(models.Angler).
-                                          where(models.Angler.id==angler_id)).first()
-    
-    angler = angler[0]
+    # update the rank field
+    if request.method == 'PATCH':
+        # get new rank from database
+        # rank = current_app.session.query(models.Rank).filter(name=form.rank.data)
+        rank = current_app.session.scalar(select(models.Rank).
+                                            where(models.Rank.name == form.ranks.data))
+        
+        # select angler from database again
+        angler = current_app.session.scalar(select(models.Angler).
+                                             where(models.Angler.id == angler_id))
+        
+        angler.rank_id = rank.id
+        
+        try:
+            current_app.session.commit()
+        except (IntegrityError, OperationalError):
+            current_app.session.rollback()
+        
+        return redirect(url_for('admin.angler', angler_id=angler_id))
+        
+        
+    # initial GET on form
+    angler = current_app.session.scalar(select(models.Angler).
+                                          where(models.Angler.id==angler_id))
     
     form.angler_id.data = angler.id
     form.name.data = angler.name
@@ -221,58 +240,30 @@ def angler_edit(angler_id: int):
     
     ranks = current_app.session.execute(select(models.Rank).
                                         order_by(models.Rank.rank_number))
-    ranks = [rank[0].name for rank in ranks]
-    
-    form.make_editable(ranks)
-    if form.validate_on_submit():
+    form.ranks.choices = [rank[0].name for rank in ranks]
+    form.ranks.data = angler.rank.name
         
-        # get new rank from database
-        # rank = current_app.session.query(models.Rank).filter(name=form.rank.data)
-        rank = current_app.session.execuste(select(models.Rank).
-                                            where(models.Rank.name == form.rank.data)).first()
-        
-        rank = rank[0]
-        
-        flash(rank.id)
-        print('RANK ID', rank.id)
-        
-        # select angler from database again
-        angler = current_app.session.execute(update(models.Angler).
-                                             where(models.Angler.id == angler_id).
-                                             values(rank_id=rank.id))
-        
-        try:
-            current_app.session.commit()
-        except (IntegrityError, OperationalError) as e:
-            print(e)
-            current_app.session.rollback()
-        
-        return redirect(url_for('admin.angler'), angler_id=angler.id)
-    
-    
-    
-    return render_template('admin/angler.html', title=angler.name, form=form, target_url='', authenticated=True)
+    return render_template('admin/angler-edit.html', title=angler.name, form=form, target_url='', authenticated=True)
 
 @bp.route('/anglers/<int:angler_id>', methods=['GET'])
 @login_required
 @admin_required(forbidden)
 def angler(angler_id: int):
     form = AnglerForm()
-    angler = current_app.session.execute(select(models.Angler).
-                                          where(models.Angler.id==angler_id)).first()
+    form.is_editable = False
+    angler = current_app.session.scalar(select(models.Angler).
+                                          where(models.Angler.id==angler_id))
 
-    angler = angler[0]
     form.angler_id.data = angler.id
     form.name.data = angler.name
-    form.rank.choices = [angler.rank.name]
+    form.rank.data = angler.rank.name
     form.account_type.data = angler.user_accounts.account_type.name
     privileges = angler.user_accounts.account_type.privileges
     form.privileges.choices = [privilege.name for privilege in privileges]
     
     return render_template('admin/angler.html',
-                           title=angler.name,
+                           title='Fishing Stories - ' + angler.name,
                            form=form,
-                           target_url=url_for('admin.angler_edit', angler_id=angler.id),
                            authenticated=True)
 
 # <div>
@@ -288,14 +279,18 @@ def angler(angler_id: int):
 def statistics():
     return render_template('admin/statistics.html', authenticated=True)
 
+# @bp.route('/manage-users', methods=['GET'])
+# @login_required
+# @admin_required(forbidden)
+# def manage_users():
+#     return render_template('admin/usermenu.html', authenticated=True)
+
 @bp.route('/users', methods=['GET'])
 @login_required
 @admin_required(forbidden)
 def users():
     users = current_app.session.scalars(select(models.UserAccount).
-                                        order_by(models.UserAccount.username))
-    
-    users = [user[0] for user in users]
+                                        order_by(models.UserAccount.account_type_id))
     
     return render_template('admin/users.html', users=users, authenticated=True)
 
@@ -303,10 +298,10 @@ def users():
 @login_required
 @admin_required(forbidden)
 def user(user_id: int):
-    user = current_app.session.execute(select(models.UserAccount).
+    user = current_app.session.scalar(select(models.UserAccount).
                                        where(models.UserAccount.id == user_id))
     
-    user = user[0][0]
+    # user = user[0][0]
     
     return render_template('admin/user.html', user=user, authenticated=True)
 

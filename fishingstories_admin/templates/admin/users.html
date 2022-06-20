@@ -3,7 +3,7 @@
 
 {% block content %}
     <h1>User Accounts</h1>
-    <table>
+    <table class="data-display-table">
         <thead>
             <th>ID</th>
             <th>Name</th>
@@ -14,8 +14,8 @@
         <tbody>
             {% for user in users %}
             <tr>
-                <td>{{ user.primary_key }}</td>
-                <td>{{ user.username }}</td>
+                <td>{{ user.id }}</td>
+                <td><a href="{{ url_for('admin.user', user_id=user.id) }}">{{ user.username }}</a></td>
                 <td>{{ user.account_type.name }}</td>
                 <td>{{ user.is_active }}</td>
                 <td>

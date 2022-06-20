@@ -3,43 +3,30 @@
 
 {% block content %}
     <h1>Angler - {{ form.name.data }}</h1>
+    <div><a href="{{ url_for('admin.amglers') }}">back</a></div>
+    <div></div>
     {{ form.hidden_tag() }}
-    
-    {% if form.is_editable %}
-        {% set form_method='post' %}
-    {% else %}
-        {% set form_method='get' %}
-    {% endif %}
-    <form method="{{ form_method }}" action="{{ target_url }}">
-        <table>
-            <tr>
-                <td>{{ form.name.label }}</td>
-                <td>{{ form.name() }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.rank.label }}</td>
-                <td>{{ form.rank(size=1) }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.angler_id.label }}</td>
-                <td>{{ form.angler_id() }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.account_type.label }}</td>
-                <td>{{ form.account_type() }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.privileges.label }}</td>
-                <td>{{ form.privileges() }}</td>
-            </tr>
-            <tr>
-                <td> </td>
-                {% if form.is_editable %}
-                <td>{{ form.submit() }}</td>
-                {% else %}
-                <td><button type="button" value="Edit" onclick="window.location.href='/admin/anglers/{{ form.angler_id.data }}/edit'"/></td>
-                {% endif %}
-            </tr>
-        </table>
-    </form>
+    <table class="view-only-form">
+        <tr>
+            <td>{{ form.name.label }}</td>
+            <td>{{ form.name() }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.rank.label }}</td>
+            <td>{{ form.rank() }}</td>
+            <td><a href="{{ url_for('admin.angler_edit', angler_id=form.angler_id.data) }}">EDIT</a></td>
+        </tr>
+        <tr>
+            <td>{{ form.angler_id.label }}</td>
+            <td>{{ form.angler_id() }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.account_type.label }}</td>
+            <td>{{ form.account_type() }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.privileges.label }}</td>
+            <td>{{ form.privileges() }}</td>
+        </tr>
+    </table>
 {% endblock %}

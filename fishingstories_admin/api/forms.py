@@ -54,19 +54,18 @@ class AddGearForm(FlaskForm):
 class AnglerForm(FlaskForm):
     angler_id = StringField("ID", render_kw={'readonly': True})
     name = StringField('Name', render_kw={'readonly': True})
-    # rank = StringField('Rank', render_kw={'readonly': True})
-    rank = SelectField('Rank', validators=[DataRequired()], render_kw={'readonly': True})
+    rank = StringField('Rank', render_kw={'readonly': True})
+    account_type = StringField('Account Type', render_kw={'readonly': True})
+    privileges = SelectMultipleField('Privleges', render_kw={'readonly': True})
+    submit = SubmitField('Edit')
+    
+class AnglerEditForm(FlaskForm):
+    angler_id = StringField("ID", render_kw={'readonly': True})
+    name = StringField('Name', render_kw={'readonly': True})
+    ranks = SelectField('Rank', render_kw={'readonly': True})
     account_type = StringField('Account Type', render_kw={'readonly': True})
     privileges = SelectMultipleField('Privleges', render_kw={'readonly': True})
     submit = SubmitField('Update')
-    is_editable: bool = False
-    
-    
-    def make_editable(self, ranks: List[str]) -> None:
-        self.is_editable = True
-        self.rank.render_kw['readonly'] = False
-        self.rank.choices = ranks
-        self.submit.data = 'Submit Change'
         
     
     
