@@ -63,3 +63,11 @@ ensure relationships in data model were all functioning correctly today.  The ad
 functionality will be largely a subset of the admin functionality.  The 6/14/2022 branch is the last containing a single app
 implementation.  Once the version with middleware is completed, the 6/14/2022 branch could be fully implemented with the frontend.
 Their functionality should be identical, except for the routing to admin in the middleware-containing version.
+
+6/19/2022
+Implementing endpoints.  Able to create ranks, privileges, edit anglers.  Adhering to RESTful API conventions.  In order to implement
+the PATCH method to update the angler rank (and for further update functions), added jquery min 3.5.0, pulled in as script from online.
+Also had to utilize ajax with redirection to send the put request to the server.  To view the angler, a FlaskForm subclass with all
+read-only fields is implemented and rendered in a template.  This paradigm can be repeated for other data edit procedures.
+
+Need to complete all endpoint, including the fishing spot data access from scraping.
