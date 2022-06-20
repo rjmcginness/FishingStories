@@ -137,6 +137,19 @@ class Rank(Base):
     
     anglers = relationship('Angler', back_populates='rank')
     
+angler_spots = Table ('angler_spots',
+                      Base.metadata,
+                      Column('angler_id',
+                             ForeignKey('anglers.id',
+                                        ondelete='CASCADE'),######will ondelete='CASCADE' delete the angler???????
+                             primary_key=True),
+                      Column('fishing_spot_id',
+                             ForeignKey('fishing_spots.id',
+                                        ondelete='CASCADE'),
+                             primary_key=True),
+                      Column('nickname', String(128))
+    )
+    
 
 class Angler(Base):
     __tablename__ = 'anglers'
@@ -157,6 +170,8 @@ class Angler(Base):
     user_accounts = relationship('UserAccount',
                                 back_populates='anglers',
                                 uselist=False)
+    
+    fishing_spots = relationship('FishingSpot', secondary=angler_spots, back_populates='anglers')
     
     # fishes = relationship('Fish', secondary=fish_caught)
 
@@ -212,7 +227,7 @@ class FishingOuting(Base):
     
     # many-to-one relationship with anglers (unidirectional)
     anglers = relationship('Angler', secondary=outings_fished)
-    
+
 
 class FishingSpot(Base):
     __tablename__ = 'fishing_spots'
@@ -221,14 +236,29 @@ class FishingSpot(Base):
     latitude = Column(Numeric, nullable=False)
     longitude = Column(Numeric, nullable=False)
     name = Column(String, nullable=False)
+    nickname = Column(String)
     description = Column(String)
+    weather_url_id = Column(Integer,
+                         ForeignKey('data_urls.id', ondelete='CASCADE'))
+    current_url_id = Column(Integer,
+                         ForeignKey('data_urls.id', ondelete='CASCADE'))
     
     __table_args__ = (UniqueConstraint('latitude', 'longitude'),)
     
     fishing_conditions = relationship('FishingConditions')
     fishes = relationship('Fish')
+    anglers = relationship('Angler', secondary=angler_spots, back_populates='fishing_spots')
+    weather_url = relationship('DataUrl')######FIX THIS
+    current_url = relationship('DataUrl')######FIX THIS
     
+class DataUrl(Base):
+    __tablename__ = 'data_urls'
     
+    id = Column(Integer, primary_key=True)
+    url = Column(String, nullable=False)
+    query_data = Column(String, nullable=False)
+    
+    __table_args__ = (UniqueConstraint('url', 'query_data'),)
 
 class FishingConditions(Base):
     __tablename__ = 'fishing_conditions'
