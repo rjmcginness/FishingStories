@@ -70,4 +70,7 @@ the PATCH method to update the angler rank (and for further update functions), a
 Also had to utilize ajax with redirection to send the put request to the server.  To view the angler, a FlaskForm subclass with all
 read-only fields is implemented and rendered in a template.  This paradigm can be repeated for other data edit procedures.
 
-Need to complete all endpoint, including the fishing spot data access from scraping.
+Need to complete all endpoint, including the fishing spot data access from scraping.  Still want to do site categorization for sites
+selected by a user, which are not directly at sites having current data.  The plan is to utilize the gps coordinates along with other
+potential features of the intended fishing spot to categorize it as a favorable fishing spot.  Ultimately, data analysis can provide
+prediction of fishing success at known spots and newly selected fishing spots by comparison to the known spots.
