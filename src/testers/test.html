@@ -1,0 +1,48 @@
+<! DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Test Ajax PUT/PATCH</title>
+        <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+    </head>
+    <body>
+        <form method="" action="">
+            <div>
+                {{ form.username.label }}
+                {{ form.username() }}
+            </div>
+            <div>
+                {{ form.password.label }}
+                {{ form.password() }}
+            </div>
+            <div>
+                {{ form.submit() }}
+            </div>
+        </form>
+        <script>
+            $(document).ready(function () {
+                $('form').submit(function (e) {
+                    let url = "{{ url_for('users.update', user_id=user_id) }}";
+                    $.ajax({
+                        type: "PUT",
+                        url: url,
+                        data: $('form').serialize(),
+                        success: function (data) {
+                            console.log(data)
+                        }
+                    });
+                    e.preventDefault();
+                });
+
+                $.ajaxSetup({
+                    beforeSend: function (xhr, settings) {
+                        if (!/^GET|HEAD|OPTIONS|TRACE$/i.test(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value() }}")
+                        }
+                    }
+                })
+            });
+        </script>
+    </body>
+    </html>

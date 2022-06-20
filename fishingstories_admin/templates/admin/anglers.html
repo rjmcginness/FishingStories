@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Anglers</h1>
+    <table>
+        <thead>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Rank</th>
+        </thead>
+        <tbody>
+            {% for angler in anglers %}
+            <tr>
+                <td>{{ angler.id }}</td>
+                {% set angler_url = '/admin/anglers/' + angler.id|string %}
+                <td><a href="{{ angler_url }}">{{ angler.name }}</a></td>
+                <td>{{ angler.rank.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

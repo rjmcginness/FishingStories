@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Gear Combos</h1>
+    <table>
+        <thead>
+            <th>Rod</th>
+            <th>Reel</th>
+            <th>Line</th>
+            <th>Leader</th>
+            <th>Hook</th>
+        </thead>
+        <tbody>
+            {% for gear in gear_list %}
+            <tr>
+                <td>{{ gear.rod }}</td>
+                <td>{{ gear.reel }}</td>
+                <td>{{ gear.line }}</td>
+                <td>{{ gear.leader }}</td>
+                <td>{{ gear.hook }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -17,7 +17,7 @@ from flask_login import login_required
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from .db import models
+from src.db import models
 from .api.forms import AddBaitForm
 from .api.forms import AddGearForm
 
@@ -29,7 +29,12 @@ bp = Blueprint('fishingstories', __name__)
 @bp.route('/index')
 def index():
     if not current_user.is_authenticated:
+        
         return redirect(url_for('auth'))
+    
+    # user is autheticated
+   
+    
     
     return render_template('fishingstories/index.html', authenticated=True)
 

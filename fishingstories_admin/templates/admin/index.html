@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Welcome Administrator</h1>
+    <div>
+        <a href="{{ url_for('admin.users') }}">manage users</a>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.manage_privileges') }}">manage privileges</a>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.manage_account_types') }}">manage account types</a>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.manage_anglers') }}">manage anglers</a>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.statistics') }}">statistics</a>
+    </div>
+{% endblock %}
+

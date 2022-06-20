@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Privileges</h1>
+    <div>
+        <a href="{{ url_for('admin.privilege_create') }}">back</a>
+    </div>
+    <table class="data-display-table">
+        <thead>
+            <th>ID</th>
+            <th>Privilege Name</h>
+        </thead>
+        <tbody>
+            {% for privilege in privileges %}
+                <tr>
+                    <td>{{ privilege.id }}</td>
+                    <td>{{ privilege.name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

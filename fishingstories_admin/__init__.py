@@ -17,7 +17,7 @@ login_manager = LoginManager()
 
 
 def create_app(test_config=None):
-    app_name = 'fishingstories'
+    app_name = 'fishingstories_admin'
     print(f'{app_name=}')
     
     # create flask app
@@ -58,18 +58,21 @@ def create_app(test_config=None):
     # from src.db.db import init_admin
     # init_admin()
     
-    from . import fishingstories
-    app.register_blueprint(fishingstories.bp)
+    from . import fishingstories_admin
+    app.register_blueprint(fishingstories_admin.bp)
     app.add_url_rule('/', endpoint='index')
+    
+    from .api import admin
+    app.register_blueprint(admin.bp)
     
     from .api import fishing_spots
     app.register_blueprint(fishing_spots.bp)
     
     from .api import auth
     app.register_blueprint(auth.bp)
-    app.add_url_rule('/auth', 'auth')
+    app.add_url_rule('/admin/auth', 'auth')
     app.add_url_rule('/register', 'register')
-    app.add_url_rule('/admin', 'admin/index')
+    # app.add_url_rule('/', 'frontend/index')
     
 
     return app

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Edit Angler - {{ form.name.data }}</h1>
+    {{ form.hidden_tag() }}
+    <form method="" action="">
+        <table>
+            <tr>
+                <td>{{ form.name.label }}</td>
+                <td>{{ form.name() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.ranks.label }}</td>
+                <td>{{ form.ranks(size=1) }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.angler_id.label }}</td>
+                <td>{{ form.angler_id() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.account_type.label }}</td>
+                <td>{{ form.account_type() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.privileges.label }}</td>
+                <td>{{ form.privileges() }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.submit() }}</td>
+            </tr>
+        </table>
+    </form>
+    <script>
+        $(document).ready(function () {
+            $('form').submit(function (e) {
+                let url = "{{ url_for('admin.angler_edit', angler_id=form.angler_id.data) }}";
+                $.ajax({
+                    type: "PATCH",
+                    url: url,
+                    data: $('form').serialize(),
+                    success: function (data) {
+                        window.location.href = "{{ url_for('admin.angler', angler_id=form.angler_id.data) }}";
+                    },
+                    error: function (data) {
+                        window.location.href = "{{ url_for('admin.angler', angler_id=form.angler_id.data) }}";
+                    }
+                });
+                e.preventDefault();
+            });
+
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!/^GET|HEAD|OPTIONS|TRACE$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value() }}")
+                    }
+                }
+            })
+        });
+    </script>
+{% endblock %}

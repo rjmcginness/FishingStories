@@ -11,10 +11,8 @@ from flask import render_template
 from flask import flash
 from flask import redirect
 from flask import url_for
-from flask import request
 from flask_login import login_user
 from flask_login import logout_user
-from flask_login import current_user
 from flask_login import login_required
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -24,12 +22,17 @@ from .login_form import LoginForm
 from .login_form import RegistrationForm
 
 
-from fishingstories import login_manager
+from fishingstories_admin import login_manager
 
 
-bp = Blueprint('/auth', __name__)
+# bp = Blueprint('/auth', __name__)
+bp = Blueprint('auth', __name__)#, url_prefix='/admin')
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    ###### NOT SURE THIS WORKS
+    return current_app.session.query(models.UserAccount).get(int(user_id))
 
 @bp.route('/auth', methods=['GET', 'POST'])
 def authenticate():
@@ -48,12 +51,6 @@ def authenticate():
             flash('Password incorrect')
         else:
             login_user(user[0], remember=form.remember_me.data)
-        
-        try:
-            if current_user.account_type.name == 'Admin':
-                return redirect(url_for('admin/index'))
-        except AttributeError:
-            pass
         
         return redirect(url_for('index'))
     return render_template('/auth/login.html', title='Sign In', form=form)
@@ -115,11 +112,8 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect('/auth')
     
-@login_manager.user_loader
-def load_user(user_id):
-    ###### NOT SURE THIS WORKS
-    return current_app.session.query(models.UserAccount).get(int(user_id))
+
 
 

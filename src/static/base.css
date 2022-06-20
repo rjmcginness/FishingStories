@@ -1,0 +1,147 @@
+body {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.left-top {
+    width: 75vw;
+    height: 18vh;
+    float: left;
+    overflow-x: hidden;
+    background-color:rgb(11, 11, 42);
+}
+
+.left-bottom {
+    width: calc(75vw - 5px); /*added to size section horizontally*/
+    float: left; /*section floats at left of container*/
+    height: 82vh; /*need to set this to make the scrollbar work.  it means 100% of the view height*/
+    overflow-x: hidden;/*hidden content horizontally*/
+    overflow-y: scroll;/*allow scrolling of this section*/
+    background-image: url("images/background-texture.jpg");
+    background-size: 75vw;
+    background-blend-mode:color-dodge;
+    padding-left: 5px;
+}
+
+//.left-bottom>div {
+//    background-color: white;
+//}
+
+.right-top {
+    width: calc(25vw - 3px);
+    height: 18vh;
+    float: right;
+    background-color: darkslategray;
+    border-left: 3px ridge silver;
+}
+
+.right-bottom {
+    width: calc(25vw - 3px);
+    height: 82vh;
+    float: left;
+    background-color:darkslategray;
+    border-left: 3px ridge silver;
+}
+
+.img-border {
+    border-radius: 10px;
+    border: 3px ridge silver
+}
+
+.search-style {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.my-address-style {
+    color: rgb(169, 165, 165);
+    bottom: 10px;
+    top: 10px;
+    text-align: center;
+}
+
+.my-address-style>a {
+    color: rgb(193, 47, 47);
+}
+
+h1 {
+    color: antiquewhite;
+    font-size: xx-large;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    text-align: center;
+    margin: 0;
+    height: 11vh;
+    padding-top: 20px;
+    text-align: center;
+    border-top: 2px inset darkgray;
+    border-bottom: none;
+}
+
+h2 {
+    color: antiquewhite;
+}
+
+li {
+    font-size:large;
+}
+
+section[class="left-top"]>a {
+    color:gold;
+}
+
+section[class="left-top"]>div {
+    text-align: center;
+}
+
+section[class="left-bottom"]>a {
+    color:antiquewhite;
+}
+
+a:visited {
+    color:gold;
+}
+
+section[class="left-bottom"]{
+    color:antiquewhite;
+}
+
+section[class="left-bottom"]>section {
+    padding: 0 10px;
+}
+
+section[class="right-top"] h2 {
+    text-align:center;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color:beige;
+ 
+}
+
+section[class="right-bottom"] ul {
+    list-style-type: none;
+}
+
+.link-img {
+    width: 20vw;
+}
+
+.data-display-table {
+    background: antiquewhite;
+    color: rgb(11, 11, 42);
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    border: solid 1px;
+    border-radius: 4px;
+}
+
+table[class="data-display-table"] th {
+    border-bottom: solid 1px;
+}
+
+table[class="data-display-table"] a:visited {
+    color: purple;
+}
+
+table[class="view-only-form"] input, table[class="view-only-form"] select {
+    color: gray;
+}
