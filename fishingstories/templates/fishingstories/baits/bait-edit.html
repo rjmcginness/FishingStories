@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Edit Angler - {{ form.name.data }}</h1>
+    {{ form.hidden_tag() }}
+    <form method="" action="">
+        <table>
+            <tr>
+                <td>{{ form.name.label }}</td>
+                <td>{{ form.name() }}</td>
+                <td><a href="{{ url_for('angler.bait_edit', bait_id=form.bait_id) }}">EDIT</a></td>
+                {% for error in form.name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.artificial() }} {{ form.artificial.label }}</td>
+                {% for error in form.artificial.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.size.label }}</td>
+                <td>{{ form.size() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.color.label }}</td>
+                <td>{{ form.color() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.description.label }}</td>
+                <td>{{ form.description() }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.submit() }}</td>
+            </tr>
+        </table>
+    </form>
+    <script>
+        $(document).ready(function () {
+            $('form').submit(function (e) {
+                let url = "{{ url_for('admin.angler_edit', angler_id=form.angler_id.data) }}";
+                $.ajax({
+                    type: "PATCH",
+                    url: url,
+                    data: $('form').serialize(),
+                    success: function (data) {
+                        window.location.href = "{{ url_for('admin.angler', angler_id=form.angler_id.data) }}";
+                    },
+                    error: function (data) {
+                        window.location.href = "{{ url_for('admin.angler', angler_id=form.angler_id.data) }}";
+                    }
+                });
+                e.preventDefault();
+            });
+
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!/^GET|HEAD|OPTIONS|TRACE$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value() }}")
+                    }
+                }
+            })
+        });
+    </script>
+{% endblock %}
