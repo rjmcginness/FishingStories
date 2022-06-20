@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>My Fishing Spots</h1>
+    <table class="data-display-table">
+        <thead>
+            <th>Name</th>
+            <th>Nickname</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Description</th>
+        </thead>
+        <tbody>
+            {% for spot in fishing_spots %}
+            <tr>
+                <td><a href="{{ url_for('fishing_spots.spot', spot_id=spot.id) }}">{{ spot.name }}</a></td>
+                <td>{{ spot.nickname }}</td>
+                <td>{{ spot.latitude }}</td>
+                <td>{{ spot.longitude }}</td>
+                <td>{{ spot.description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

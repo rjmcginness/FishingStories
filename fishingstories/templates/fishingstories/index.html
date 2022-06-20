@@ -4,7 +4,7 @@
     {% if authenticated %}
     <h1>Welcome!</h1>
     <div>
-        <a href="">fishing spots</a>
+        <a href="{{ url_for('fishing_spots.fishing_spots_menu') }}">fishing spots</a>
     </div>
     <div>
         <a href="{{ url_for('angler.baits_menu') }}">baits</a>

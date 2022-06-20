@@ -4,10 +4,7 @@
     <h1>{{ form.search.label }} Search</h1>
     <form method="get" action="{{ search_endpoint }}">
         <div>
-            {{ form.search.label }} {{ form.search() }}
-        </div>
-        <div>
-            {{ form.submit() }}
+            {{ form.search.label }} {{ form.search() }} {{ form.submit() }}
         </div>
     </form>
 {% endblock %}

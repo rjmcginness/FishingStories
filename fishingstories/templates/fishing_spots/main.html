@@ -3,7 +3,7 @@
 {% block content %}
     <h1>Fishing Spots</h1>
     <div>
-        <a href="/myspots">my fishing spots</a>
+        <a href="{{ url_for('angler.my_spots', angler_id=angler_id) }}">my fishing spots</a>
     </div>
     <div>
         <a href="/public-spots">public fishing spots</a>
