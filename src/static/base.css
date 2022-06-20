@@ -137,3 +137,11 @@ section[class="right-bottom"] ul {
 table[class="data-display-table"] th {
     border-bottom: solid 1px;
 }
+
+table[class="data-display-table"] a:visited {
+    color: purple;
+}
+
+table[class="view-only-form"] input, table[class="view-only-form"] select {
+    color: gray;
+}
