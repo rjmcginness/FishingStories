@@ -10,6 +10,7 @@ import requests
 from scrapy.selector import Selector
 from typing import List
 import urllib
+from html import unescape
 from calcs import coordinate_to_dms
 from calcs import coordinate_to_decimal
 
@@ -73,9 +74,11 @@ def current_sites(url: str) -> List[CurrentStation]:
     
     site_rows = [Selector(text=row).xpath('//a').getall() for row in site_rows]
     
+    domain = 'http://tbone.biol.sc.edu/tide/'
+    
     site_data_list = [
                        {'map': Selector(text=row[0]).xpath('//a/@href').get(),
-                       'url': Selector(text=row[1]).xpath('//a/@href').get(),
+                       'url': domain + Selector(text=row[1]).xpath('//a/@href').get(),
                        'name': Selector(text=row[1]).xpath('//a/text()').get()}
                      for row in site_rows if len(row) == 2
                      ]
