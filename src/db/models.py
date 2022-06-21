@@ -17,6 +17,7 @@ from sqlalchemy import Boolean
 from sqlalchemy import DateTime
 from sqlalchemy import Date
 from sqlalchemy import UniqueConstraint
+from sqlalchemy import text
 
 from sqlalchemy.orm import relationship
 
@@ -238,6 +239,8 @@ class FishingSpot(Base):
     name = Column(String, nullable=False)
     nickname = Column(String)
     description = Column(String)
+    # for this to work in the db, it must be server_default=SQL text to default to FALSE
+    is_public = Column(Boolean, nullable=False)######default not working,but it is not null boolean??server_default=text('ALTER TABLE fishing_spots ALTER is_public SET DEFAULT FALSE'))
     weather_url_id = Column(Integer,
                          ForeignKey('data_urls.id', ondelete='CASCADE'))
     current_url_id = Column(Integer,
@@ -248,13 +251,13 @@ class FishingSpot(Base):
     fishing_conditions = relationship('FishingConditions')
     fishes = relationship('Fish')
     anglers = relationship('Angler', secondary=angler_spots, back_populates='fishing_spots')
-    weather_url = relationship('DataUrl')######FIX THIS
-    current_url = relationship('DataUrl')######FIX THIS
+    weather_url = relationship('DataUrl', foreign_keys=[weather_url_id], backref='weather_spots')######FIX THIS
+    current_url = relationship('DataUrl', foreign_keys=[weather_url_id], backref='current_spots')######FIX THIS
     
 class DataUrl(Base):
     __tablename__ = 'data_urls'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     url = Column(String, nullable=False)
     query_data = Column(String, nullable=False)
     
