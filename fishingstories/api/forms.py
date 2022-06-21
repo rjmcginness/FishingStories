@@ -106,10 +106,10 @@ class ViewFishingSpotForm(FlaskForm):
     submit = SubmitField('Go')
     
 class AddFishingSpotForm(FlaskForm):
-    name = SelectField('Name', validate_choice=False, validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
     latitude = DecimalField('Latitude', validators=[DataRequired()])
     longitude = DecimalField('Longitude', validators=[DataRequired()])
-    is_public = BooleanField('Public', default='checked', validators=[DataRequired()])
+    is_public = BooleanField('Public')
     nickname = StringField('Nickname')
     description = StringField('Description')
     submit = SubmitField('Add Spot')

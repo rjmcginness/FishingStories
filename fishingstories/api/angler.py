@@ -48,18 +48,20 @@ bp = Blueprint('angler', __name__, url_prefix='/anglers')
 def angler_home(angler_id: int):
     return render_template('fishingstories/index.html', angler_id=angler_id, authenticated=True)
 
-@bp.route('/<int:angler_id>/fishing-spots-menu', methods=['GET'])
+@bp.route('/<int:angler_id>/fishing_spots/menu', methods=['GET'])
 @login_required
 def angler_spots_menu(angler_id: int):
     return render_template('/fishing_spots/main.html', angler_id=angler_id, authenticated=True)
 
-@bp.route('/<int:angler_id>/fishing-spot-create', methods=['GET', 'POST'])
+@bp.route('/<int:angler_id>/fishing_spots/create', methods=['GET', 'POST'])
 @login_required
 def fishing_spot_create(angler_id: int):
     spots = current_app.session.scalars(select(models.FishingSpot).where(
                                         models.FishingSpot.is_public == True))
     
-    form = AddFishingSpotForm(list(spots))
+    spots = list(spots)
+    
+    form = AddFishingSpotForm([spot.name for spot in spots])
     
     if form.validate_on_submit():
         pass

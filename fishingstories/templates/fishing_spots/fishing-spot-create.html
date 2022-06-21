@@ -2,43 +2,61 @@
 
 {% block content %}
     <h1>My Spots</h1>
+    <section class="maps-search-style">
+        <form target="_blank" action="https://www.google.com/maps/search/?api=1" method="get">
+            <label for="search">Use Google Maps to Find your spot</label><br>
+            <input type="text" name="q" id="search" placeholder="Search Google Maps"/>
+            <input type="submit" value="Go!"/>
+        </form>    
+    </section>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
-        <p>
-            {{ form.name.label }} {{ form.name() }}
-            {% for error in form.name.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.nickname.label }} {{ form.nickname() }}
-            {% for error in form.nickname.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.latitude.label }} {{ form.latitude() }}
-            {% for error in form.latitude.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.longitude.label }} {{ form.longitude() }}
-            {% for error in form.longitude.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.is_public.label }} {{ form.is_public() }}
-        </p>
-        <p>
-            {{ form.description.label }} {{ form.description() }}
-        </p>
-        <p>{{ form.submit() }}</p>
+        <table>
+            <tr>
+                <td>{{ form.name.label }}</td>
+                <td>{{ form.name() }}</td>
+                {% for error in form.name.errors %}
+                <td><span style="color: red;">[{{ error }}]</span></td>
+                {% endfor %}
+            </tr>
+            <tr>
+               <td>{{ form.nickname.label }}</td>
+               <td>{{ form.nickname() }}</td>
+                {% for error in form.nickname.errors %}
+                <td><span style="color: red;">[{{ error }}]</span></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.latitude.label }}</td>
+                <td>{{ form.latitude() }}</td>
+                {% for error in form.latitude.errors %}
+                <td><span style="color: red;">[{{ error }}]</span></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.longitude.label }}</td>
+                <td>{{ form.longitude() }}</td>
+                {% for error in form.longitude.errors %}
+                <td><span style="color: red;">[{{ error }}]</span></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.is_public.label }} {{ form.is_public() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.description.label }}</td>
+                <td>{{ form.description() }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.submit() }}</td>
+            </tr>
+        </table>
     </form>
     <section>
         <h3>Fishing Spots</h3>
-        <table>
+        <table class="data-display-table">
             <thead>
                 <th>Name</th>
                 <th>Description</th>
