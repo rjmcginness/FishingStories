@@ -17,9 +17,10 @@ from sqlalchemy import Boolean
 from sqlalchemy import DateTime
 from sqlalchemy import Date
 from sqlalchemy import UniqueConstraint
-from sqlalchemy import text
-
+from sqlalchemy import event
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import DDL
+
 
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
@@ -229,6 +230,19 @@ class FishingOuting(Base):
     # many-to-one relationship with anglers (unidirectional)
     anglers = relationship('Angler', secondary=outings_fished)
 
+class CurrentStation(Base):
+    __tablename__ = 'current_stations'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(280), nullable=False, unique=True)
+    latitude = Column(Numeric, nullable=False)
+    longitude = Column(Numeric, nullable=False)
+    current_url_id = Column(Integer,
+                            ForeignKey('data_urls.id', ondelete='CASCADE'),
+                            nullable=False)
+    
+    current_url = relationship('DataUrl', foreign_keys=[current_url_id], backref='current_station')
+
 
 class FishingSpot(Base):
     __tablename__ = 'fishing_spots'
@@ -240,20 +254,57 @@ class FishingSpot(Base):
     nickname = Column(String)
     description = Column(String)
     # for this to work in the db, it must be server_default=SQL text to default to FALSE
-    is_public = Column(Boolean, nullable=False)######default not working,but it is not null boolean??server_default=text('ALTER TABLE fishing_spots ALTER is_public SET DEFAULT FALSE'))
+    is_public = Column(Boolean, nullable=False, seerver_default='false')######default not working,but it is not null boolean??server_default=text('ALTER TABLE fishing_spots ALTER is_public SET DEFAULT FALSE'))
     weather_url_id = Column(Integer,
                          ForeignKey('data_urls.id', ondelete='CASCADE'))
-    current_url_id = Column(Integer,
-                         ForeignKey('data_urls.id', ondelete='CASCADE'))
+    
+    current_station_id = Column(Integer,
+                                 ForeignKey('current_stations.id'))
     
     __table_args__ = (UniqueConstraint('latitude', 'longitude'),)
     
     fishing_conditions = relationship('FishingConditions')
     fishes = relationship('Fish')
     anglers = relationship('Angler', secondary=angler_spots, back_populates='fishing_spots')
-    weather_url = relationship('DataUrl', foreign_keys=[weather_url_id], backref='weather_spots')######FIX THIS
-    current_url = relationship('DataUrl', foreign_keys=[weather_url_id], backref='current_spots')######FIX THIS
-    
+    weather_url = relationship('DataUrl', foreign_keys=[weather_url_id], backref='weather_spots')
+    current_station = relationship('CurrentStation', foreign_keys=[current_station_id], backref='fishing_spots')
+
+# find_nearest_current = DDL('''
+#                            CREATE FUNCTION find_nearest()
+#                            RETURNS TRIGGER AS $$
+#                            BEGIN
+#                                WITH distances AS (
+#                                    SELECT id,
+#                                    MIN(3963 * ACOS(SIN(cs.latitude) * SIN(NEW.latitude) + 
+#                                                 COS(cs.latitude) * COS(NEW.latitude) *
+#                                                 COS(NEW.latitude - cs.latitude)
+#                                                )
+#                                     ) AS dist FROM current_stations cs
+#                                 ) INSERT INTO fishing_spots (nearest_known_id)
+#                                   SELECT id FROM distances WHERE dist=(SELECT MIN(dist) from distances);
+#                            RETURN NEW;
+#                            END;
+#                            $$ LANGUAGE PLPGSQL
+#                            '''
+# )
+
+# trigger = DDL('''
+#               CREATE TRIGGER insert_nearest
+#               AFTER INSERT ON fishing_spots
+#               FOR EACH ROW EXECUTE find_nearest();
+#               '''
+# )
+
+# event.listen(FishingSpot.__table__,
+#              'after_create',
+#              find_nearest_current.execute_if(dialect='postgresql')
+# )
+
+# event.listen(FishingSpot.__table__,
+#              'after_create',
+#              trigger.execute_if(dialect='postgresql')
+# )
+
 class DataUrl(Base):
     __tablename__ = 'data_urls'
     
@@ -262,6 +313,7 @@ class DataUrl(Base):
     query_data = Column(String, nullable=False)
     
     __table_args__ = (UniqueConstraint('url', 'query_data'),)
+    
 
 class FishingConditions(Base):
     __tablename__ = 'fishing_conditions'

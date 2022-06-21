@@ -55,6 +55,17 @@ body {
     margin-bottom: 40px;
 }
 
+.maps-search-style {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+section[class="maps-search-style"] label {
+    color:gold;
+    font-size:x-large;
+}
+
 .my-address-style {
     color: rgb(169, 165, 165);
     bottom: 10px;
