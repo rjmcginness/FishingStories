@@ -43,13 +43,44 @@ bp = Blueprint('angler', __name__, url_prefix='/anglers')
     
 #     return render_template('fishing_spots/main.html', angler_id=angler_id, authenticated=True)
 
+@bp.route('/<int:angler_id>', methods=['GET'])
+@login_required
+def angler_home(angler_id: int):
+    return render_template('fishingstories/index.html', angler_id=angler_id, authenticated=True)
+
+@bp.route('/<int:angler_id>/fishing-spots-menu', methods=['GET'])
+@login_required
+def angler_spots_menu(angler_id: int):
+    return render_template('/fishing_spots/main.html', angler_id=angler_id, authenticated=True)
+
+@bp.route('/<int:angler_id>/fishing-spot-create', methods=['GET', 'POST'])
+@login_required
+def fishing_spot_create(angler_id: int):
+    spots = current_app.session.scalars(select(models.FishingSpot).where(
+                                        models.FishingSpot.is_public == True))
+    
+    form = AddFishingSpotForm(list(spots))
+    
+    if form.validate_on_submit():
+        pass
+    
+    return render_template('fishing_spots/fishing-spot-create.html', form=form, angler_id=angler_id)
+
+    
+    
+
 @bp.route('/<int:angler_id>/fishing_spots', methods=['GET'])
 @login_required
 def my_spots(angler_id: int):
     angler = current_app.session.scalar(select(models.Angler).where(
                                                 models.Angler.id == angler_id))
     
+    fishing_spots = []
+    if angler is not None:
+        fishing_spots = angler.fishing_spots
     
+    
+    return render_template('fishing_spots/angler-spots.html', fishing_spots=fishing_spots, authenticated=True)
 
 @bp.route('/<int:angler_id>/fishing-spots/<int:spot_id>', methods = ['GET', 'POST'])
 @login_required

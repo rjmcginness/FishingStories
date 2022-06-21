@@ -106,11 +106,17 @@ class ViewFishingSpotForm(FlaskForm):
     submit = SubmitField('Go')
     
 class AddFishingSpotForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
+    name = SelectField('Name', validate_choice=False, validators=[DataRequired()])
     latitude = DecimalField('Latitude', validators=[DataRequired()])
     longitude = DecimalField('Longitude', validators=[DataRequired()])
+    is_public = BooleanField('Public', default='checked', validators=[DataRequired()])
+    nickname = StringField('Nickname')
     description = StringField('Description')
     submit = SubmitField('Add Spot')
+    
+    def __init__(self, spot_choices: list, **kwargs) -> None:
+        super(AddFishingSpotForm, self).__init__(**kwargs)
+        self.name.choices = spot_choices
     
 class CreateAccountTypeForm(FlaskForm):
     name = StringField('Account Type Name', validators=[DataRequired()])

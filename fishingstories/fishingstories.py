@@ -21,9 +21,12 @@ def index():
         
         return redirect(url_for('auth'))
     
-    # user is autheticated
+    # user is autheticated and has not been dispatched to admin
+    # Therefore, user is an angler
+    
+    angler_id = current_user.angler_id #######CAN I DO THIS? IT"S A FOREIGNKEY
+    
+    return redirect(url_for('angler.angler_home', angler_id=angler_id))
    
-    
-    
-    return render_template('fishingstories/index.html', authenticated=True)
+    # return render_template('fishingstories/index.html', angler_id=angler_id, authenticated=True)
 

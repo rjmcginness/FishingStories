@@ -11,6 +11,7 @@ from flask import render_template
 from flask import flash
 from flask import redirect
 from flask import request
+from flask import abort
 # from flask import get_flashed_messages
 from flask_login import login_required
 from flask_login import current_user
@@ -34,9 +35,9 @@ bp = Blueprint('fishing_spots', __name__, url_prefix='/fishing_spots')
 @bp.route('/', methods=['GET'])
 @login_required
 def fishing_spots_menu():
-    # get_flashed_messages().clear()
     
-    return render_template('fishing_spots/main.html', angler_id=current_user.id, authenticated=True)
+    return abort(400)
+
 
 @bp.route('/<int:spot_id>', methods=['GET'])
 @login_required
