@@ -1,0 +1,1 @@
+tideshow.cgi?site=Bah%EDa+Honda+Harbor+%28Bridge%29+Florida+Current>>'charmap' codec can't encode character '\ufffd' in position 13: character maps to <undefined>
