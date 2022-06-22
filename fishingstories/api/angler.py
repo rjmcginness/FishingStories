@@ -86,16 +86,23 @@ def fishing_spot_create(angler_id: int):
                                                     global_position.latitude,
                                                     global_position.longitude))
         
+        ####################################################################
+        ######CONSIDER HOW TO ADD URL TO TIDE_WEATHER SITE
+        
+        
         # setup foreign key on map_url to global_position
         map_url.global_position = global_position
         
         current_app.session.add(fishing_spot)
         try:
             current_app.session.commit()
+            
+            # add new spot to list to display
+            spots.insert(0, fishing_spot)
         except (IntegrityError, OperationalError) as e:
             current_app.logger.info(e)
         
-        spots.insert(0, fishing_spot)
+        
     
     return render_template('fishing_spots/fishing-spot-create.html',
                            form=form,
