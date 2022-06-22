@@ -108,16 +108,16 @@ def google_maps_url2022(latitude: float, longitude: float) -> str:
     
     return map_url
 
-def coordinate_from_dmsstr(coordinate: str) -> float:
-    """ Expects a string of format (-)XX°XX'XX  or
+# def coordinate_from_dmsstr(coordinate: str) -> float:
+#     """ Expects a string of format (-)XX°XX'XX  or
         
-    """
+#     """
 
-def coordinate_fromstr(coordinate: str) -> float:
-    if "'" in coordinate or '"' in coordinate:
-        return coordinate_from_dmsstr(coordinate)
+# def coordinate_fromstr(coordinate: str) -> float:
+#     if "'" in coordinate or '"' in coordinate:
+#         return coordinate_from_dmsstr(coordinate)
     
-    return float(coordinate)
+#     return float(coordinate)
     
     
 

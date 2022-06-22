@@ -146,7 +146,53 @@ def make_date_time(date: str,
     
     return date_time_list
 
+# https://www.tide-forecast.com/countries/United-States/regions
+
+
+def state_weather_locations(url: str) -> List[str]:
+    response = requests.get(url)
+    
+    location_list = Selector(text=response.content).xpath('//select[@name="location_filename_part"]').get()
+    
+    return Selector(text=location_list).xpath('//option/@value').getall()
+    
+def tide_weather_locations(url: str) -> List[str]:
+    # response = requests.get('https://www.tide-forecast.com/regions/New-Hampshire')
+    # response = requests.get('https://www.tide-forecast.com/countries/United-States/regions')
+    
+    response = requests.get(url)
+    
+    regions_list = Selector(text=response.content).xpath('//select[@name="region_id"]').get()
+    states = Selector(text=regions_list).xpath('//option/text()').getall()
+    states = [state.replace(' ', '-') for state in states]
+    
+    state_base_url = 'https://www.tide-forecast.com/regions/'
+    
+    site_names = []
+    for state in states:
+        state_sites = state_weather_locations(state_base_url + state)
+        site_names += state_sites
+          
+    return site_names
+    
+    
+    
+
 if __name__ == '__main__':
+    
+    weather_locations = tide_weather_locations('https://www.tide-forecast.com')
+    
+    print(weather_locations)
+    
+    base_url = 'https://www.tide-forecast.com/locations/'
+    url_path = '/forecasts/latest'
+    
+    with open('tide_weather_site_names.txt', 'wt') as f:
+        for location_name in weather_locations:
+            f.write(str({'url': base_url + location_name + url_path}) + '\n')
+            
+
+            
     exit()
     '''TEST DATE MODULUS ALGORITHM'''
     # days28 = list(range(1, 29))
