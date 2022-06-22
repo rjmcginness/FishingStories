@@ -9,6 +9,7 @@ import requests
 from scrapy.selector import Selector
 from typing import List
 import urllib
+from .utilities import google_maps_url2022
 from .calcs import coordinate_to_dms
 
 # http://tbone.biol.sc.edu/tide/
@@ -86,27 +87,27 @@ def current_sites(url: str) -> List[CurrentStation]:
     return current_stations
 
 
-def google_maps_url2022(latitude: float, longitude: float) -> str:
-    lat_hemisphere = 'N' if latitude > 0 else 'S'
-    lat_d, lat_m, lat_s = coordinate_to_dms(abs(latitude))
-    lat_dms_str = str(lat_d) + '°' + \
-                  str(lat_m) + '\'' + \
-                  str(int(lat_s)) + '.0"' + \
-                  lat_hemisphere
+# def google_maps_url2022(latitude: float, longitude: float) -> str:
+#     lat_hemisphere = 'N' if latitude > 0 else 'S'
+#     lat_d, lat_m, lat_s = coordinate_to_dms(abs(latitude))
+#     lat_dms_str = str(lat_d) + '°' + \
+#                   str(lat_m) + '\'' + \
+#                   str(int(lat_s)) + '.0"' + \
+#                   lat_hemisphere
                   
-    long_d, long_m, long_s = coordinate_to_dms(abs(longitude))
+#     long_d, long_m, long_s = coordinate_to_dms(abs(longitude))
     
-    long_hemisphere = 'W' if longitude < 0 else 'E'
-    long_dms_str = str(long_d) + '°' + \
-                   str(long_m) + '\'' + \
-                   str(int(long_s)) + '.0"' + \
-                   long_hemisphere
+#     long_hemisphere = 'W' if longitude < 0 else 'E'
+#     long_dms_str = str(long_d) + '°' + \
+#                    str(long_m) + '\'' + \
+#                    str(int(long_s)) + '.0"' + \
+#                    long_hemisphere
     
-    map_url = 'https://www.google.com/maps/place/'
-    map_url += lat_dms_str + '+' + long_dms_str
-    map_url += '/@' + str(latitude) + ',' + str(longitude)
+#     map_url = 'https://www.google.com/maps/place/'
+#     map_url += lat_dms_str + '+' + long_dms_str
+#     map_url += '/@' + str(latitude) + ',' + str(longitude)
     
-    return map_url
+#     return map_url
 
 # def coordinate_from_dmsstr(coordinate: str) -> float:
 #     """ Expects a string of format (-)XX°XX'XX  or

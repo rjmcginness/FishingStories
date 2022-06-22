@@ -6,13 +6,9 @@ Created on Mon Jun 13 16:56:01 2022
 @author: robertjmcginness
 """
 
-from dataclasses import dataclass
 import math
 
-@dataclass
-class GlobalPosition:
-    latitude: float
-    longitude: float
+from .nature_entities import GlobalPosition
 
 def coordinate_to_dms(coordinate: float) -> tuple:
     degrees = int(coordinate)
