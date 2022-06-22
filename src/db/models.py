@@ -19,6 +19,7 @@ from sqlalchemy import Date
 from sqlalchemy import UniqueConstraint
 from sqlalchemy import event
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref
 from sqlalchemy.schema import DDL
 
 
@@ -235,39 +236,31 @@ class CurrentStation(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(280), nullable=False, unique=True)
-    latitude = Column(Numeric, nullable=False)
-    longitude = Column(Numeric, nullable=False)
-    current_url_id = Column(Integer,
-                            ForeignKey('data_urls.id', ondelete='CASCADE'),
-                            nullable=False)
+    global_position_id = Column(Integer,
+                                ForeignKey('global_positions.id'),
+                                nullable=False)
     
-    current_url = relationship('DataUrl', foreign_keys=[current_url_id], backref='current_station')
+    global_position = relationship('GlobalPosition', back_populates='current_station')
 
 
 class FishingSpot(Base):
     __tablename__ = 'fishing_spots'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    latitude = Column(Numeric, nullable=False)
-    longitude = Column(Numeric, nullable=False)
     name = Column(String, nullable=False)
     nickname = Column(String)
     description = Column(String)
+    global_position_id = Column(Integer,
+                                ForeignKey('global_positions.id'),
+                                nullable=False)
     # for this to work in the db, it must be server_default=SQL text to default to FALSE
-    is_public = Column(Boolean, nullable=False, seerver_default='false')######default not working,but it is not null boolean??server_default=text('ALTER TABLE fishing_spots ALTER is_public SET DEFAULT FALSE'))
-    weather_url_id = Column(Integer,
-                         ForeignKey('data_urls.id', ondelete='CASCADE'))
+    is_public = Column(Boolean, nullable=False, server_default='f')######default not working,but it is not null boolean??server_default=text('ALTER TABLE fishing_spots ALTER is_public SET DEFAULT FALSE'))
     
-    current_station_id = Column(Integer,
-                                 ForeignKey('current_stations.id'))
-    
-    __table_args__ = (UniqueConstraint('latitude', 'longitude'),)
-    
+    global_position = relationship('GlobalPosition', back_populates='fishing_spots')
     fishing_conditions = relationship('FishingConditions')
     fishes = relationship('Fish')
     anglers = relationship('Angler', secondary=angler_spots, back_populates='fishing_spots')
-    weather_url = relationship('DataUrl', foreign_keys=[weather_url_id], backref='weather_spots')
-    current_station = relationship('CurrentStation', foreign_keys=[current_station_id], backref='fishing_spots')
+    
 
 # find_nearest_current = DDL('''
 #                            CREATE FUNCTION find_nearest()
@@ -305,14 +298,28 @@ class FishingSpot(Base):
 #              trigger.execute_if(dialect='postgresql')
 # )
 
+class GlobalPosition(Base):
+    __tablename__ = 'global_positions'
+    id = Column(Integer, primary_key=True)
+    latitude = Column(Numeric, nullable=False)
+    longitude = Column(Numeric, nullable=False)
+    
+    # __table_args__ = (UniqueConstraint('latitude', 'longitude'),)
+    
+    data_urls = relationship('DataUrl', back_populates='global_position')
+    fishing_spots = relationship('FishingSpot')
+    current_station = relationship('CurrentStation', back_populates='global_position', uselist=False)
+
 class DataUrl(Base):
     __tablename__ = 'data_urls'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     url = Column(String, nullable=False)
-    query_data = Column(String, nullable=False)
+    global_position_id = Column(Integer,
+                        ForeignKey('global_positions.id'),
+                        nullable=False)
     
-    __table_args__ = (UniqueConstraint('url', 'query_data'),)
+    global_position = relationship('GlobalPosition', back_populates='data_urls')
     
 
 class FishingConditions(Base):

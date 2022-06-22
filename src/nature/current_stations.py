@@ -5,14 +5,11 @@ Created on Tue Jun 21 09:09:33 2022
 @author: Robert J McGinness
 """
 
-from dataclasses import dataclass
 import requests
 from scrapy.selector import Selector
 from typing import List
 import urllib
-from html import unescape
-from calcs import coordinate_to_dms
-from calcs import coordinate_to_decimal
+from .calcs import coordinate_to_dms
 
 # http://tbone.biol.sc.edu/tide/
 # http://tbone.biol.sc.edu/tide/sites_allcurrent.html
@@ -31,24 +28,25 @@ class CurrentStation:
             
             self.latitude, self.longitude = (float(item[0]) for item in 
                                                          query_string.values())
-            lat_hemisphere = 'N' if self.latitude > 0 else 'S'
-            lat_d, lat_m, lat_s = coordinate_to_dms(abs(self.latitude))
-            lat_dms_str = str(lat_d) + '°' + \
-                          str(lat_m) + '\'' + \
-                          str(int(lat_s)) + '.0"' + \
-                          lat_hemisphere
+            # lat_hemisphere = 'N' if self.latitude > 0 else 'S'
+            # lat_d, lat_m, lat_s = coordinate_to_dms(abs(self.latitude))
+            # lat_dms_str = str(lat_d) + '°' + \
+            #               str(lat_m) + '\'' + \
+            #               str(int(lat_s)) + '.0"' + \
+            #               lat_hemisphere
                           
-            long_d, long_m, long_s = coordinate_to_dms(abs(self.longitude))
+            # long_d, long_m, long_s = coordinate_to_dms(abs(self.longitude))
             
-            long_hemisphere = 'W' if self.longitude < 0 else 'E'
-            long_dms_str = str(long_d) + '°' + \
-                           str(long_m) + '\'' + \
-                           str(int(long_s)) + '.0"' + \
-                           long_hemisphere
+            # long_hemisphere = 'W' if self.longitude < 0 else 'E'
+            # long_dms_str = str(long_d) + '°' + \
+            #                str(long_m) + '\'' + \
+            #                str(int(long_s)) + '.0"' + \
+            #                long_hemisphere
             
-            self.map_url = 'https://www.google.com/maps/place/'
-            self.map_url += lat_dms_str + '+' + long_dms_str
-            self.map_url += '/@' + str(self.latitude) + ',' + str(self.longitude)
+            # self.map_url = 'https://www.google.com/maps/place/'
+            # self.map_url += lat_dms_str + '+' + long_dms_str
+            # self.map_url += '/@' + str(self.latitude) + ',' + str(self.longitude)
+            self.map_url = google_maps_url2022(self.latitude, self.longitude)
             
     def serialize(self) -> dict:
         return (
@@ -86,7 +84,40 @@ def current_sites(url: str) -> List[CurrentStation]:
     current_stations = [CurrentStation(**site) for site in site_data_list]
     
     return current_stations
+
+
+def google_maps_url2022(latitude: float, longitude: float) -> str:
+    lat_hemisphere = 'N' if latitude > 0 else 'S'
+    lat_d, lat_m, lat_s = coordinate_to_dms(abs(latitude))
+    lat_dms_str = str(lat_d) + '°' + \
+                  str(lat_m) + '\'' + \
+                  str(int(lat_s)) + '.0"' + \
+                  lat_hemisphere
+                  
+    long_d, long_m, long_s = coordinate_to_dms(abs(longitude))
     
+    long_hemisphere = 'W' if longitude < 0 else 'E'
+    long_dms_str = str(long_d) + '°' + \
+                   str(long_m) + '\'' + \
+                   str(int(long_s)) + '.0"' + \
+                   long_hemisphere
+    
+    map_url = 'https://www.google.com/maps/place/'
+    map_url += lat_dms_str + '+' + long_dms_str
+    map_url += '/@' + str(latitude) + ',' + str(longitude)
+    
+    return map_url
+
+def coordinate_from_dmsstr(coordinate: str) -> float:
+    """ Expects a string of format (-)XX°XX'XX  or
+        
+    """
+
+def coordinate_fromstr(coordinate: str) -> float:
+    if "'" in coordinate or '"' in coordinate:
+        return coordinate_from_dmsstr(coordinate)
+    
+    return float(coordinate)
     
     
 
