@@ -17,6 +17,7 @@ from flask_login import login_required
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import OperationalError
 
 from datetime import datetime
 
@@ -30,10 +31,8 @@ from .forms import ViewFishingSpotForm
 
 from src.nature.retrieve_weather import retrieve_weather
 from src.nature.retrieve_tide_current import retrieve_tide_currents
-from src.nature.calcs import coordinates_to_decimal
-from src.nature.calc import coordinates_to_dms
 from src.nature.current_stations import google_maps_url2022
-from src.nature.current_stations import coordinate_fromstr
+
 
 
 
@@ -69,21 +68,40 @@ def fishing_spot_create(angler_id: int):
     
     if form.validate_on_submit():
         
-        latitude = coordinate_fromstr(form.latitude.data)
-        longitude = coordinate_fromstr(form.longitude.data)
-
+        # instantiate new spot
         fishing_spot = models.FishingSpot(name=form.name.data,
                                           nickname=form.nickname.data,
                                           description=form.description.data)
         
+        # instantiate global position
         global_position = models.GlobalPosition(latitude=form.latitude.data,
-                                                longitude=form.longitude.data,
-                                                is_public=form.is_public.data)
+                                                longitude=float(form.longitude.data),
+                                                is_public=float(form.is_public.data))
         
+        # setup foreign key on fishing_spot to global_position
         fishing_spot.global_position = global_position
-        map_url = 
+        
+        # generate url to google maps for this spot
+        map_url = models.DataUrl(url=google_maps_url2022(
+                                                    global_position.latitude,
+                                                    global_position.longitude))
+        
+        # setup foreign key on map_url to global_position
+        map_url.global_position = global_position
+        
+        current_app.session.add(fishing_spot)
+        try:
+            current_app.session.commit()
+        except (IntegrityError, OperationalError) as e:
+            current_app.logger.info(e)
+        
+        spots.insert(0, fishing_spot)
     
-    return render_template('fishing_spots/fishing-spot-create.html', form=form, angler_id=angler_id, authenticated=True)
+    return render_template('fishing_spots/fishing-spot-create.html',
+                           form=form,
+                           spots=spots,
+                           angler_id=angler_id,
+                           authenticated=True)
 
     
     
