@@ -19,8 +19,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import OperationalError
 
 from functools import wraps
+import math
 
 from src.db import models
+from src.nature.current_stations import current_sites
 from .forms import RankForm
 from .forms import CreateAccountTypeForm
 from .forms import CreatePrivilegeForm
@@ -58,6 +60,45 @@ def admin_required(forbidden):
     return wrapper
 
 
+@bp.route('/current_stations/load', methods=['GET'])
+@login_required
+@admin_required(forbidden)
+def load_current_stations():
+    ######HARD CODED FOR NOW
+    current_stations = current_sites('http://tbone.biol.sc.edu/tide/sites_allcurrent.html')
+    
+    for station in current_stations:
+        # create global position with lat an dlong in radians
+        global_position = models.GlobalPosition(
+                                    latitude=math.radians(station.latitude),
+                                    longitude=math.radians(station.longitude))
+        
+        # instantiate DataUrls for urls for the station
+        current_url = models.DataUrl(url=station.url)
+        map_url = models.DataUrl(url=station.map_url)
+        
+        # back_populate GlobalPosition
+        current_url.global_position = global_position
+        map_url.global_position = global_position
+        
+        # instantiate CurrentStation and set foreign key
+        current_station = models.CurrentStation(name=station.name)
+        current_station.global_position = global_position
+        
+        current_app.session.add(current_station)
+    
+    current_app.session.commit()
+    # try:
+    #     current_app.session.commit()
+    # except (IntegrityError, OperationalError) as e:
+    #     print(e)
+    #     current_app.logger.info(e)
+    #     flash('Data may already exist')
+    
+    return render_template('admin/current-stations.html', stations=current_stations, authenticated=True)
+    
+    
+    
 
 
 @bp.route('/ranks/create', methods = ['GET', 'POST'])
