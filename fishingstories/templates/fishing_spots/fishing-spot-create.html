@@ -4,9 +4,10 @@
     <h1>My Spots</h1>
     <section class="maps-search-style">
         <form target="_blank" action="https://www.google.com/maps/search/?api=1" method="get">
-            <label for="search">Use Google Maps to Find your spot</label><br>
+            <label for="search">Find Your Spot on Google Maps</label><br>
             <input type="text" name="q" id="search" placeholder="Search Google Maps"/>
             <input type="submit" value="Go!"/>
+            <br><span style="font-size:medium;color:gold;">(drop a pin for coordinates)</span>
         </form>    
     </section>
     <form action="" method="post" novalidate>
@@ -59,6 +60,7 @@
         <table class="data-display-table">
             <thead>
                 <th>Name</th>
+                <th>Nickname</th>
                 <th>Description</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
@@ -68,9 +70,10 @@
                 {% for spot in spots %}
                 <tr>
                     <td>{{ spot.name }}</td>
+                    <td>{{ spot.nickname }}</td>
                     <td>{{ spot.description }}</td>
-                    <td>{{ spot.latitude }}</td>
-                    <td>{{ spot.longitude }}</td>
+                    <td>{{ spot.global_position.latitude }}</td>
+                    <td>{{ spot.global_position..longitude }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

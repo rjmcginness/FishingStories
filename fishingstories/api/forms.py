@@ -107,8 +107,8 @@ class ViewFishingSpotForm(FlaskForm):
     
 class AddFishingSpotForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    latitude = DecimalField('Latitude', validators=[DataRequired()])
-    longitude = DecimalField('Longitude', validators=[DataRequired()])
+    latitude = StringField('Latitude', validators=[DataRequired()])
+    longitude = StringField('Longitude', validators=[DataRequired()])
     is_public = BooleanField('Public')
     nickname = StringField('Nickname')
     description = StringField('Description')

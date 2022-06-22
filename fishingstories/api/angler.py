@@ -30,6 +30,10 @@ from .forms import ViewFishingSpotForm
 
 from src.nature.retrieve_weather import retrieve_weather
 from src.nature.retrieve_tide_current import retrieve_tide_currents
+from src.nature.calcs import coordinates_to_decimal
+from src.nature.calc import coordinates_to_dms
+from src.nature.current_stations import google_maps_url2022
+from src.nature.current_stations import coordinate_fromstr
 
 
 
@@ -64,9 +68,22 @@ def fishing_spot_create(angler_id: int):
     form = AddFishingSpotForm([spot.name for spot in spots])
     
     if form.validate_on_submit():
-        pass
+        
+        latitude = coordinate_fromstr(form.latitude.data)
+        longitude = coordinate_fromstr(form.longitude.data)
+
+        fishing_spot = models.FishingSpot(name=form.name.data,
+                                          nickname=form.nickname.data,
+                                          description=form.description.data)
+        
+        global_position = models.GlobalPosition(latitude=form.latitude.data,
+                                                longitude=form.longitude.data,
+                                                is_public=form.is_public.data)
+        
+        fishing_spot.global_position = global_position
+        map_url = 
     
-    return render_template('fishing_spots/fishing-spot-create.html', form=form, angler_id=angler_id)
+    return render_template('fishing_spots/fishing-spot-create.html', form=form, angler_id=angler_id, authenticated=True)
 
     
     
