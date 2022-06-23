@@ -94,6 +94,15 @@ class AccountType(Base):
     
     # one-to-many relationship with user accounts
     user_accounts = relationship('UserAccount', back_populates='account_type')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'name': self.name,
+                    'price': self.price
+                }
+               )
 
 class Privilege(Base):
     __tablename__ = 'privileges'
@@ -116,14 +125,13 @@ class UserAccount(UserMixin, Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(30), nullable=False, unique=True)
     password = Column(String(256), nullable=False)
+    email = Column(String(280))
     
     def set_password(self, password) -> None:
         self.password = generate_password_hash(password)
         
     def check_password(self, password) -> bool:
         return check_password_hash(self.password, password)
-    
-    
     
     # many-to-one relationship with account_types (unidirectional)
     account_type_id = Column(Integer,
@@ -140,6 +148,15 @@ class UserAccount(UserMixin, Base):
                                   ondelete='CASCADE'))
     
     anglers = relationship('Angler', back_populates='user_accounts')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'username': self.username,
+                    'email': self.email
+                }
+               )
 
 class Rank(Base):
     __tablename__ = 'ranks'
@@ -150,6 +167,16 @@ class Rank(Base):
     description = Column(String, nullable=False)
     
     anglers = relationship('Angler', back_populates='rank')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'name': self.name,
+                    'rank_number': self.rank_number,
+                    'description': self.description
+                }
+               )
 
 class Angler(Base):
     __tablename__ = 'anglers'
@@ -175,6 +202,15 @@ class Angler(Base):
     catches = relationship('Catch', back_populates='angler')
     
     outings = relationship('FishingOuting', secondary=angler_outings, back_populates='anglers')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'name': self.name
+                    ###### should i serialize the relationships here???
+                }
+               )
 
 
 class Bait(Base):
@@ -191,6 +227,18 @@ class Bait(Base):
     
     catches = relationship('Catch', back_populates='bait')
     anglers = relationship('Angler', secondary=angler_baits, back_populates='baits')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'name': self.name,
+                    'artificial': self.artificial,
+                    'size': self.size,
+                    'color': self.color,
+                    'description': self.description
+                }
+               )
 
 class FishingGear(Base):
     __tablename__ = 'fishing_gear'
@@ -205,7 +253,17 @@ class FishingGear(Base):
     catches = relationship('Catch', back_populates='fishing_gear')
     anglers = relationship('Angler', secondary=angler_gear, back_populates='gear')
     
-
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'rod': self.rod,
+                    'reel': self.reel,
+                    'line': self.line,
+                    'hook': self.hook,
+                    'leader': self.leader
+                }
+               )
 
 class GlobalPosition(Base):
     __tablename__ = 'global_positions'
@@ -219,6 +277,15 @@ class GlobalPosition(Base):
     fishing_spots = relationship('FishingSpot')
     current_station = relationship('CurrentStation', back_populates='global_position', uselist=False)
     
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'latitude': self.latitude,
+                    'longitude': self.longitude
+                }
+               )
+    
 class DataUrl(Base):
     __tablename__ = 'data_urls'
     
@@ -229,6 +296,14 @@ class DataUrl(Base):
                         nullable=False)
     
     global_position = relationship('GlobalPosition', back_populates='data_urls')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'url': self.url
+                }
+               )
 
 class CurrentStation(Base):
     __tablename__ = 'current_stations'
@@ -240,6 +315,14 @@ class CurrentStation(Base):
                                 nullable=False)
     
     global_position = relationship('GlobalPosition', back_populates='current_station')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'name': self.name
+                }
+               )
 
 class FishingSpot(Base):
     __tablename__ = 'fishing_spots'
@@ -258,6 +341,16 @@ class FishingSpot(Base):
     anglers = relationship('Angler', secondary=angler_fishing_spots, back_populates='fishing_spots')
     outings = relationship('FishingOuting', back_populates='fishing_spot')
     
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'name': self.name,
+                    'nickname': self.nickname,
+                    'description': self.description
+                }
+               )
+    
 class Fish(Base):
     __tablename__ = 'fishes'
     
@@ -268,6 +361,17 @@ class Fish(Base):
     description = Column(String)
     
     catch = relationship('Catch', back_populates='fish', uselist=False)
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'species': self.species,
+                    'weight': self.weight,
+                    'length': self.length,
+                    'description': self.description
+                }
+               )
     
 class Catch(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -293,6 +397,14 @@ class Catch(Base):
     bait = relationship('Bait', back_populates='catches')
     fishing_gear = relationship('FishingGear', back_populates='catches')
     
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'date_time': self.date_time_caught
+                }
+               )
+    
 class FishingOuting(Base):
     __tablename__ = 'fishing_outings'
     
@@ -308,6 +420,15 @@ class FishingOuting(Base):
     
     fishing_spot = relationship('FishingSpot', back_populates='outings')
     anglers = relationship('Angler', secondary=angler_outings, back_populates='outings')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'name': self.name,
+                    'date': self.outing_date
+                }
+               )
 
 class FishingConditions(Base):
     __tablename__ = 'fishing_conditions'
@@ -325,6 +446,23 @@ class FishingConditions(Base):
     pressure_today = Column(Numeric)
 
     fishing_outing = relationship('FishingOuting')
+    
+    def serialize(self) -> dict:
+        return (
+                {
+                    'id': self.id,
+                    'weather': self.weather,
+                    'tide_phase': self.tide_phase,
+                    'time_stamp': self.time_stamp,
+                    'current_flow': self.current_flow,
+                    'current_speed': self.current_speed,
+                    'moon_phase': self.moon_phase,
+                    'wind_direction': self.wind_direction,
+                    'wind_speed': self.wind_speed,
+                    'pressure_yesterday': self.pressure_yesterday,
+                    'pressure_today': self.pressure_today
+                }
+               )
     
     
     
