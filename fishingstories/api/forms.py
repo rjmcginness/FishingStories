@@ -16,6 +16,9 @@ from wtforms import HiddenField
 from wtforms import DecimalField
 from wtforms import FormField
 from wtforms import SelectMultipleField
+from wtforms import DateTimeField
+from wtforms import TextAreaField
+from wtforms import FileField
 from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 
@@ -24,7 +27,28 @@ from wtforms.widgets import HiddenInput
 #     password = PasswordField('Password', validators=[DataRequired()])
 #     remember_me = BooleanField('Remember Me')
 #     submit = SubmitField('Sign In')
+
+
+class SearchBasicForm(FlaskForm):
+    search = StringField('', validators=[DataRequired()])
+    submit = SubmitField('Search')
     
+    def __init__(self, search_name: str=None, **kwargs) -> None:
+        super(SearchBasicForm, self).__init__(**kwargs)
+        if search_name is not None:
+            self.search.label = search_name
+
+class AddFishForm(FlaskForm):
+    species = StringField('Species', validators=[DataRequired()])
+    weight = DecimalField('Weight (lb)')
+    length = DecimalField('Length (inches)')
+    fishing_spot = SelectField('Place Caught', validators=[DataRequired()])
+    bait = SelectField('Bait Used', validators=[DataRequired()])
+    gear = SelectField('Gear Combo Used')
+    date_time = DateTimeField('Date and Time Caught', validators=[DataRequired()])
+    description = TextAreaField('Description')
+    image = FileField('Image')
+    submit = SubmitField('Record Fish')
 
 class AddBaitForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -40,6 +64,33 @@ class AddBaitForm(FlaskForm):
         self.size.data = ''
         self.color.data = ''
         self.description.data = ''
+
+class BaitForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    artificial = BooleanField('Artificial', validators=[DataRequired()])
+    size = StringField('Size')
+    color = StringField('Color')
+    description = StringField('Description')
+    submit = SubmitField('Update')
+    
+    def __init__(self, bait=None, **kwargs) -> None:
+        super(BaitForm, self).__init__(**kwargs)
+        self.name.data = bait.name
+        self.artificial.data = bait.artificial
+        self.size.data = bait.size
+        self.color.data = bait.color
+        self.description.data = bait.description
+        self.bait_id = bait.id
+        self.is_readonly = True
+    
+    def readonly(self, set_readonly=True):
+        self.is_readonlt = set_readonly
+        self.name.render_kw={'readonly': set_readonly}
+        self.artificial.render_kw={'disabled': set_readonly}
+        self.size.render_kw={'readonly': set_readonly}
+        self.color.render_kw={'readonly': set_readonly}
+        self.description.render_kw={'readonly': set_readonly}
+        
     
 class AddGearForm(FlaskForm):
     rod = StringField('Rod', validators=[DataRequired()])
@@ -71,10 +122,16 @@ class ViewFishingSpotForm(FlaskForm):
     
 class AddFishingSpotForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    latitude = DecimalField('Latitude', validators=[DataRequired()])
-    longitude = DecimalField('Longitude', validators=[DataRequired()])
+    latitude = StringField('Latitude', validators=[DataRequired()])
+    longitude = StringField('Longitude', validators=[DataRequired()])
+    is_public = BooleanField('Public')
+    nickname = StringField('Nickname')
     description = StringField('Description')
     submit = SubmitField('Add Spot')
+    
+    def __init__(self, spot_choices: list, **kwargs) -> None:
+        super(AddFishingSpotForm, self).__init__(**kwargs)
+        self.name.choices = spot_choices
     
 class CreateAccountTypeForm(FlaskForm):
     name = StringField('Account Type Name', validators=[DataRequired()])

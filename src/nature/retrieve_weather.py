@@ -6,31 +6,34 @@ Created on Fri Jun 10 02:18:34 2022
 """
 
 import requests
+import urllib
 from scrapy.selector import Selector
 from typing import List
-from typing import Optional
-from dataclasses import dataclass
 from datetime import datetime
 from calendar import isleap
 from calendar import month_abbr
 
+from .nature_entities import SeaConditions
+from .nature_entities import GlobalPosition
+# from nature_entities import SeaConditions
+# from nature_entities import GlobalPosition
 
-@dataclass
-class SeaConditions:
-    date_time: datetime
-    swell_height: float
-    swell_direction: str
-    wave_height: int
-    wave_period: int
-    wind_speed: int
-    wind_direction: str
-    weather_state: str
-    temperature: int
-    wind_chill: int
-    water_temperature: int
-    water_temp_units: str
-    high_tide_height: Optional[float] = None
-    low_tide_height: Optional[float] = None
+# @dataclass
+# class SeaConditions:
+#     date_time: datetime
+#     swell_height: float
+#     swell_direction: str
+#     wave_height: int
+#     wave_period: int
+#     wind_speed: int
+#     wind_direction: str
+#     weather_state: str
+#     temperature: int
+#     wind_chill: int
+#     water_temperature: int
+#     water_temp_units: str
+#     high_tide_height: Optional[float] = None
+#     low_tide_height: Optional[float] = None
 
 
 def retrieve_weather(url: str) -> List[SeaConditions]:
@@ -146,8 +149,102 @@ def make_date_time(date: str,
     
     return date_time_list
 
+# https://www.tide-forecast.com/countries/United-States/regions
+
+
+def state_weather_locations(url: str) -> List[str]:
+    response = requests.get(url)
+    
+    location_list = Selector(text=response.content).xpath('//select[@name="location_filename_part"]').get()
+    
+    return Selector(text=location_list).xpath('//option/@value').getall()
+    
+def tide_weather_locations(url: str) -> List[str]:
+    # response = requests.get('https://www.tide-forecast.com/regions/New-Hampshire')
+    # response = requests.get('https://www.tide-forecast.com/countries/United-States/regions')
+    
+    response = requests.get(url)
+    
+    regions_list = Selector(text=response.content).xpath('//select[@name="region_id"]').get()
+    states = Selector(text=regions_list).xpath('//option/text()').getall()
+    states = [state.replace(' ', '-') for state in states]
+    
+    state_base_url = 'https://www.tide-forecast.com/regions/'
+    
+    site_names = []
+    for state in states:
+        state_sites = state_weather_locations(state_base_url + state)
+        site_names += state_sites
+          
+    return site_names
+
+# action="https://www.google.com/maps/search/?api=1"
+#     <input type="text" name="q" id="search" placeholder="Search Google Maps"/>    
+
+def map_site_coordinates(site_name: str) -> GlobalPosition:
+    google_maps_url = 'https://www.google.com/maps/search/?api=1'
+    
+    site_name = site_name.replace(' ', '+')
+    site_name = site_name.replace('-', '+')
+    
+    response = requests.get(google_maps_url + "&q=" + site_name, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0'})
+    print(response.text)
+    
+    url = Selector(text=response.text).xpath('//meta/@content[contains(.,"maps.google.com")]').get()
+    
+    query_parts = urllib.parse.parse_qs(url)
+    coords_key = [key for key in query_parts if 'maps.google.com' in key][0]
+    latitude, longitude = query_parts[coords_key][0].split(',')
+    
+    return GlobalPosition(latitude=float(latitude.strip()),
+                          longitude=float(longitude.strip()))
+    
+
 if __name__ == '__main__':
-    exit()
+    # exit()
+    # global_position = map_site_coordinates('Weeks-Bay-Vermilion-Bay-Louisiana')
+    
+    # print(global_position)
+    
+    
+    error_file = open('../../logs/sea_site_errors.txt', 'wt')
+    
+    weather_locations = tide_weather_locations('https://www.tide-forecast.com')
+    
+    base_url = 'https://www.tide-forecast.com/locations/'
+    url_path = '/forecasts/latest'
+    
+    with open('tide_weather_site_names.txt', 'wt') as f:
+        for location_name in weather_locations:
+            try:
+                # position = map_site_coordinates(location_name)
+                f.write(str({'name':location_name.replace('-', ' '),
+                             'url': base_url + location_name + url_path}) + '\n')
+                
+                # f.write(str({'url': base_url + location_name + url_path,
+                #              'latitude': position.latitude,
+                #              'longitude': position.longitude}) + '\n')
+            except:
+                error_file.write(location_name + '\n')
+    
+    error_file.close()
+    
+            
+    
+    # weather_locations = tide_weather_locations('https://www.tide-forecast.com')
+    
+    # print(weather_locations)
+    
+    # base_url = 'https://www.tide-forecast.com/locations/'
+    # url_path = '/forecasts/latest'
+    
+    # with open('tide_weather_site_names.txt', 'wt') as f:
+    #     for location_name in weather_locations:
+    #         f.write(str({'url': base_url + location_name + url_path}) + '\n')
+            
+
+            
+    
     '''TEST DATE MODULUS ALGORITHM'''
     # days28 = list(range(1, 29))
     # days29 = list(range(1, 30))

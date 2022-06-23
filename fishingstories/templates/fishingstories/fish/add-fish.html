@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Record Fish Caught</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <table>
+            <tr>
+                <td>{{ form.species.label }}</td>
+                <td>{{ form.species() }}</td>
+                {% for error in form.species.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.date_time.label }}</td>
+                <td>{{ form.date_time() }}</td>
+                {% for error in form.date_time.errors %}
+                <stran style="color: red;">[{{ error }}]</stran>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.weight.label }}</td>
+                <td>{{ form.weight() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.length.label }}</td>
+                <td>{{ form.length() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.fishing_spot.label }}</td>
+                <td>{{ form.fishing_spot() }}</td>
+                {% for error in form.fishing_spot.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.bait.label }}</td>
+                <td>{{ form.bait() }}</td>
+                {% for error in form.bait.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.gear.label }}</td>
+                <td>{{ form.gear() }}</td>
+                {% for error in form.gear.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.description.label }}</td>
+                <td>{{ form.description() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.image.label }}</td>
+                <td>{{ form.image() }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.submit() }}</td>
+            </tr>
+        </table>
+    </form>
+{% endblock %}

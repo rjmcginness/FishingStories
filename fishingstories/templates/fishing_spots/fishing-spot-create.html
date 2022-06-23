@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>My Spots</h1>
+    <section class="maps-search-style">
+        <form target="_blank" action="https://www.google.com/maps/search/?api=1" method="get">
+            <label for="search">Find Your Spot on Google Maps</label><br>
+            <input type="text" name="q" id="search" placeholder="Search Google Maps"/>
+            <input type="submit" value="Go!"/>
+            <br><span style="font-size:medium;color:gold;">(drop a pin for coordinates)</span>
+            <br><span style="font-size:medium;color:gold;">(use decimal representation ex 42.8133)</span>
+        </form>    
+    </section>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <table>
+            <tr>
+                <td>{{ form.name.label }}</td>
+                <td>{{ form.name() }}</td>
+                {% for error in form.name.errors %}
+                <td><span style="color: red;">[{{ error }}]</span></td>
+                {% endfor %}
+            </tr>
+            <tr>
+               <td>{{ form.nickname.label }}</td>
+               <td>{{ form.nickname() }}</td>
+                {% for error in form.nickname.errors %}
+                <td><span style="color: red;">[{{ error }}]</span></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.latitude.label }}</td>
+                <td>{{ form.latitude() }}</td>
+                {% for error in form.latitude.errors %}
+                <td><span style="color: red;">[{{ error }}]</span></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>{{ form.longitude.label }}</td>
+                <td>{{ form.longitude() }}</td>
+                {% for error in form.longitude.errors %}
+                <td><span style="color: red;">[{{ error }}]</span></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.is_public.label }} {{ form.is_public() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.description.label }}</td>
+                <td>{{ form.description() }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.submit() }}</td>
+            </tr>
+        </table>
+    </form>
+    <section>
+        <h3>Fishing Spots</h3>
+        <table class="data-display-table">
+            <thead>
+                <th>Name</th>
+                <th>Nickname</th>
+                <th>Description</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th></th>
+            </thead>
+            <tbody>
+                {% for spot in spots %}
+                <tr>
+                    <td>{{ spot.name }}</td>
+                    <td>{{ spot.nickname }}</td>
+                    <td>{{ spot.description }}</td>
+                    <td>{{ spot.global_position.latitude }}</td>
+                    <td>{{ spot.global_position..longitude }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}

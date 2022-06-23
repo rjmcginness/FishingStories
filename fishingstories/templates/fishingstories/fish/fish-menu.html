@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Baits</h1>
+    <div>
+        <a href="{{ url_for('fish.add_fish', angler_id=angler_id) }}">record fish</a>
+    </div>
+    <div>
+        <a href="{{ url_for('fish.my_fish', angler_id=angler_id) }}">show my fish</a>
+    </div>
+    <div>
+        <a href="{{ url_for('fish.fish_search', angler_id=angler_id) }}">find fish</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Baits</h1>
+    <div>
+        <a href="{{ url_for('angler.baits') }}">show baits</a>
+    </div>
+    <div>
+        <a href="{{ url_for('angler.bait_search') }}">find baits</a>
+    </div>
+    <div>
+        <a href="{{ url_for('angler.bait_create') }}">add new bait</a>
+    </div>
+{% endblock %}

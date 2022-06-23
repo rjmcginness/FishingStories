@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Current Stations</h1>
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Current Data</th>
+            <th>Map</th>
+        </thead>
+        <tbody>
+            {% for station in stations %}
+            <tr>
+                <td>{{ station.name }}</td>
+                <td>{{ station.latitude }}</td>
+                <td>{{ station.longitude }}</td>
+                <td><a href="{{ station.url }}">view data</a></td>
+                <td><a href="{{ station.map_url }}">view map</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

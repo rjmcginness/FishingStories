@@ -9,36 +9,13 @@ import requests
 from scrapy.selector import Selector
 from datetime import datetime
 from datetime import date
-from datetime import time
 from typing import List
-from dataclasses import dataclass
 
+from .nature_entities import WaterState
+from .nature_entities import MoonDetails
+from .nature_entities import SunDetails
+from .nature_entities import GlobalPosition
 
-@dataclass
-class WaterState:
-    date_time: datetime
-    current_flow: str
-    incoming: bool = True
-    slack: bool = True
-    current_speed: float = 0.00
-
-@dataclass
-class MoonDetails:
-    date: date
-    phase: str = None
-    rise_time: time = None
-    set_time: time = None
-
-@dataclass
-class SunDetails:
-    date: date
-    rise_time: time = None
-    set_time: time = None
-    
-@dataclass
-class GlobalPosition:
-    latitude: float
-    longitude: float
 
 class TideDataParser:
     def __init__(self, date: date, raw_data: str) -> None:

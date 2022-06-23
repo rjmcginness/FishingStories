@@ -71,6 +71,12 @@ def create_app(test_config=None):
     app.add_url_rule('/register', 'register')
     app.add_url_rule('/admin', 'admin/index')
     
+    from .api import angler
+    app.register_blueprint(angler.bp)
+    
+    from .api import fish
+    app.register_blueprint(fish.bp)
+    
 
     return app
 

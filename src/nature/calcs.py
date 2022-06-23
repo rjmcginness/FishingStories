@@ -6,14 +6,22 @@ Created on Mon Jun 13 16:56:01 2022
 @author: robertjmcginness
 """
 
-from dataclasses import dataclass
 import math
 
-@dataclass
-class GlobalPosition:
-    latitude: float
-    longitude: float
+from .nature_entities import GlobalPosition
 
+def coordinate_to_dms(coordinate: float) -> tuple:
+    degrees = int(coordinate)
+    fractional_part = coordinate - degrees
+    minutes = int(fractional_part * 60)
+    fractional_part = (fractional_part * 60) - minutes
+    seconds = fractional_part * 60
+    
+    return degrees, minutes, seconds
+
+def coordinate_to_decimal(degrees: int, minutes: int, seconds: float) -> float:
+    return degrees + (minutes + (seconds / 60)) / 60
+    
 
 def distance_between_coordinates(point1: GlobalPosition, point2: GlobalPosition) -> float:
     ''' Calculates the Great Circle (orthodromic) distance between two points on Earth 

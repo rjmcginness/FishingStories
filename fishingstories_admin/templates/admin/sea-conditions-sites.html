@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Sea Condition Sites</h1>
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Current Data</th>
+            <th>Map</th>
+        </thead>
+        <tbody>
+            {% for site_4tuple in sites %}
+            <tr>
+                <td>{{ site_4tuple[0] }}</td>
+                <td>{{ site_4tuple[1].latitude }}</td>
+                <td>{{ site_4tuple[1].longitude }}</td>
+                <td><a href="{{ site_4tuple[2] }}">view data</a></td>
+                <td><a href="{{ site_4tuple[3] }}">view map</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
