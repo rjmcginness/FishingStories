@@ -74,6 +74,9 @@ def create_app(test_config=None):
     from .api import angler
     app.register_blueprint(angler.bp)
     
+    from .api import fish
+    app.register_blueprint(fish.bp)
+    
 
     return app
 

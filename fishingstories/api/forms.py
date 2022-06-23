@@ -16,6 +16,9 @@ from wtforms import HiddenField
 from wtforms import DecimalField
 from wtforms import FormField
 from wtforms import SelectMultipleField
+from wtforms import DateTimeField
+from wtforms import TextAreaField
+from wtforms import FileField
 from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 
@@ -34,6 +37,18 @@ class SearchBasicForm(FlaskForm):
         super(SearchBasicForm, self).__init__(**kwargs)
         if search_name is not None:
             self.search.label = search_name
+
+class AddFishForm(FlaskForm):
+    species = StringField('Species', validators=[DataRequired()])
+    weight = DecimalField('Weight (lb)')
+    length = DecimalField('Length (inches)')
+    fishing_spot = SelectField('Place Caught', validators=[DataRequired()])
+    bait = SelectField('Bait Used', validators=[DataRequired()])
+    gear = SelectField('Gear Combo Used')
+    date_time = DateTimeField('Date and Time Caught', validators=[DataRequired()])
+    description = TextAreaField('Description')
+    image = FileField('Image')
+    submit = SubmitField('Record Fish')
 
 class AddBaitForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])

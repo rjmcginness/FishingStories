@@ -39,6 +39,9 @@ from src.nature.current_stations import google_maps_url2022
 bp = Blueprint('angler', __name__, url_prefix='/anglers')
 
 
+
+
+
 # @bp.route('/<int:angler_id>/fishing-spots-menu', methods=['GET'])
 # @login_required
 # def fishing_spots_menu(angler_id: int):
