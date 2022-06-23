@@ -331,7 +331,7 @@ class DataUrl(Base):
     __tablename__ = 'data_urls'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    url = Column(String, nullable=False, unique=True)
+    url = Column(String, nullable=False)
     data_type = Column(String(8), nullable=False)
     global_position_id = Column(Integer,
                         ForeignKey('global_positions.id'),
