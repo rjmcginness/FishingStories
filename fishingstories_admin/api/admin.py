@@ -23,6 +23,9 @@ import math
 
 from src.db import models
 from src.nature.current_stations import current_sites
+from src.nature.retrieve_weather import tide_weather_locations
+from src.nature.retrieve_weather import map_site_coordinates
+from src.nature.utilities import google_maps_url2022
 from .forms import RankForm
 from .forms import CreateAccountTypeForm
 from .forms import CreatePrivilegeForm
@@ -74,8 +77,8 @@ def load_current_stations():
                                     longitude=math.radians(station.longitude))
         
         # instantiate DataUrls for urls for the station
-        current_url = models.DataUrl(url=station.url)
-        map_url = models.DataUrl(url=station.map_url)
+        current_url = models.DataUrl(url=station.url, data_type='current')
+        map_url = models.DataUrl(url=station.map_url, data_type='map')
         
         # back_populate GlobalPosition
         current_url.global_position = global_position
@@ -87,19 +90,74 @@ def load_current_stations():
         
         current_app.session.add(current_station)
     
-    current_app.session.commit()
-    # try:
-    #     current_app.session.commit()
-    # except (IntegrityError, OperationalError) as e:
-    #     print(e)
-    #     current_app.logger.info(e)
-    #     flash('Data may already exist')
+    # current_app.session.commit()
+    try:
+        current_app.session.commit()
+    except (IntegrityError, OperationalError) as e:
+        print(e)
+        current_app.logger.info(e)
+        flash('Data may already exist')
     
     return render_template('admin/current-stations.html', stations=current_stations, authenticated=True)
     
     
+@bp.route('/sea_condition_sites/load', methods=['GET'])
+@login_required
+@admin_required(forbidden)
+def load_sea_condition_sites():
+    ''' Scrapes sea condition site urls and separately global position coordinates.
+        Stores urls as DataUrl in the data_urls table and by foreign key
+        constrain back_populates the GlobalPosition to global_positions.
+        Does the same with a google_maps url created from the global position
+        coordinates.
+        
+        Watch the lights dim on this one!!!
+    '''
+    ######HARD CODED FOR NOW
+    weather_locations = tide_weather_locations('https://www.tide-forecast.com')
     
+    weather_base_url = 'https://www.tide-forecast.com/locations/'
+    weather_url_path = '/forecasts/latest'
+    
+    # dictionary comprehension creates full weather urls as keys and
+    # src.nature.nature_entities.GlobalPosition as value
+    # internally scrapes coordinates from google maps from the site name
+    weather_urls = {weather_base_url + location_name + weather_url_path: 
+                                        map_site_coordinates(location_name) 
+                                        for location_name in weather_locations}
+    
+                
+    current_app.logger.info(weather_urls)
+    flash(weather_urls)
+    
+    map_url_list = []
+    for url, position in weather_urls.items():
+        weather_data_url = models.DataUrl(url=url, data_type='sea')
+        global_position = models.GlobalPosition(latitude=math.radians(position.latitude),
+                                                longitude=math.radians(position.longitude))
+        
+        # make a google maps url from global_position, add to list
+        map_url_list.append(google_maps_url2022(position.latitude,position.longitude))
+        # instantiate a DataUrl for the map url
+        map_url = models.DataUrl(url=map_url_list[-1], data_type='map')
+        
+        global_position.data_urls.append(weather_data_url)
+        global_position.data_urls.append(map_url)
+        
+        current_app.session.add(global_position)
 
+    try:
+        current_app.session.commit()
+    except (IntegrityError, OperationalError) as e:
+        print(e)
+        current_app.logger.info(e)
+        
+    display_data = list(zip(weather_locations,
+                            weather_urls.values(), # gp coords
+                            weather_urls.keys(), # urls
+                            map_url_list))
+        
+    return render_template('admin/sea-conditions-sites.html', sites=display_data, authenticated=True)
 
 @bp.route('/ranks/create', methods = ['GET', 'POST'])
 @login_required
