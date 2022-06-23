@@ -16,6 +16,7 @@ from sqlalchemy import Numeric
 from sqlalchemy import Boolean
 from sqlalchemy import DateTime
 from sqlalchemy import Date
+from sqlalchemy import LargeBinary
 from sqlalchemy import UniqueConstraint
 from sqlalchemy import event
 from sqlalchemy.orm import relationship
@@ -243,6 +244,18 @@ class CurrentStation(Base):
     global_position = relationship('GlobalPosition', back_populates='current_station')
 
 
+spot_related_positions = Table('spot_related_positions',
+                               Base.metadata,
+                               Column('fishing_spot_id',
+                                      ForeignKey('fishing_spots.id'),
+                                      primary_key=True
+                                      ),
+                               Column('global_position_id',
+                                      ForeignKey('global_positions.id'),
+                                      primary_key=True)
+    
+                               )
+
 class FishingSpot(Base):
     __tablename__ = 'fishing_spots'
     
@@ -260,6 +273,8 @@ class FishingSpot(Base):
     fishing_conditions = relationship('FishingConditions')
     fishes = relationship('Fish')
     anglers = relationship('Angler', secondary=angler_spots, back_populates='fishing_spots')
+    
+    related_global_positions = relationship('GlobalPosition', secondary=spot_related_positions, back_populates='related_fishing_spots')
     
 
 # find_nearest_current = DDL('''
@@ -309,12 +324,15 @@ class GlobalPosition(Base):
     data_urls = relationship('DataUrl', back_populates='global_position')
     fishing_spots = relationship('FishingSpot')
     current_station = relationship('CurrentStation', back_populates='global_position', uselist=False)
+    
+    related_fishing_spots = relationship('FishingSpot', secondary=spot_related_positions, back_populates='related_global_positions')
 
 class DataUrl(Base):
     __tablename__ = 'data_urls'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    url = Column(String, nullable=False)
+    url = Column(String, nullable=False, unique=True)
+    data_type = Column(String(8), nullable=False)
     global_position_id = Column(Integer,
                         ForeignKey('global_positions.id'),
                         nullable=False)
@@ -350,6 +368,7 @@ class Fish(Base):
     weight = Column(Numeric)
     length = Column(Numeric)
     description = Column(String)
+    image = Column(LargeBinary)
     
     bait_id = Column(Integer, ForeignKey('baits.id'))
     fishing_gear_id = Column(Integer,

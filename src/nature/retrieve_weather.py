@@ -13,8 +13,10 @@ from datetime import datetime
 from calendar import isleap
 from calendar import month_abbr
 
-from nature_entities import SeaConditions
-from nature_entities import GlobalPosition
+from .nature_entities import SeaConditions
+from .nature_entities import GlobalPosition
+# from nature_entities import SeaConditions
+# from nature_entities import GlobalPosition
 
 # @dataclass
 # class SeaConditions:
@@ -185,7 +187,9 @@ def map_site_coordinates(site_name: str) -> GlobalPosition:
     site_name = site_name.replace(' ', '+')
     site_name = site_name.replace('-', '+')
     
-    response = requests.get(google_maps_url + "&q=" + site_name)
+    response = requests.get(google_maps_url + "&q=" + site_name, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0'})
+    print(response.text)
+    
     url = Selector(text=response.text).xpath('//meta/@content[contains(.,"maps.google.com")]').get()
     
     query_parts = urllib.parse.parse_qs(url)
@@ -197,10 +201,35 @@ def map_site_coordinates(site_name: str) -> GlobalPosition:
     
 
 if __name__ == '__main__':
-    exit()
-    global_position = map_site_coordinates('Weeks-Bay-Vermilion-Bay-Louisiana')
+    # exit()
+    # global_position = map_site_coordinates('Weeks-Bay-Vermilion-Bay-Louisiana')
     
-    print(global_position)
+    # print(global_position)
+    
+    
+    error_file = open('../../logs/sea_site_errors.txt', 'wt')
+    
+    weather_locations = tide_weather_locations('https://www.tide-forecast.com')
+    
+    base_url = 'https://www.tide-forecast.com/locations/'
+    url_path = '/forecasts/latest'
+    
+    with open('tide_weather_site_names.txt', 'wt') as f:
+        for location_name in weather_locations:
+            try:
+                # position = map_site_coordinates(location_name)
+                f.write(str({'name':location_name.replace('-', ' '),
+                             'url': base_url + location_name + url_path}) + '\n')
+                
+                # f.write(str({'url': base_url + location_name + url_path,
+                #              'latitude': position.latitude,
+                #              'longitude': position.longitude}) + '\n')
+            except:
+                error_file.write(location_name + '\n')
+    
+    error_file.close()
+    
+            
     
     # weather_locations = tide_weather_locations('https://www.tide-forecast.com')
     
