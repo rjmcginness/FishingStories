@@ -12,47 +12,72 @@ from datetime import date
 from typing import List
 import urllib
 
-from .nature_entities import WaterState
-from .nature_entities import MoonDetails
-from .nature_entities import SunDetails
-from .nature_entities import GlobalPosition
+# from .nature_entities import WaterState
+# from .nature_entities import MoonDetails
+# from .nature_entities import SunDetails
+# from .nature_entities import GlobalPosition
 
-# from nature_entities import WaterState
-# from nature_entities import MoonDetails
-# from nature_entities import SunDetails
-# from nature_entities import GlobalPosition
+from nature_entities import WaterState
+from nature_entities import MoonDetails
+from nature_entities import SunDetails
+from nature_entities import GlobalPosition
 
 
 class TideDataParser:
     def __init__(self, date: date, raw_data: str) -> None:
         self.__date = date
         
-        self.__raw_data = [[part.strip().lower() for part in line.strip().split(' ') if part != '']
-         for line in raw_data.split('\n') if not line.isspace() and line != '']
+        # rows = body.split('\n\n')
+        date_substr = date_time.strftime('%Y-%m-%d')
         
-        self.coordinates = self.__parse_coordinates()
+        # get all the rows of data
+        rows = raw_data.splitlines()
+        
+        # get only rows containing dates (these have the actual data)
+        # as lists of the non-empty substrings in the data
+        self.__raw_data = [list(filter(lambda s: s != '', part.split(' ')))
+                                        for part in[row.strip().lower()
+                                        for row in rows if date_substr in row]]
+        
+        # first row contains coordinates
+        self.coordinates = self.__parse_coordinates(rows[0])
+    
         self.water = self.__parse_water_data()
         self.sun, self.moon = self.__parse_sun_moon_data()
     
-    def __parse_coordinates(self) -> GlobalPosition:
-        coords = self.__raw_data[0]
-        latitude = coords[0][:-1].strip()
-        longitude = coords[2][:-1].strip()
+    def __parse_coordinates(self, coord_str: str) -> GlobalPosition:
+        ''' Parse latitude and longitude from string argument'''
+        coords =  coord_str.strip().split(',')
         
-        return GlobalPosition(latitude, longitude)
+        latitude, longitude = (coord.strip().split(' ') for coord in coords)
+        
+        # latitude = coords[0].strip().split(' ')
+        # longitude = coords[1].strip().split(' ')
+        
+        # with open('current_errors.txt', 'wb') as f:
+        #     f.write(str(len(longitude[0])).encode())
+        #     f.write((longitude[1] + '\n').encode())
+        
+        # make negative if necessary and remove degree sign
+        latitude = ('-' if latitude[1] == 'S' else '') + latitude[0].strip()[:-1]
+        longitude = ('-' if longitude[1] == 'W' else '') + longitude[0].strip()[:-1]
+               
+        return GlobalPosition(float(latitude), float(longitude))
     
     def __parse_water_data(self) -> List[WaterState]:
         
         # If 'moon' or 'sun' is a substring of any strings in a line, we do not
         # that line (filter for those lines, then choose not to include those
         # lines in the list comprehension)
-        water_raw_data = [line for line in self.__raw_data[1:]
-                          if  not list(filter(lambda part: 'moon' in part or
+        water_raw_data = [line for line in self.__raw_data
+                          if not list(filter(lambda part: 'moon' in part or
                                                            'sun' in part, line))]
-        
+        print(water_raw_data)
         # parse each line of water data
         water_states = []
         for water_data in water_raw_data:
+            
+            print(water_data)
             
             current_flow = 'slack'
             incoming = True
@@ -68,6 +93,7 @@ class TideDataParser:
             
             # parse time from water data line
             dt_str = ' '.join(water_data[:2])
+            print(dt_str)
             date_time = datetime.strptime(dt_str, '%Y-%m-%d %H:%M')
             
             # create WaterState object
@@ -100,10 +126,10 @@ class TideDataParser:
         #                   if list(filter(lambda part: 'moon' in part or 'sun' in part, line))]
         
         
-        moon_lines = [line for line in self.__raw_data[1:]
+        moon_lines = [line for line in self.__raw_data
                           if list(filter(lambda part: 'moon' in part, line))]
         
-        sun_lines = [line for line in self.__raw_data[1:]
+        sun_lines = [line for line in self.__raw_data
                           if list(filter(lambda part: 'sun' in part, line))]
         
         return (self.__parse_celestial_body(SunDetails, sun_lines),
@@ -196,6 +222,7 @@ def retrieve_tide_currents(url: str, date_time: datetime) -> TideData:
 if __name__ == '__main__':
     # exit()
     url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=0%2E1+mile+east+of+Point+Evans%2C+The+Narrows%2C+Washington+Current'
+    url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=Little+Card+Sound+bridge%2C+Florida&units=f'
 
     date_time = datetime(year=2022, month=6, day=11)
 
