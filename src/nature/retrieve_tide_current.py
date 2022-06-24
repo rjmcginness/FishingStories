@@ -10,11 +10,17 @@ from scrapy.selector import Selector
 from datetime import datetime
 from datetime import date
 from typing import List
+import urllib
 
 from .nature_entities import WaterState
 from .nature_entities import MoonDetails
 from .nature_entities import SunDetails
 from .nature_entities import GlobalPosition
+
+# from nature_entities import WaterState
+# from nature_entities import MoonDetails
+# from nature_entities import SunDetails
+# from nature_entities import GlobalPosition
 
 
 class TideDataParser:
@@ -168,7 +174,10 @@ class TideData:
         return self.__raw_data
     
 
-def retrieve_tide_currents(url: str, date_time: datetime, site: str) -> TideData:
+def retrieve_tide_currents(url: str, date_time: datetime) -> TideData:
+    
+    site = list(urllib.parse.parse_qs(url).values())[0][0]
+    print(site)
     formdata={
                 'sitesave': site,
                 'glen': '1',
@@ -186,7 +195,7 @@ def retrieve_tide_currents(url: str, date_time: datetime, site: str) -> TideData
     
 if __name__ == '__main__':
     # exit()
-    url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
+    url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=0%2E1+mile+east+of+Point+Evans%2C+The+Narrows%2C+Washington+Current'
 
     date_time = datetime(year=2022, month=6, day=11)
 
@@ -209,7 +218,7 @@ if __name__ == '__main__':
     # print(data)
     
     '''Test retrieve_tide_currents function'''
-    tc_data = retrieve_tide_currents(url, date_time,'Newburyport (Merrimack River), Massachusetts Current')
+    tc_data = retrieve_tide_currents(url, date_time)
     print(tc_data.coordinates)
     print(tc_data.moon)
     print(tc_data.sun)

@@ -51,7 +51,12 @@ def add_fish(angler_id: int):
     form = AddFishForm()
     form.bait.choices = [bait.name for bait in baits]
     form.gear.choices = [gr.name for gr in gear]
-    form.fishing_spot.choices = angler.fishing_spots
+    form.fishing_spot.choices = [spot.name for spot in angler.fishing_spots]
+    
+    
+    ###########################################################################
+    ######IMPLEMENT FORM SUBMISSION HERE
+    
     
     return render_template('fishingstories/fish/add-fish.html', form=form, authenticated=True)
 
