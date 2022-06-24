@@ -34,40 +34,48 @@ from .db import Base
 angler_fishing_spots = Table('angler_fishing_spots',
                              Base.metadata,
                              Column('angler_id',
-                                    ForeignKey('anglers.id'),
+                                    ForeignKey('anglers.id',
+                                               name='angler_fishing_Spots_angler_id_fkey'),
                                     primary_key=True),
                              Column('fishing_spot_id',
-                                    ForeignKey('fishing_spots.id'),
+                                    ForeignKey('fishing_spots.id',
+                                               name='angler_fishing_spots_fishing_spot_id_fkey'),
                                     primary_key=True)
                             )
 
 angler_baits = Table('angler_baits',
                      Base.metadata,
                      Column('angler_id',
-                            ForeignKey('anglers.id'),
+                            ForeignKey('anglers.id',
+                                       name='angler_baits_angler_id_fkey'),
                             primary_key=True),
                      Column('bait_id',
-                            ForeignKey('baits.id'),
+                            ForeignKey('baits.id',
+                                       name='angler_baits_bait_id_fkey'),
                             primary_key=True)
                      )
 
 angler_gear = Table('angler_gear',
                     Base.metadata,
                     Column('angler_id',
-                           ForeignKey('anglers.id'),
+                           ForeignKey('anglers.id',
+                                      name='angler_gear_angler_id_fkey'),
                            primary_key=True),
                     Column('fishing_gear_id',
-                           ForeignKey('fishing_gear.id'),
+                           ForeignKey('fishing_gear.id',
+                                      name='angler_gear_fishing_gear_id_fkey'),
                            primary_key=True)
                     )
 
 angler_outings = Table('angler_outings',
                        Base.metadata,
                        Column('angler_id',
-                              ForeignKey('anglers.id'),
+                              ForeignKey('anglers.id',
+                                         name='angler_outings_angler_id_fkey'),
                               primary_key=True),
                        Column('fishing_outing_id',
-                              ForeignKey('fishing_outings.id'),
+                              ForeignKey('fishing_outings.id',
+                                         name='angler_outings_fishing_outing_id_fkey'),
                               primary_key=True)
                       )
 
@@ -75,10 +83,12 @@ account_privileges = Table('account_privileges',
                             Base.metadata,
                             Column('account_type_id',
                                     ForeignKey('account_types.id',
+                                               name='account_privileges_account_type_id_fkey',
                                               ondelete='CASCADE'),
                                     primary_key=True),
                             Column('privilege_id',
                                     ForeignKey('privileges.id',
+                                               name='account_privileges_privilege_id_fkey',
                                               ondelete='CASCADE'),
                                     primary_key=True)
                             )
@@ -137,17 +147,16 @@ class UserAccount(UserMixin, Base):
     # many-to-one relationship with account_types (unidirectional)
     account_type_id = Column(Integer,
                               ForeignKey('account_types.id',
+                                         name='user_accounts_account_type_id_fkey',
                                         ondelete='CASCADE'),
                               nullable=False)
-    
-    account_type = relationship('AccountType', back_populates='user_accounts')
-    
-    
     # one-to-one relationship with anglers (this is the child)
     angler_id = Column(Integer,
                         ForeignKey('anglers.id',
+                                   name='user_accounts_angler_id_fkey',
                                   ondelete='CASCADE'))
     
+    account_type = relationship('AccountType', back_populates='user_accounts') 
     anglers = relationship('Angler', back_populates='user_accounts')
     
     def serialize(self) -> dict:
@@ -186,6 +195,7 @@ class Angler(Base):
     name = Column(String(280), nullable=False, unique=True)
     rank_id = Column(Integer,
                       ForeignKey('ranks.id',
+                                 name='anglers_rank_id_fkey',
                                 ondelete='CASCADE'),
                       nullable=False)
     
@@ -300,10 +310,12 @@ class DataUrl(Base):
     url = Column(String, nullable=False)
     data_type = Column(String(8), nullable=False)
     global_position_id = Column(Integer,
-                        ForeignKey('global_positions.id'),
+                        ForeignKey('global_positions.id',
+                                   name='data_urls_global_position_id_fkey'),
                         nullable=False)
     
     global_position = relationship('GlobalPosition', back_populates='data_urls')
+    fishing_spots = relationship('FishingSpot', back_populates='current_url')
     
     def serialize(self) -> dict:
         return (
@@ -319,7 +331,8 @@ class CurrentStation(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(280), nullable=False, unique=True)
     global_position_id = Column(Integer,
-                                ForeignKey('global_positions.id'),
+                                ForeignKey('global_positions.id',
+                                           name='current_stations_global_position_id_fkey'),
                                 nullable=False)
     
     global_position = relationship('GlobalPosition', back_populates='current_station')
@@ -339,13 +352,19 @@ class FishingSpot(Base):
     name = Column(String, nullable=False)
     nickname = Column(String)
     description = Column(String)
-    global_position_id = Column(Integer,
-                                ForeignKey('global_positions.id'),
-                                nullable=False)
     # for this to work in the db, it must be server_default=SQL text to default to FALSE
     is_public = Column(Boolean, nullable=False, server_default='false')######default not working,but it is not null boolean??server_default=text('ALTER TABLE fishing_spots ALTER is_public SET DEFAULT FALSE'))
+    global_position_id = Column(Integer,
+                                ForeignKey('global_positions.id',
+                                           name='fishing_spots_global_position_id_fkey'),
+                                nullable=False)
+    current_url_id = Column(Integer,
+                            ForeignKey('data_urls.id',
+                                       name='fishing_spots_current_url_id_fkey'))
+    
     catches = relationship('Catch', back_populates='fishing_spot')
     global_position = relationship('GlobalPosition', back_populates='fishing_spots')
+    current_url = relationship('DataUrl', back_populates='fishing_spots')
     anglers = relationship('Angler', secondary=angler_fishing_spots, back_populates='fishing_spots')
     outings = relationship('FishingOuting', back_populates='fishing_spot')
     
@@ -388,19 +407,24 @@ class Catch(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     date_time_caught = Column(DateTime, nullable=False)
     fish_id = Column(Integer,
-                       ForeignKey('fishes.id'),
+                       ForeignKey('fishes.id',
+                                  name='catches_fish_id_fkey'),
                        nullable=False)
     angler_id = Column(Integer,
-                       ForeignKey('anglers.id'),
+                       ForeignKey('anglers.id',
+                                  name='catches_angler_id_fkey'),
                        nullable=False)
     fishing_spot_id = Column(Integer,
-                       ForeignKey('fishing_spots.id'),
+                       ForeignKey('fishing_spots.id',
+                                  name='catches_fishing_spot_id_fkey'),
                        nullable=False)
     bait_id = Column(Integer,
-                       ForeignKey('baits.id'),
+                       ForeignKey('baits.id',
+                                  name='catches_bait_id_fkey'),
                        nullable=False)
     gear_id = Column(Integer,
-                       ForeignKey('fishing_gear.id'))
+                       ForeignKey('fishing_gear.id',
+                                  name='catches_gear_id_fkey'))
     
     fish = relationship('Fish', back_populates='catch')
     angler = relationship('Angler', back_populates='catches')
@@ -423,10 +447,12 @@ class FishingOuting(Base):
     name = Column(String(280), nullable=False)
     outing_date = Column(Date, nullable=False)
     fishing_spot_id = Column(Integer,
-                             ForeignKey('fishing_spots.id'),
+                             ForeignKey('fishing_spots.id',
+                                        name='fishing_outings_fishing_spot_id_fkey'),
                              nullable=False)
     fishing_conditions_id = Column(Integer,
-                                   ForeignKey('fishing_conditions.id'),
+                                   ForeignKey('fishing_conditions.id',
+                                              name='fishing_outings_fishing_conditions_id_fkey'),
                                    nullable=False)
     
     fishing_spot = relationship('FishingSpot', back_populates='outings')
@@ -475,6 +501,45 @@ class FishingConditions(Base):
                     'pressure_today': self.pressure_today
                 }
                )
-    
-    
-    
+
+
+#######################################################################
+######FUNCTIONS AND TRIGGER TO SET NEAREST CURRENT URL ON FISHING_SPOTS
+######BASED ON DISTANCE FROM CURRENT SITES
+
+
+'''
+CREATE OR REPLACE FUNCTION curr_min_distance(lat NUMERIC, lon NUMERIC) RETURNS INTEGER AS
+$$
+DECLARE url_id INTEGER;
+BEGIN
+	WITH distances AS (
+	SELECT u.id as u_id, 3963 * ACOS(SIN(gp.latitude) * SIN($1) + COS(gp.latitude) * COS($1) * COS($2 - gp.longitude)) AS dist FROM data_urls u
+	INNER JOIN global_positions gp
+	ON u.global_position_id = gp.id WHERE u.data_type = 'current'
+	) SELECT u_id FROM distances WHERE dist = (SELECT MIN(dist) FROM distances) INTO url_id;
+	RETURN url_id;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+CREATE OR REPLACE FUNCTION find_nearest_curr() RETURNS TRIGGER AS
+$$
+DECLARE url_id INTEGER;
+DECLARE lat NUMERIC;
+DECLARE lon NUMERIC;
+BEGIN
+	 
+	SELECT gp.latitude, gp.longitude FROM global_positions gp
+	WHERE NEW.global_position_id = gp.id INTO lat, lon;
+	SELECT * FROM curr_min_distance(lat, lon) INTO url_id;
+	NEW.current_url_id = url_id;
+	RETURN NEW;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+CREATE TRIGGER set_nearest_curr
+BEFORE INSERT ON fishing_spots
+FOR ROW EXECUTE FUNCTION find_nearest_curr();
+'''
