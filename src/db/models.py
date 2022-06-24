@@ -16,10 +16,8 @@ from sqlalchemy import DateTime
 from sqlalchemy import Date
 from sqlalchemy import LargeBinary
 from sqlalchemy import UniqueConstraint
-from sqlalchemy import event
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import backref
-from sqlalchemy.schema import DDL
+
 
 
 from werkzeug.security import generate_password_hash
@@ -352,7 +350,7 @@ class FishingSpot(Base):
     name = Column(String, nullable=False)
     nickname = Column(String)
     description = Column(String)
-    # for this to work in the db, it must be server_default=SQL text to default to FALSE
+    # for this to work in the db, it must be server_default=
     is_public = Column(Boolean, nullable=False, server_default='false')######default not working,but it is not null boolean??server_default=text('ALTER TABLE fishing_spots ALTER is_public SET DEFAULT FALSE'))
     global_position_id = Column(Integer,
                                 ForeignKey('global_positions.id',
@@ -502,6 +500,10 @@ class FishingConditions(Base):
                 }
                )
 
+
+tab = Table('hi',
+            Base.metadata,
+            Column('id', Integer, primary_key=True))
 
 #######################################################################
 ######FUNCTIONS AND TRIGGER TO SET NEAREST CURRENT URL ON FISHING_SPOTS
