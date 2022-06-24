@@ -43,7 +43,7 @@ def fishing_spots_menu():
 @login_required
 def spot(spot_id: int):
     spot = current_app.session.scalar(select(models.FishingSpot).where(
-                                            models.FishingSpot.id == spot_id)).first()
+                                            models.FishingSpot.id == spot_id))
     
     # 'https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest'
     # 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
@@ -52,11 +52,13 @@ def spot(spot_id: int):
         flash('Error loading spot')
         return redirect(request.referrer)
     
+    #############################################################################
+    ####### Unable to scrape data from google to map sea conditions to coordinates
     weather = []
-    try:
-        weather = retrieve_weather(spot.weather_url)
-    except:
-        pass
+    # try:
+    #     weather = retrieve_weather(spot.weather_url)
+    # except:
+    #     pass
     
     tide_currents = None
     try:

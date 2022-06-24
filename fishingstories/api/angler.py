@@ -20,6 +20,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import OperationalError
 
 from datetime import datetime
+import math
 
 from src.db import models
 from .forms import SearchBasicForm
@@ -67,19 +68,20 @@ def fishing_spot_create(angler_id: int):
     
     spots = list(spots)
     
-    form = AddFishingSpotForm([spot.name for spot in spots])
+    form = AddFishingSpotForm()
     
     if form.validate_on_submit():
         
         # instantiate new spot
         fishing_spot = models.FishingSpot(name=form.name.data,
                                           nickname=form.nickname.data,
-                                          description=form.description.data)
+                                          description=form.description.data,
+                                          is_public=form.is_public.data)
         
         # instantiate global position
-        global_position = models.GlobalPosition(latitude=form.latitude.data,
-                                                longitude=float(form.longitude.data),
-                                                is_public=float(form.is_public.data))
+        # store the lat and long as radians
+        global_position = models.GlobalPosition(latitude=math.radians(float(form.latitude.data)),
+                                                longitude=math.radians(float(form.longitude.data)))
         
         # setup foreign key on fishing_spot to global_position
         fishing_spot.global_position = global_position
@@ -87,14 +89,19 @@ def fishing_spot_create(angler_id: int):
         # generate url to google maps for this spot
         map_url = models.DataUrl(url=google_maps_url2022(
                                                     global_position.latitude,
-                                                    global_position.longitude))
-        
-        ####################################################################
-        ######CONSIDER HOW TO ADD URL TO TIDE_WEATHER SITE
-        
+                                                    global_position.longitude),
+                                 data_type='map')
         
         # setup foreign key on map_url to global_position
         map_url.global_position = global_position
+        
+        # Trigger fires on database to set current_url_id :) 
+        
+        # get the angler to make establish association
+        angler = current_app.session.scalar(select(models.Angler).where(
+                                                models.Angler.id == angler_id))
+        
+        fishing_spot.anglers.append(angler)
         
         current_app.session.add(fishing_spot)
         try:
@@ -104,7 +111,10 @@ def fishing_spot_create(angler_id: int):
             spots.insert(0, fishing_spot)
         except (IntegrityError, OperationalError) as e:
             current_app.logger.info(e)
-        
+    
+    ################################################################
+    ######MAY BE A BUG HERE.  SPOTS NOT LOADING, WHEN YOU GO BACK TO PAGE
+    ######MIGHT NEED TO GET THEM FROM DB AGAIN
         
     
     return render_template('fishing_spots/fishing-spot-create.html',

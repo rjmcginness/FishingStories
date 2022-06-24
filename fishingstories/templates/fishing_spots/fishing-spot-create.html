@@ -70,11 +70,11 @@
             <tbody>
                 {% for spot in spots %}
                 <tr>
-                    <td>{{ spot.name }}</td>
+                    <td><a href="{{ url_for('angler.fishing_spot', angler_id=angler_id, spot_id=spot.id) }}">{{ spot.name }}</a></td>
                     <td>{{ spot.nickname }}</td>
                     <td>{{ spot.description }}</td>
                     <td>{{ spot.global_position.latitude }}</td>
-                    <td>{{ spot.global_position..longitude }}</td>
+                    <td>{{ spot.global_position.longitude }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

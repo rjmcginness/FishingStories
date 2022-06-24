@@ -129,9 +129,9 @@ class AddFishingSpotForm(FlaskForm):
     description = StringField('Description')
     submit = SubmitField('Add Spot')
     
-    def __init__(self, spot_choices: list, **kwargs) -> None:
-        super(AddFishingSpotForm, self).__init__(**kwargs)
-        self.name.choices = spot_choices
+    # def __init__(self, spot_choices: list, **kwargs) -> None:
+    #     super(AddFishingSpotForm, self).__init__(**kwargs)
+    #     self.name.choices = spot_choices
     
 class CreateAccountTypeForm(FlaskForm):
     name = StringField('Account Type Name', validators=[DataRequired()])

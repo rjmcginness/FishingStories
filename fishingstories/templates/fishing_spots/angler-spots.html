@@ -16,8 +16,8 @@
             <tr>
                 <td><a href="{{ url_for('fishing_spots.spot', spot_id=spot.id) }}">{{ spot.name }}</a></td>
                 <td>{{ spot.nickname }}</td>
-                <td>{{ spot.latitude }}</td>
-                <td>{{ spot.longitude }}</td>
+                <td>{{ spot.global_position.latitude }}</td>
+                <td>{{ spot.global_position.longitude }}</td>
                 <td>{{ spot.description }}</td>
             </tr>
             {% endfor %}
