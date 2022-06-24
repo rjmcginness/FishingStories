@@ -14,6 +14,7 @@ from sqlalchemy import Numeric
 from sqlalchemy import Boolean
 from sqlalchemy import DateTime
 from sqlalchemy import Date
+from sqlalchemy import LargeBinary
 from sqlalchemy import UniqueConstraint
 from sqlalchemy import event
 from sqlalchemy.orm import relationship
@@ -188,6 +189,12 @@ class Angler(Base):
                                 ondelete='CASCADE'),
                       nullable=False)
     
+    # one-to-one relationship with user_accounts
+    #(unidirectional- this is parent)
+    user_accounts = relationship('UserAccount',
+                                back_populates='anglers',
+                                uselist=False)
+    
     # one-to-many relationship with ranks
     rank = relationship('Rank', back_populates='anglers')
     
@@ -291,6 +298,7 @@ class DataUrl(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     url = Column(String, nullable=False)
+    data_type = Column(String(8), nullable=False)
     global_position_id = Column(Integer,
                         ForeignKey('global_positions.id'),
                         nullable=False)
@@ -359,6 +367,7 @@ class Fish(Base):
     weight = Column(Numeric)
     length = Column(Numeric)
     description = Column(String)
+    image = Column(LargeBinary)
     
     catch = relationship('Catch', back_populates='fish', uselist=False)
     
@@ -422,6 +431,7 @@ class FishingOuting(Base):
     
     fishing_spot = relationship('FishingSpot', back_populates='outings')
     anglers = relationship('Angler', secondary=angler_outings, back_populates='outings')
+    conditions = relationship('FishingConditions', back_populates='fishing_outing')
     
     def serialize(self) -> dict:
         return (
@@ -447,7 +457,7 @@ class FishingConditions(Base):
     pressure_yesterday = Column(Numeric)
     pressure_today = Column(Numeric)
 
-    fishing_outing = relationship('FishingOuting')
+    fishing_outing = relationship('FishingOuting', back_populates='conditions')
     
     def serialize(self) -> dict:
         return (
