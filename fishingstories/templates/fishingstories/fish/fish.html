@@ -1,35 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>View Bait</h1>
-    <table class="view-only-form">
-        {{ form.hidden_tag() }}
-        <tr>
-            <td>{{ form.name.label }}</td>
-            <td>{{ form.name() }}</td>
-            <td><a href="{{ url_for('angler.bait_edit', bait_id=form.bait_id) }}">EDIT</a></td>
-            {% for error in form.name.errors %}
-            <span style="color: red;">[{{ error }}]</span>
+    <h1>View Fish</h1>
+    <a href="{{ url_for('fish.add_fish', angler_id=angler_id) }}">Add More Fish</a>
+    <a href="{{ url_for('angler.angler_home', angler_id=angler_id) }}">Menu</a>
+    <table class="data-display-table">
+        <thead>
+            <tr>
+                <th>Date/Time</th>
+                <th>Species</th>
+                <th>Length</th>
+                <th>Weight</th>
+                <th>Where Caught</th>
+                <th>Bait</th>
+                <th>Gear</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in fish %}
+            <tr>
+                <td>{{ f.date_time_caught }}</td>
+                <td>{{ f.species }}</td>
+                <td>{{ f.length }}</td>
+                <td>{{ f.weight }}</td>
+                <td>{{ f.fishing_spot.name }}</td>
+                <td>{{ f.bait.name ~ ' ' ~ f.bait.size ~ ' ' ~ f.bait.color }}</td>
+                <td>{{ f.fishing_gear.rod ~ ' with ' ~ f.fishing_gear.reel }}</td>
+            </tr>
             {% endfor %}
-        </tr>
-        <tr>
-            <td></td>
-            <td>{{ form.artificial() }} {{ form.artificial.label }}</td>
-            {% for error in form.artificial.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </tr>
-        <tr>
-            <td>{{ form.size.label }}</td>
-            <td>{{ form.size() }}</td>
-        </tr>
-        <tr>
-            <td>{{ form.color.label }}</td>
-            <td>{{ form.color() }}</td>
-        </tr>
-        <tr>
-            <td>{{ form.description.label }}</td>
-            <td>{{ form.description() }}</td>
-        </tr>
+        </tbody>
     </table>
 {% endblock %}

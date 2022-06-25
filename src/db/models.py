@@ -213,8 +213,8 @@ class Angler(Base):
     # many-to_many relationship with fishing_gear
     gear = relationship('FishingGear', secondary=angler_gear, back_populates='anglers')
     
-    # one-to-many relationship with catches
-    catches = relationship('Catch', back_populates='angler')
+    # one-to-many relationship with fish
+    fish = relationship('Fish', back_populates='angler')
     
     outings = relationship('FishingOuting', secondary=angler_outings, back_populates='anglers')
     
@@ -240,7 +240,7 @@ class Bait(Base):
     
     __table_args__ = (UniqueConstraint('name', 'size', 'color'),)
     
-    catches = relationship('Catch', back_populates='bait')
+    fish = relationship('Fish', back_populates='bait')
     anglers = relationship('Angler', secondary=angler_baits, back_populates='baits')
     
     def serialize(self) -> dict:
@@ -265,7 +265,7 @@ class FishingGear(Base):
     hook = Column(String)
     leader = Column(String)
     
-    catches = relationship('Catch', back_populates='fishing_gear')
+    fish = relationship('Fish', back_populates='fishing_gear')
     anglers = relationship('Angler', secondary=angler_gear, back_populates='gear')
     
     def serialize(self) -> dict:
@@ -360,7 +360,7 @@ class FishingSpot(Base):
                             ForeignKey('data_urls.id',
                                        name='fishing_spots_current_url_id_fkey'))
     
-    catches = relationship('Catch', back_populates='fishing_spot')
+    fish = relationship('Fish', back_populates='fishing_spot')
     global_position = relationship('GlobalPosition', back_populates='fishing_spots')
     current_url = relationship('DataUrl', back_populates='fishing_spots')
     anglers = relationship('Angler', secondary=angler_fishing_spots, back_populates='fishing_spots')
@@ -385,8 +385,30 @@ class Fish(Base):
     length = Column(Numeric)
     description = Column(String)
     image = Column(LargeBinary)
+    date_time_caught = Column(DateTime, nullable=False)
+
+    angler_id = Column(Integer,
+                       ForeignKey('anglers.id',
+                                  name='fishes_angler_id_fkey'),
+                       nullable=False)
+    fishing_spot_id = Column(Integer,
+                       ForeignKey('fishing_spots.id',
+                                  name='fishes_fishing_spot_id_fkey'),
+                       nullable=False)
+    bait_id = Column(Integer,
+                       ForeignKey('baits.id',
+                                  name='fishes_bait_id_fkey'),
+                       nullable=False)
+    gear_id = Column(Integer,
+                       ForeignKey('fishing_gear.id',
+                                  name='fishes_gear_id_fkey'))
     
-    catch = relationship('Catch', back_populates='fish', uselist=False)
+    angler = relationship('Angler', back_populates='fish')
+    fishing_spot = relationship('FishingSpot', back_populates='fish')
+    bait = relationship('Bait', back_populates='fish')
+    fishing_gear = relationship('FishingGear', back_populates='fish')
+    
+    # catch = relationship('Catch', back_populates='fish', uselist=False)
     
     def serialize(self) -> dict:
         return (
@@ -399,44 +421,44 @@ class Fish(Base):
                 }
                )
     
-class Catch(Base):
-    __tablename__ = 'catches'
+# class Catch(Base):
+#     __tablename__ = 'catches'
     
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    date_time_caught = Column(DateTime, nullable=False)
-    fish_id = Column(Integer,
-                       ForeignKey('fishes.id',
-                                  name='catches_fish_id_fkey'),
-                       nullable=False)
-    angler_id = Column(Integer,
-                       ForeignKey('anglers.id',
-                                  name='catches_angler_id_fkey'),
-                       nullable=False)
-    fishing_spot_id = Column(Integer,
-                       ForeignKey('fishing_spots.id',
-                                  name='catches_fishing_spot_id_fkey'),
-                       nullable=False)
-    bait_id = Column(Integer,
-                       ForeignKey('baits.id',
-                                  name='catches_bait_id_fkey'),
-                       nullable=False)
-    gear_id = Column(Integer,
-                       ForeignKey('fishing_gear.id',
-                                  name='catches_gear_id_fkey'))
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     date_time_caught = Column(DateTime, nullable=False)
+#     fish_id = Column(Integer,
+#                        ForeignKey('fishes.id',
+#                                   name='catches_fish_id_fkey'),
+#                        nullable=False)
+#     angler_id = Column(Integer,
+#                        ForeignKey('anglers.id',
+#                                   name='catches_angler_id_fkey'),
+#                        nullable=False)
+#     fishing_spot_id = Column(Integer,
+#                        ForeignKey('fishing_spots.id',
+#                                   name='catches_fishing_spot_id_fkey'),
+#                        nullable=False)
+#     bait_id = Column(Integer,
+#                        ForeignKey('baits.id',
+#                                   name='catches_bait_id_fkey'),
+#                        nullable=False)
+#     gear_id = Column(Integer,
+#                        ForeignKey('fishing_gear.id',
+#                                   name='catches_gear_id_fkey'))
     
-    fish = relationship('Fish', back_populates='catch')
-    angler = relationship('Angler', back_populates='catches')
-    fishing_spot = relationship('FishingSpot', back_populates='catches')
-    bait = relationship('Bait', back_populates='catches')
-    fishing_gear = relationship('FishingGear', back_populates='catches')
+#     fish = relationship('Fish', back_populates='catch')
+#     angler = relationship('Angler', back_populates='catches')
+#     fishing_spot = relationship('FishingSpot', back_populates='catches')
+#     bait = relationship('Bait', back_populates='catches')
+#     fishing_gear = relationship('FishingGear', back_populates='catches')
     
-    def serialize(self) -> dict:
-        return (
-                {
-                    'id': self.id,
-                    'date_time': self.date_time_caught
-                }
-               )
+#     def serialize(self) -> dict:
+#         return (
+#                 {
+#                     'id': self.id,
+#                     'date_time': self.date_time_caught
+#                 }
+#                )
     
 class FishingOuting(Base):
     __tablename__ = 'fishing_outings'
@@ -499,11 +521,6 @@ class FishingConditions(Base):
                     'pressure_today': self.pressure_today
                 }
                )
-
-
-tab = Table('hi',
-            Base.metadata,
-            Column('id', Integer, primary_key=True))
 
 #######################################################################
 ######FUNCTIONS AND TRIGGER TO SET NEAREST CURRENT URL ON FISHING_SPOTS

@@ -6,6 +6,12 @@ Created on Thu Jun  2 13:36:52 2022
 """
 
 from flask_wtf import FlaskForm
+# from werkzeug.utils import secure_filename
+# from flask_uploads import UploadSet
+# from flask_uploads import IMAGES
+# from flask_uploads import configure_uploads
+# from flask_wtf.file import FileField
+# from flask_wtf.file import FileAllowed
 from wtforms import StringField
 from wtforms import PasswordField
 from wtforms import BooleanField
@@ -14,13 +20,17 @@ from wtforms import SubmitField
 from wtforms import IntegerField
 from wtforms import HiddenField
 from wtforms import DecimalField
+from wtforms import FloatField
 from wtforms import FormField
 from wtforms import SelectMultipleField
-from wtforms import DateTimeField
 from wtforms import TextAreaField
-from wtforms import FileField
 from wtforms.validators import DataRequired
+from wtforms.validators import ValidationError
+from wtforms.validators import Optional
 from wtforms.widgets import HiddenInput
+from wtforms.fields import DateField
+from wtforms.fields import TimeField
+import datetime
 
 # class LoginForm(FlaskForm):
 #     username = StringField('Username', validators=[DataRequired()])
@@ -28,6 +38,9 @@ from wtforms.widgets import HiddenInput
 #     remember_me = BooleanField('Remember Me')
 #     submit = SubmitField('Sign In')
 
+# pip install git+https://github.com/maxcountryman/flask-uploads.git@f66d7dc
+
+# form_images = UploadSet('images', IMAGES)
 
 class SearchBasicForm(FlaskForm):
     search = StringField('', validators=[DataRequired()])
@@ -38,17 +51,41 @@ class SearchBasicForm(FlaskForm):
         if search_name is not None:
             self.search.label = search_name
 
+def validate_measure(form, field):
+    if field.data is not None and field.data <= 0:
+        raise ValidationError('Must have positive or blank ' + field.name)
+def validate_select(form, field):
+    if field.data == -1:
+        raise ValidationError("Please select " + field.name)
+
 class AddFishForm(FlaskForm):
     species = StringField('Species', validators=[DataRequired()])
-    weight = DecimalField('Weight (lb)')
-    length = DecimalField('Length (inches)')
-    fishing_spot = SelectField('Place Caught', validators=[DataRequired()])
-    bait = SelectField('Bait Used', validators=[DataRequired()])
+    weight = DecimalField('Weight (lb)', validators=[Optional(), validate_measure])
+    length = DecimalField('Length (inches)', validators=[Optional(), validate_measure])
+    fishing_spot = SelectField('Place Caught', coerce=int, validators=[validate_select])
+    bait = SelectField('Bait Used', coerce=int, validators=[validate_select])
     gear = SelectField('Gear Combo Used')
-    date_time = DateTimeField('Date and Time Caught', validators=[DataRequired()])
+    date = DateField('Date and Time Caught')
+    time = TimeField('Time Caught')
     description = TextAreaField('Description')
-    image = FileField('Image')
+    # image = FileField('Image', validators=[FileAllowed(form_images, 'Images Only!')])
     submit = SubmitField('Record Fish')
+
+def date_check(form, field):
+    if form.end_date.data is None:
+        return 
+    
+    if form.start_date.data > form.end_date.data:
+        raise ValidationError("From Date cannot be after To Date")
+    
+class FishSearchForm(FlaskForm):
+    start_date = DateField('From Date', validators=[Optional()])
+    end_date = DateField('To Date', validators=[Optional(), date_check])
+    fishing_spot = SelectField('Where Caught', validators=[Optional()])
+    bait = SelectField('Bait Used', validators=[Optional()])
+    species = SelectField('Species', validators=[Optional()])
+    submit = SubmitField('Search')
+    
 
 class AddBaitForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
