@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1>Record Fish Caught</h1>
-    <form action="" method="post"  novalidate>
+    <form action="" method="get"  novalidate>
         {{ form.hidden_tag() }}
         {% if form.errors %}
         {{ form.errors }}
@@ -17,28 +17,20 @@
                 </td>
             </tr>
             <tr>
-                <td>{{ form.date.label }}</td>
-                <td>{{ form.date(class="datepicker") }} {{ form.time() }}</td>
-                <td>{% for error in form.date.errors %}
+                <td>{{ form.start_date.label }}</td>
+                <td>{{ form.start_date(class="datepicker") }}</td>
+                <td>{{ form.end_date.label }} {{ form.end_date(class="datepicker") }}</td>
+                <td>{% for error in form.start_date.errors %}
                     <span style="color: red;">[{{ error }}]</span>
                     {% endfor %}
-                    {% for error in form.time.errors %}
+                    {% for error in form.end_date.errors %}
                     <span style="color: red;">[{{ error }}]</span>
                     {% endfor %}
                 </td>
             </tr>
             <tr>
-                <td>{{ form.weight.label }}</td>
-                <td>{{ form.weight() }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.length.label }}</td>
-                <td>{{ form.length() }}</td>
-            </tr>
-            <tr>
                 <td>{{ form.fishing_spot.label }}</td>
                 <td>{{ form.fishing_spot() }}</td>
-                <td><a href="{{ url_for('angler.fishing_spot_create', angler_id=angler_id) }}">Create New Spot</a></td>
                 <td>
                     {% for error in form.fishing_spot.errors %}
                     <span style="color: red;">[{{ error }}]</span>
@@ -48,28 +40,12 @@
             <tr>
                 <td>{{ form.bait.label }}</td>
                 <td>{{ form.bait() }}</td>
-                <td><a href="{{ url_for('angler.bait_create') }}">Create New Bait</a></td>
                 <td>
                     {% for error in form.bait.errors %}
                     <span style="color: red;">[{{ error }}]</span>
                     {% endfor %}
                 </td>
             </tr>
-            <tr>
-                <td>{{ form.gear.label }}</td>
-                <td>{{ form.gear() }} (Optional) </td>
-                <td><a href="{{ url_for('angler.bait_create') }}">Create Gear</a></td>
-                <td>
-                    {% for error in form.gear.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </td>
-            </tr>
-            <tr>
-                <td>{{ form.description.label }}</td>
-                <td>{{ form.description() }}</td>
-            </tr>
-            
             <tr>
                 <td></td>
                 <td>{{ form.submit() }}</td>
