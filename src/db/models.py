@@ -213,7 +213,7 @@ class Angler(Base):
     # many-to_many relationship with fishing_gear
     gear = relationship('FishingGear', secondary=angler_gear, back_populates='anglers')
     
-    # one-to-many relationship with catches
+    # one-to-many relationship with fish
     fish = relationship('Fish', back_populates='angler')
     
     outings = relationship('FishingOuting', secondary=angler_outings, back_populates='anglers')
@@ -389,24 +389,24 @@ class Fish(Base):
 
     angler_id = Column(Integer,
                        ForeignKey('anglers.id',
-                                  name='catches_angler_id_fkey'),
+                                  name='fishes_angler_id_fkey'),
                        nullable=False)
     fishing_spot_id = Column(Integer,
                        ForeignKey('fishing_spots.id',
-                                  name='catches_fishing_spot_id_fkey'),
+                                  name='fishes_fishing_spot_id_fkey'),
                        nullable=False)
     bait_id = Column(Integer,
                        ForeignKey('baits.id',
-                                  name='catches_bait_id_fkey'),
+                                  name='fishes_bait_id_fkey'),
                        nullable=False)
     gear_id = Column(Integer,
                        ForeignKey('fishing_gear.id',
-                                  name='catches_gear_id_fkey'))
+                                  name='fishes_gear_id_fkey'))
     
-    angler = relationship('Angler', back_populates='catches')
-    fishing_spot = relationship('FishingSpot', back_populates='catches')
-    bait = relationship('Bait', back_populates='catches')
-    fishing_gear = relationship('FishingGear', back_populates='catches')
+    angler = relationship('Angler', back_populates='fish')
+    fishing_spot = relationship('FishingSpot', back_populates='fish')
+    bait = relationship('Bait', back_populates='fish')
+    fishing_gear = relationship('FishingGear', back_populates='fish')
     
     # catch = relationship('Catch', back_populates='fish', uselist=False)
     
@@ -521,11 +521,6 @@ class FishingConditions(Base):
                     'pressure_today': self.pressure_today
                 }
                )
-
-
-tab = Table('hi',
-            Base.metadata,
-            Column('id', Integer, primary_key=True))
 
 #######################################################################
 ######FUNCTIONS AND TRIGGER TO SET NEAREST CURRENT URL ON FISHING_SPOTS
