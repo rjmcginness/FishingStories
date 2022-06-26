@@ -30,6 +30,7 @@ from wtforms.validators import Optional
 from wtforms.widgets import HiddenInput
 from wtforms.fields import DateField
 from wtforms.fields import TimeField
+from wtforms.fields import DateTimeField
 import datetime
 
 # class LoginForm(FlaskForm):
@@ -70,6 +71,44 @@ class AddFishForm(FlaskForm):
     description = TextAreaField('Description')
     # image = FileField('Image', validators=[FileAllowed(form_images, 'Images Only!')])
     submit = SubmitField('Record Fish')
+
+class FishViewOnlyForm(FlaskForm):
+    species = StringField('Species', render_kw={'readonly': True})
+    weight = DecimalField('Weight (lb)', validators=[Optional(), validate_measure])
+    length = DecimalField('Length (inches)', validators=[Optional(), validate_measure])
+    fishing_spot = SelectField('Place Caught', render_kw={'readonly': True})
+    bait = SelectField('Bait Used', render_kw={'readonly': True})
+    gear = SelectField('Gear Combo Used', render_kw={'readonly': True})
+    date_time = DateTimeField('Date and Time Caught', render_kw={'readonly': True})
+    description = TextAreaField('Description', render_kw={'readonly': True})
+    
+class EditFishForm(FlaskForm):
+    species = StringField('Species', validators=[DataRequired()])
+    weight = DecimalField('Weight (lb)', validators=[Optional(), validate_measure])
+    length = DecimalField('Length (inches)', validators=[Optional(), validate_measure])
+    fishing_spot = SelectField('Place Caught', coerce=int, validators=[validate_select])
+    bait = SelectField('Bait Used', coerce=int, validators=[validate_select])
+    gear = SelectField('Gear Combo Used')
+    date = DateField('Date and Time Caught', render_kw={'readonly': True})
+    time = TimeField('Time Caught', render_kw={'readonly': True})
+    description = TextAreaField('Description')
+    # image = FileField('Image', validators=[FileAllowed(form_images, 'Images Only!')])
+    submit = SubmitField('Save Edits')
+    
+def check_agree_to_delete(form, field):
+    if field.data == False:
+        raise ValidationError('You must agree to delete this item')
+    
+class DeleteFishForm(FlaskForm):
+    species = StringField('Species', render_kw={'readonly': True})
+    weight = DecimalField('Weight (lb)', validators=[Optional(), validate_measure])
+    length = DecimalField('Length (inches)', validators=[Optional(), validate_measure])
+    fishing_spot = SelectField('Place Caught', render_kw={'readonly': True})
+    date_time = DateTimeField('Date and Time Caught', render_kw={'readonly': True})
+    description = TextAreaField('Description', render_kw={'readonly': True})
+    agree = BooleanField("Permanently Delete Fish?", validators=[DataRequired(), check_agree_to_delete])
+    submit = SubmitField('DELETE FISH')
+
 
 def date_check(form, field):
     if form.end_date.data is None:

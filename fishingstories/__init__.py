@@ -77,6 +77,12 @@ def create_app(test_config=None):
     from .api import fish
     app.register_blueprint(fish.bp)
     
+    from .api import baits
+    app.register_blueprint(baits.bp)
+    
+    from .api import gear
+    app.register_blueprint(gear.bp)
+    
 
     return app
 
