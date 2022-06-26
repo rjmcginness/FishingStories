@@ -12,15 +12,15 @@ from datetime import date
 from typing import List
 import urllib
 
-# from .nature_entities import WaterState
-# from .nature_entities import MoonDetails
-# from .nature_entities import SunDetails
-# from .nature_entities import GlobalPosition
+from .nature_entities import WaterState
+from .nature_entities import MoonDetails
+from .nature_entities import SunDetails
+from .nature_entities import GlobalPosition
 
-from nature_entities import WaterState
-from nature_entities import MoonDetails
-from nature_entities import SunDetails
-from nature_entities import GlobalPosition
+# from nature_entities import WaterState
+# from nature_entities import MoonDetails
+# from nature_entities import SunDetails
+# from nature_entities import GlobalPosition
 
 
 class TideDataParser:

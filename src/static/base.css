@@ -107,7 +107,7 @@ section[class="left-top"]>div {
 }
 
 section[class="left-bottom"]>a {
-    color:antiquewhite;
+    color:rgb(240, 140, 10);
 }
 
 a:visited {
@@ -155,4 +155,9 @@ table[class="data-display-table"] a:visited {
 
 table[class="view-only-form"] input, table[class="view-only-form"] select {
     color: gray;
+}
+
+a[class="button-anchor"] {
+    color: black;
+    text-decoration: none !important;
 }
