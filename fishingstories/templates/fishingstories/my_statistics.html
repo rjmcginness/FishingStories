@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 
-@dataclass
+<!--@dataclass
 class StatsBundle:
     total_fish: int
     catch_count_by_species: List(tuple)
     species_avg_weight_length: List[tuple]
     fish_at_spots: List[tuple]
     best_spots: List[tuple]
-    percent_at_best_spot: float
+    percent_at_best_spot: float -->
 
 
 
@@ -34,7 +34,7 @@ class StatsBundle:
         {% endfor %}
         </tr>
         <tr>
-        {% for row in results.catch_count_by_species %}
+        {% for row in results.fish_at_spots %}
             <td>Fish Caught at</td>
             <td>{{ row[0] }}</td>
             <td>{{ row[1] }}</td>
@@ -42,7 +42,7 @@ class StatsBundle:
         </tr>
         <tr>
             <td>Best Spots</td>
-            <td>{% for row in results.catch_count_by_species %}
+            <td>{% for row in results.best_spots %}
                 {{ row[0] }} Total Fish: {{ row[1] }}
                 {% endfor %}
             </td>
