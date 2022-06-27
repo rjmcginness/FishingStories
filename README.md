@@ -2,8 +2,14 @@
 Fishing Diary and Predictor
 
 REQUIREMENTS:
-Proper installation and use of FishingStories requires Python3 and Docker to be installed on the computer from which it is run.
+Proper installation and use of FishingStories requires Python3 and Docker to be installed on the computer from which it is run.  The application has been tested with Python 3.9.7 and Python 3.10.5
 
+Python: https://www.python.org/downloads/
+
+Docker: https://hub.docker.com/editions/community/docker-ce-desktop-windows/
+        https://docs.docker.com/docker-for-mac/install/
+        
+        
 INSTALLATION:
 1. Download fishingstories.zip
 2. Unzip fishingstories.zip
