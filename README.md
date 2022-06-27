@@ -6,8 +6,9 @@ Proper installation and use of FishingStories requires Python3 and Docker to be 
 
 Python: https://www.python.org/downloads/
 
-Docker: https://hub.docker.com/editions/community/docker-ce-desktop-windows/
-        https://docs.docker.com/docker-for-mac/install/
+Docker: (on Windows) https://hub.docker.com/editions/community/docker-ce-desktop-windows/
+        
+        (on macOS) https://docs.docker.com/docker-for-mac/install/
         
         
 INSTALLATION:
