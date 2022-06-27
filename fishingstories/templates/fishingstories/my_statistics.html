@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+
+@dataclass
+class StatsBundle:
+    total_fish: int
+    catch_count_by_species: List(tuple)
+    species_avg_weight_length: List[tuple]
+    fish_at_spots: List[tuple]
+    best_spots: List[tuple]
+    percent_at_best_spot: float
+
+
+
+{% block content %}
+    <h1>My Statistics</h1>
+    <table class="data-display-table">
+        <tr>
+            <td>Total Fish Caught</td>
+            <td>{{ results.total_fish }}</td>
+        </tr>
+        <tr>
+        {% for row in results.catch_count_by_species %}
+            <td>Number of</td>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+        {% endfor %}
+        </tr>
+        <tr>
+        {% for row in results.species_avg_weight_length %}
+            <td>{{ row[0] }}</td>
+            <td>Average Weight: {{ row[1] }}</td>
+            <td>Average Length: {{ row[2] }}</td>
+        {% endfor %}
+        </tr>
+        <tr>
+        {% for row in results.catch_count_by_species %}
+            <td>Fish Caught at</td>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+        {% endfor %}
+        </tr>
+        <tr>
+            <td>Best Spots</td>
+            <td>{% for row in results.catch_count_by_species %}
+                {{ row[0] }} Total Fish: {{ row[1] }}
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Best Spot % Caught</td>
+            <td>{{ results.percent_at_best_spot }}</td>
+        </tr>
+    </table>
+{% endblock %}

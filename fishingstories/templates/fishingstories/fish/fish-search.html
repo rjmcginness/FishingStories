@@ -3,10 +3,6 @@
 {% block content %}
     <h1>Record Fish Caught</h1>
     <form action="" method="get"  novalidate>
-        {{ form.hidden_tag() }}
-        {% if form.errors %}
-        {{ form.errors }}
-        {% endif %}
         <table>
             <tr>
                 <td>{{ form.species.label }}</td>

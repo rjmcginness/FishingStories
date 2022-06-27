@@ -7,7 +7,6 @@
         <tr>
             <td>{{ form.name.label }}</td>
             <td>{{ form.name() }}</td>
-            <td><a href="{{ url_for('angler.bait_edit', bait_id=form.bait_id) }}">EDIT</a></td>
             {% for error in form.name.errors %}
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
@@ -30,6 +29,12 @@
         <tr>
             <td>{{ form.description.label }}</td>
             <td>{{ form.description() }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <button><a class="button-anchor" href="{{ url_for('bait.my_bait_delete', angler_id=angler_id, bait_id=bait_id) }}">Delete</a></button>
+            </td>
         </tr>
     </table>
 {% endblock %}

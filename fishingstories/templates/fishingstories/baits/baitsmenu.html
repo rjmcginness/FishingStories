@@ -4,12 +4,18 @@
 {% block content %}
     <h1>Baits</h1>
     <div>
-        <a href="{{ url_for('angler.baits') }}">show baits</a>
+        <a href="{{ url_for('bait.my_baits', angler_id=angler_id) }}">my baits</a>
     </div>
     <div>
-        <a href="{{ url_for('angler.bait_search') }}">find baits</a>
+        <a href="{{ url_for('bait.bait_create', angler_id=angler_id) }}">create new bait</a>
     </div>
     <div>
-        <a href="{{ url_for('angler.bait_create') }}">add new bait</a>
+        <a href="{{ url_for('bait.baits', angler_id=angler_id) }}">all baits</a>
+    </div>
+    <div>
+        <a href="{{ url_for('bait.my_bait_search', angler_id=angler_id) }}">search my baits</a>
+    </div>
+    <div>
+        <a href="{{ url_for('bait.bait_search', angler_id=angler_id) }}">search all baits</a>
     </div>
 {% endblock %}

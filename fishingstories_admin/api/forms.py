@@ -62,7 +62,7 @@ class AnglerForm(FlaskForm):
 class AnglerEditForm(FlaskForm):
     angler_id = StringField("ID", render_kw={'readonly': True})
     name = StringField('Name', render_kw={'readonly': True})
-    ranks = SelectField('Rank', render_kw={'readonly': True})
+    ranks = SelectField('Rank', render_kw={'readonly': True}) ###### is this really readonly????
     account_type = StringField('Account Type', render_kw={'readonly': True})
     privileges = SelectMultipleField('Privleges', render_kw={'readonly': True})
     submit = SubmitField('Update')

@@ -67,6 +67,9 @@ def register():
     account_types = current_app.session.execute(select(models.AccountType).
                                                 where(models.AccountType.name != 'Admin').
                                                 order_by(models.AccountType.price))
+    
+    ######FIX THIS TO USE A TUPLE OF ID AND LABEL
+    
     form.account_types.choices=[acct_type[0].name + ' $' + 
                                                 str(acct_type[0].price)
                                                 for acct_type in account_types]

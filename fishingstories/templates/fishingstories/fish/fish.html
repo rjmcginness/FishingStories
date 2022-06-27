@@ -19,7 +19,7 @@
         <tbody>
             {% for f in fish %}
             <tr>
-                <td>{{ f.date_time_caught }}</td>
+                <td><a href="{{ url_for('fish.fish', angler_id=angler_id, fish_id=f.id) }}">{{ f.date_time_caught }}</a></td>
                 <td>{{ f.species }}</td>
                 <td>{{ f.length }}</td>
                 <td>{{ f.weight }}</td>

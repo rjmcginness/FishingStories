@@ -4,9 +4,9 @@
 {% block content %}
     <h1>Gear</h1>
     <div>
-        <a href="/gear">gear combos</a>
+        <a href="{{ url_for('gear.my_gear', angler_id=angler_id) }}">gear combos</a>
     </div>
     <div>
-        <a href="/create-gear">add gear combo</a>
+        <a href="{{ url_for('gear.add_gear', angler_id=angler_id) }}">add gear combo</a>
     </div>
 {% endblock %}

@@ -12,15 +12,15 @@ from datetime import date
 from typing import List
 import urllib
 
-# from .nature_entities import WaterState
-# from .nature_entities import MoonDetails
-# from .nature_entities import SunDetails
-# from .nature_entities import GlobalPosition
+from .nature_entities import WaterState
+from .nature_entities import MoonDetails
+from .nature_entities import SunDetails
+from .nature_entities import GlobalPosition
 
-from nature_entities import WaterState
-from nature_entities import MoonDetails
-from nature_entities import SunDetails
-from nature_entities import GlobalPosition
+# from nature_entities import WaterState
+# from nature_entities import MoonDetails
+# from nature_entities import SunDetails
+# from nature_entities import GlobalPosition
 
 
 class TideDataParser:
@@ -28,7 +28,7 @@ class TideDataParser:
         self.__date = date
         
         # rows = body.split('\n\n')
-        date_substr = date_time.strftime('%Y-%m-%d')
+        date_substr = date.strftime('%Y-%m-%d')
         
         # get all the rows of data
         rows = raw_data.splitlines()
@@ -72,13 +72,11 @@ class TideDataParser:
         water_raw_data = [line for line in self.__raw_data
                           if not list(filter(lambda part: 'moon' in part or
                                                            'sun' in part, line))]
-        print(water_raw_data)
+        
         # parse each line of water data
         water_states = []
         for water_data in water_raw_data:
-            
-            print(water_data)
-            
+          
             current_flow = 'slack'
             incoming = True
             slack = False
@@ -93,7 +91,6 @@ class TideDataParser:
             
             # parse time from water data line
             dt_str = ' '.join(water_data[:2])
-            print(dt_str)
             date_time = datetime.strptime(dt_str, '%Y-%m-%d %H:%M')
             
             # create WaterState object
@@ -203,7 +200,6 @@ class TideData:
 def retrieve_tide_currents(url: str, date_time: datetime) -> TideData:
     
     site = list(urllib.parse.parse_qs(url).values())[0][0]
-    print(site)
     formdata={
                 'sitesave': site,
                 'glen': '1',
@@ -220,35 +216,35 @@ def retrieve_tide_currents(url: str, date_time: datetime) -> TideData:
     return TideData(date_time.date(), body)
     
 if __name__ == '__main__':
-    # exit()
-    url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=0%2E1+mile+east+of+Point+Evans%2C+The+Narrows%2C+Washington+Current'
-    url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=Little+Card+Sound+bridge%2C+Florida&units=f'
+    exit()
+    # url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=0%2E1+mile+east+of+Point+Evans%2C+The+Narrows%2C+Washington+Current'
+    # url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?site=Little+Card+Sound+bridge%2C+Florida&units=f'
 
-    date_time = datetime(year=2022, month=6, day=11)
+    # date_time = datetime(year=2022, month=6, day=11)
 
 
-    # formdata={
-    #             'sitesave': 'Newburyport (Merrimack River), Massachusetts Current',
-    #             'glen': '1',
-    #             'year': str(date_time.year),
-    #             'month': str(date_time.month),
-    #             'day': str(date_time.day)}
+    # # formdata={
+    # #             'sitesave': 'Newburyport (Merrimack River), Massachusetts Current',
+    # #             'glen': '1',
+    # #             'year': str(date_time.year),
+    # #             'month': str(date_time.month),
+    # #             'day': str(date_time.day)}
     
-    '''Preliminary test to send form data to site'''
-    # r = requests.post(url, data=formdata)
+    # '''Preliminary test to send form data to site'''
+    # # r = requests.post(url, data=formdata)
 
 
-    # selector = Selector(text=r.content)
+    # # selector = Selector(text=r.content)
 
-    # data = selector.xpath('//pre/text()').get()
+    # # data = selector.xpath('//pre/text()').get()
 
-    # print(data)
+    # # print(data)
     
-    '''Test retrieve_tide_currents function'''
-    tc_data = retrieve_tide_currents(url, date_time)
-    print(tc_data.coordinates)
-    print(tc_data.moon)
-    print(tc_data.sun)
-    for water_state in tc_data.water:
-        print(water_state)
+    # '''Test retrieve_tide_currents function'''
+    # tc_data = retrieve_tide_currents(url, date_time)
+    # print(tc_data.coordinates)
+    # print(tc_data.moon)
+    # print(tc_data.sun)
+    # for water_state in tc_data.water:
+    #     print(water_state)
     

@@ -11,6 +11,7 @@ from wtforms import PasswordField
 from wtforms import BooleanField
 from wtforms import SubmitField
 from wtforms import SelectField
+from wtforms.fields import EmailField
 from wtforms.validators import DataRequired
 from wtforms.validators import ValidationError
 
@@ -81,6 +82,7 @@ class RegistrationForm(FlaskForm):
                                     validators=[DataRequired(),
                                                 passwords_match_check])
     account_types = SelectField('Account Type')
+    email = EmailField('Email')
     submit = SubmitField('Register')
     
     def passwords_match_check(self) -> bool:

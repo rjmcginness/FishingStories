@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Fish Caught</h1>
+    <a href="{{ url_for('fish.add_fish', angler_id=angler_id) }}">Return to Fish Menu</a>
+    <div></div>
+    <form action="" method=""  novalidate>
+        <table class="view-only-form">
+            <tr>
+                <td>{{ form.species.label }}</td>
+                <td>{{ form.species() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.date_time.label }}</td>
+                <td>{{ form.date_time() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.weight.label }}</td>
+                <td>{{ form.weight() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.length.label }}</td>
+                <td>{{ form.length() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.fishing_spot.label }}</td>
+                <td>{{ form.fishing_spot() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.bait.label }}</td>
+                <td>{{ form.bait() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.gear.label }}</td>
+                <td>{{ form.gear() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.description.label }}</td>
+                <td>{{ form.description() }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button ><a class="button-anchor" href="{{ url_for('fish.fish_edit', angler_id=angler_id, fish_id=fish_id) }}">Edit</a></button>
+                    <button ><a class="button-anchor" href="{{ url_for('fish.fish_delete', angler_id=angler_id, fish_id=fish_id) }}">Delete</a></button>
+                </td>
+            </tr>
+        </table>
+    </form>
+{% endblock %}

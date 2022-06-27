@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Edit Gear Combos</h1>
+    <a href="{{ url_for('gear.my_gear', angler_id=angler_id, gear_id=gear_id) }}">Return to Gear</a>
+    <div> </div>
+    <form method="" action="">
+        {{ form.hidden_tag() }}
+        <table>
+            <tr>
+                <td>{{ form.rod.label }}</td>
+                <td>{{ form.rod() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.reel.label }}</td>
+                <td>{{ form.reel() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.line.label }}</td>
+                <td>{{ form.line() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.line.label }}</td>
+                <td>{{ form.line() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.hook.label }}</td>
+                <td>{{ form.hook() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.agree.label }}</td>
+                <td>{{ form.agree() }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ form.submit(value='Edit Gear') }}</td>
+            </tr>
+        </table>
+    </form>
+    <script>
+        $(document).ready(function () {
+            $('form').submit(function (e) {
+                let url = "{{ url_for('gear.gear_delete', angler_id=angler_id, gear_id=gear_id) }}";
+                $.ajax({
+                    type: "DELETE",
+                    url: url,
+                    data: $('form').serialize(),
+                    success: function (data) {
+                        window.location.href = "{{ url_for('gear.my_gear', angler_id=angler_id, gear_id=gear_id) }}";
+                    },
+                    error: function (data) {
+                        window.location.href = "{{ url_for('gear.my_gear', angler_id=angler_id, gear_id=gear_id) }}";
+                    }
+                });
+                e.preventDefault();
+            });
+
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!/^GET|HEAD|OPTIONS|TRACE$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value() }}")
+                    }
+                }
+            })
+        });
+    </script>
+{% endblock %}

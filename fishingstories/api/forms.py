@@ -30,6 +30,7 @@ from wtforms.validators import Optional
 from wtforms.widgets import HiddenInput
 from wtforms.fields import DateField
 from wtforms.fields import TimeField
+from wtforms.fields import DateTimeField
 import datetime
 
 # class LoginForm(FlaskForm):
@@ -71,6 +72,44 @@ class AddFishForm(FlaskForm):
     # image = FileField('Image', validators=[FileAllowed(form_images, 'Images Only!')])
     submit = SubmitField('Record Fish')
 
+class FishViewOnlyForm(FlaskForm):
+    species = StringField('Species', render_kw={'readonly': True})
+    weight = DecimalField('Weight (lb)', validators=[Optional(), validate_measure])
+    length = DecimalField('Length (inches)', validators=[Optional(), validate_measure])
+    fishing_spot = SelectField('Place Caught', render_kw={'readonly': True})
+    bait = SelectField('Bait Used', render_kw={'readonly': True})
+    gear = SelectField('Gear Combo Used', render_kw={'readonly': True})
+    date_time = DateTimeField('Date and Time Caught', render_kw={'readonly': True})
+    description = TextAreaField('Description', render_kw={'readonly': True})
+    
+class EditFishForm(FlaskForm):
+    species = StringField('Species', validators=[DataRequired()])
+    weight = DecimalField('Weight (lb)', validators=[Optional(), validate_measure])
+    length = DecimalField('Length (inches)', validators=[Optional(), validate_measure])
+    fishing_spot = SelectField('Place Caught', coerce=int, validators=[validate_select])
+    bait = SelectField('Bait Used', coerce=int, validators=[validate_select])
+    gear = SelectField('Gear Combo Used')
+    date = DateField('Date and Time Caught', render_kw={'readonly': True})
+    time = TimeField('Time Caught', render_kw={'readonly': True})
+    description = TextAreaField('Description')
+    # image = FileField('Image', validators=[FileAllowed(form_images, 'Images Only!')])
+    submit = SubmitField('Save Edits')
+    
+def check_agree_to_delete(form, field):
+    if field.data == False:
+        raise ValidationError('You must agree to delete this item')
+    
+class DeleteFishForm(FlaskForm):
+    species = StringField('Species', render_kw={'readonly': True})
+    weight = DecimalField('Weight (lb)', validators=[Optional(), validate_measure])
+    length = DecimalField('Length (inches)', validators=[Optional(), validate_measure])
+    fishing_spot = SelectField('Place Caught', render_kw={'readonly': True})
+    date_time = DateTimeField('Date and Time Caught', render_kw={'readonly': True})
+    description = TextAreaField('Description', render_kw={'readonly': True})
+    agree = BooleanField("Permanently Delete Fish?", validators=[DataRequired(), check_agree_to_delete])
+    submit = SubmitField('DELETE FISH')
+
+
 def date_check(form, field):
     if form.end_date.data is None:
         return 
@@ -101,6 +140,21 @@ class AddBaitForm(FlaskForm):
         self.size.data = ''
         self.color.data = ''
         self.description.data = ''
+        
+class DeleteBaitForm(FlaskForm):
+    name = StringField('Name', render_kw={'readonly': True})
+    size = DecimalField('Size', render_kw={'readonly': True})
+    color = StringField('Color', render_kw={'readonly': True})
+    agree = BooleanField('Permanently Delete Bait?',
+                         validators=[DataRequired(),
+                                     check_agree_to_delete])
+    submit = SubmitField('Delete Bait')
+    
+    def __init__(self, name: str, size: float, color: str, **kwargs) -> None:
+        super(DeleteBaitForm, self).__init__(**kwargs)
+        self.name.data = name
+        self.size.data = size
+        self.color.data = color
 
 class BaitForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -136,6 +190,17 @@ class AddGearForm(FlaskForm):
     hook = StringField('Hook')
     leader = StringField('Leader')
     submit = SubmitField('Add Gear')
+    
+class GearViewOnlyForm(FlaskForm):
+    rod = StringField('Rod', render_kw={'readonly': True})
+    reel = StringField('Reel', render_kw={'readonly': True})
+    line = StringField('Line', render_kw={'readonly': True})
+    hook = StringField('Hook', render_kw={'readonly': True})
+    leader = StringField('Leader', render_kw={'readonly': True})
+    agree = BooleanField('Permanently Delete Gear?',
+                         validators=[DataRequired(),
+                                     check_agree_to_delete])
+    submit = SubmitField('Delete Gear')
 
 class CreateAnglerForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -154,8 +219,27 @@ class RankForm(FlaskForm):
         self.description.data = ''
 
 class ViewFishingSpotForm(FlaskForm):
-    spot_name = HiddenField('spot_name')
-    submit = SubmitField('Go')
+    name = StringField('Name', render_kw={'readonly': True})
+    latitude = StringField('Latitude', render_kw={'readonly': True})
+    longitude = StringField('Longitude', render_kw={'readonly': True})
+    is_public = BooleanField('Public', render_kw={'readonly': True})
+    nickname = StringField('Nickname', render_kw={'readonly': True})
+    description = StringField('Description', render_kw={'readonly': True})
+    
+    def __init__(self, name: str,
+                       latitude: float,
+                       longitude: float,
+                       is_public: bool,
+                       nickname: str,
+                       description: str,
+                       **kwargs) -> None:
+        super(ViewFishingSpotForm, self).__init__(**kwargs)
+        self.name.data = name
+        self.latitude.data = latitude
+        self.longitude.data = longitude
+        self.is_public.data = is_public
+        self.nickname.data = nickname
+        self.description.data = description
     
 class AddFishingSpotForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
