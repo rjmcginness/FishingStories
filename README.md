@@ -1,6 +1,9 @@
 # FishingStories
 Fishing Diary and Predictor
 
+REQUIREMENTS:
+Proper installation and use of FishingStories requires Python3 and Docker to be installed on the computer from which it is run.
+
 INSTALLATION:
 1. Download fishingstories.zip
 2. Unzip fishingstories.zip
@@ -9,8 +12,21 @@ INSTALLATION:
 5. Change directory to the root directory of fishingstories.  This will be the outer most directory named "fishingstories_1_0_0" within the directory where the fishingstories.zip was unzipped
 6. In the terminal, ensure docker is running with the command: docker compose ls
 7. Run the command: docker compose up -d (note you must be in the proper directory described in step 5).
-8. In the terminal/console connect fishingstories postgres container with the command: docker exec -it fishing_container psql
+8. In the terminal/console, type the command: cat fishing_stories.sql | docker exec -i fishing_container psql, then press enter
 
+
+CREATING APP ENVIRONMENT:
+To start the application,
+1. Open a terminal or console window.
+2. Change directories to the root directory of fishingstories.  This will be the outermost directory withing the directory, in which fishingstories.zip was unzipped
+3. Create a virtual environment with the command python -m venv .venv (on windows) or python3 -m venv .venv (on macOS). Python3 must be installed on the computer.
+4. Activate the virtual environment with the command: .venv/Scripts/activate (on windows) or source .venv/bin/activate (on macOS)
+5. Install dependencies with the command: pip install -r requirements.txt
+6. Start the application with the command: python run.py (on windows) or python3 run.py (on mac OS)
+
+
+ACCESSING THE APP:
+FishingStories may be accessed through web browser.  The URL is localhost:5000.  The application must be started to access the app.
 
 
 
