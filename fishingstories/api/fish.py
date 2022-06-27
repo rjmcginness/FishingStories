@@ -25,7 +25,6 @@ from datetime import datetime
 from typing import List
 
 from src.db import models
-from .forms import SearchBasicForm
 from .forms import AddFishForm
 from .forms import FishSearchForm
 from .forms import FishViewOnlyForm

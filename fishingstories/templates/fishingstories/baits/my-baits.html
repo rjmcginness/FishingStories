@@ -2,7 +2,7 @@
 
 
 {% block content %}
-    <h1>Baits</h1>
+    <h1>My Baits</h1>
     <a href="{{ url_for('bait.baits_menu', angler_id=angler_id) }}">Return to Baits Menu</a>
     <div> </div>
     <table class="data-display-table">
@@ -12,7 +12,6 @@
             <th>Size</th>
             <th>Color</th>
             <th>Description</th>
-            <th> </th>
         </thead>
         <tbody>
             {% for bait in baits %}
@@ -22,7 +21,6 @@
                 <td>{{ bait.size }}</td>
                 <td>{{ bait.color }}</td>
                 <td>{{ bait.description }}</td>
-                <td><a href="{{ url_for('bait.use_bait', angler_id=angler_id, bait_id=bait.id) }}">add to my baits</a></td>
             </tr>
             {% endfor %}
         </tbody>

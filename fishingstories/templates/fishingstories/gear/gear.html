@@ -3,13 +3,14 @@
 
 {% block content %}
     <h1>Gear Combos</h1>
-    <table>
+    <table class="data-display-table">
         <thead>
             <th>Rod</th>
             <th>Reel</th>
             <th>Line</th>
             <th>Leader</th>
             <th>Hook</th>
+            <th> </th>
         </thead>
         <tbody>
             {% for gear in gear_list %}
@@ -19,6 +20,7 @@
                 <td>{{ gear.line }}</td>
                 <td>{{ gear.leader }}</td>
                 <td>{{ gear.hook }}</td>
+                <td><button ><a class="button-anchor" href="{{ url_for('gear.gear_combo', angler_id=angler_id, gear_id=gear.id) }}">View</a></button></td>
             </tr>
             {% endfor %}
         </tbody>

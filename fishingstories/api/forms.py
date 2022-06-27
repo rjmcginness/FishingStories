@@ -140,6 +140,21 @@ class AddBaitForm(FlaskForm):
         self.size.data = ''
         self.color.data = ''
         self.description.data = ''
+        
+class DeleteBaitForm(FlaskForm):
+    name = StringField('Name', render_kw={'readonly': True})
+    size = DecimalField('Size', render_kw={'readonly': True})
+    color = StringField('Color', render_kw={'readonly': True})
+    agree = BooleanField('Permanently Delete Bait?',
+                         validators=[DataRequired(),
+                                     check_agree_to_delete])
+    submit = SubmitField('Delete Bait')
+    
+    def __init__(self, name: str, size: float, color: str, **kwargs) -> None:
+        super(DeleteBaitForm, self).__init__(**kwargs)
+        self.name.data = name
+        self.size.data = size
+        self.color.data = color
 
 class BaitForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -175,6 +190,17 @@ class AddGearForm(FlaskForm):
     hook = StringField('Hook')
     leader = StringField('Leader')
     submit = SubmitField('Add Gear')
+    
+class GearViewOnlyForm(FlaskForm):
+    rod = StringField('Rod', render_kw={'readonly': True})
+    reel = StringField('Reel', render_kw={'readonly': True})
+    line = StringField('Line', render_kw={'readonly': True})
+    hook = StringField('Hook', render_kw={'readonly': True})
+    leader = StringField('Leader', render_kw={'readonly': True})
+    agree = BooleanField('Permanently Delete Gear?',
+                         validators=[DataRequired(),
+                                     check_agree_to_delete])
+    submit = SubmitField('Delete Gear')
 
 class CreateAnglerForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])

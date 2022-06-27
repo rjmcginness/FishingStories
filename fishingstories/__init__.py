@@ -83,6 +83,9 @@ def create_app(test_config=None):
     from .api import gear
     app.register_blueprint(gear.bp)
     
+    from .api import statistics
+    app.register_blueprint(statistics.bp)
+    
 
     return app
 

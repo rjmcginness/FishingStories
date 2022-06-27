@@ -11,7 +11,7 @@ from wtforms import PasswordField
 from wtforms import BooleanField
 from wtforms import SubmitField
 from wtforms import SelectField
-from wtforms.foelds import EmailField
+from wtforms.fields import EmailField
 from wtforms.validators import DataRequired
 from wtforms.validators import ValidationError
 

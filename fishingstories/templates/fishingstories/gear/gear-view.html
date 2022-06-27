@@ -1,20 +1,18 @@
 {% extends "base.html" %}
 
+
 {% block content %}
-    <h1>Add Gear</h1>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <table>
+    <h1>Gear Combo</h1>
+    <table>
+        <tbody>
             <tr>
                 <td>{{ form.rod.label }}</td>
                 <td>{{ form.rod() }}</td>
-                {% for error in form.rod.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
             </tr>
             <tr>
                 <td>{{ form.reel.label }}</td>
                 <td>{{ form.reel() }}</td>
+
             </tr>
             <tr>
                 <td>{{ form.line.label }}</td>
@@ -30,8 +28,11 @@
             </tr>
             <tr>
                 <td></td>
-                <td>{{ form.submit() }}</td>
+                <td>
+                    <button ><a class="button-anchor" href="{{ url_for('gear.gear_edit', angler_id=angler_id, gear_id=gear_id) }}">Edit</a></button>
+                    <button ><a class="button-anchor" href="{{ url_for('gear.gear_delete', angler_id=angler_id, gear_id=gear_id) }}">Delete</a></button>
+                </td>
             </tr>
-        </table>
-    </form>
+        </tbody>
+    </table>
 {% endblock %}

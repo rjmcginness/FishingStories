@@ -2,25 +2,15 @@
 
 
 {% block content %}
-    <h1>Edit Bait</h1>
+    <h1>Delete This Bait From Your Baits</h1>
     <a href="{{ url_for('bait.bait', angler_id=angler_id, bait_id=bait_id) }}">Return to Bait</a>
     <div> </div>
     <form method="" action="">
         {{ form.hidden_tag() }}
-        <table>
+        <table class="view-only-form">
             <tr>
                 <td>{{ form.name.label }}</td>
                 <td>{{ form.name() }}</td>
-                {% for error in form.name.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </tr>
-            <tr>
-                <td></td>
-                <td>{{ form.artificial() }} {{ form.artificial.label }}</td>
-                {% for error in form.artificial.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
             </tr>
             <tr>
                 <td>{{ form.size.label }}</td>
@@ -31,25 +21,25 @@
                 <td>{{ form.color() }}</td>
             </tr>
             <tr>
-                <td>{{ form.description.label }}</td>
-                <td>{{ form.description() }}</td>
+                <td>{{ form.agree.label }}</td>
+                <td>{{ form.agree() }}</td>
             </tr>
             <tr>
                 <td></td>
-                <td>{{ form.submit() }}</td>
+                <td>{{ form.submit() }} <button style="color: black;"><a class="button-anchor" href="{{ url_for('bait.bait', angler_id=angler_id, bait_id=bait_id) }}">Cancel</a></button></td>
             </tr>
         </table>
     </form>
     <script>
         $(document).ready(function () {
             $('form').submit(function (e) {
-                let url = "{{ url_for('bait.bait_edit', angler_id=angler_id, bait_id=bait_id) }}";
+                let url = "{{ url_for('bait.my_bait_delete', angler_id=angler_id, bait_id=bait_id) }}";
                 $.ajax({
-                    type: "PATCH",
+                    type: "DELETE",
                     url: url,
                     data: $('form').serialize(),
                     success: function (data) {
-                        window.location.href = "{{ url_for('bait.bait', angler_id=angler_id, bait_id=bait_id) }}";
+                        window.location.href = "{{ url_for('bait.my_baits', angler_id=angler_id) }}";
                     },
                     error: function (data) {
                         window.location.href = "{{ url_for('bait.bait', angler_id=angler_id, bait_id=bait_id) }}";
