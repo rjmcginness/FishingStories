@@ -46,15 +46,18 @@ bp = Blueprint('fishing_spots', __name__)
 @bp.route('/angler/<int:angler_id>/fishing_spots/menu', methods=['GET'])
 @login_required
 def angler_spots_menu(angler_id: int):
-    return render_template('/fishing_spots/main.html', angler_id=angler_id, authenticated=True)
+    return render_template('fishing_spots/main.html', angler_id=angler_id, authenticated=True)
 
 @bp.route('/angler/<int:angler_id>/fishing_spots/create', methods=['GET', 'POST'])
 @login_required
 def fishing_spot_create(angler_id: int):
-    spots = current_app.session.scalars(select(models.FishingSpot).where(
-                                        models.FishingSpot.is_public == True))
+    # spots = current_app.session.scalars(select(models.FishingSpot).where(
+    #                                     models.FishingSpot.is_public == True))
     
-    spots = list(spots)
+    angler = current_app.session.scalar(select(models.Angler).where(
+                                                models.Angler.id == angler_id))
+    
+    spots = angler.fishing_spots
     
     form = AddFishingSpotForm()
     
@@ -125,160 +128,61 @@ def my_spots(angler_id: int):
         fishing_spots = angler.fishing_spots
     
     
-    return render_template('fishing_spots/angler-spots.html', fishing_spots=fishing_spots, authenticated=True)
+    return render_template('fishing_spots/angler-spots.html', angler_id=angler_id, fishing_spots=fishing_spots, authenticated=True)
 
-@bp.route('/angler/<int:angler_id>/fishing_spots/<int:spot_id>', methods = ['GET', 'POST'])
+@bp.route('/angler/<int:angler_id>/fishing_spots/<int:spot_id>', methods = ['GET'])
 @login_required
 def fishing_spot(angler_id: int, spot_id: int):
-    add_form = AddFishingSpotForm()
-    view_form = ViewFishingSpotForm()
     
-    if view_form.spot_name.data:
-        weather = retrieve_weather('https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest')
-        
-        tc_url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
-        tide_currents = retrieve_tide_currents(tc_url, datetime.now(),'Newburyport (Merrimack River), Massachusetts Current')
-        # flash(weather)
-        # flash(tide_currents.water)
-        return render_template('fishing_spots/spot-view.html',
-                                spot_name=view_form.spot_name.data,
-                                weather=weather,
-                                tide_currents=tide_currents)
+    spot = current_app.session.scalar(select(models.FishingSpot).where(
+                                            models.FishingSpot.id == spot_id))
     
-    if add_form.validate_on_submit():
-        fishing_spot = models.FishingSpot(name=add_form.name.data,
-                                          latitude=add_form.latitude.data,
-                                          longitude=add_form.longitude.data,
-                                          description=add_form.description.data)
-        
-        try:
-            current_app.session.add(fishing_spot)
-            current_app.session.commit()
-        except IntegrityError:
-            flash('Duplicate Spot: latitude {}, longitude {} already exists'.
-                  format(add_form.latitude, add_form.longitude))
-            current_app.session.rollback()
+    gp = spot.global_position
     
-    spots = current_app.session.execute(select(models.FishingSpot))
-    spots = [spot[0] for spot in spots]
+    form = ViewFishingSpotForm(name=spot.name,
+                               latitude=math.degrees(gp.latitude),
+                               longitude=math.degrees(gp.longitude),
+                               is_public=spot.is_public,
+                               nickname=spot.nickname,
+                               description=spot.description)
+    
+    current_data_url = spot.current_url.url
+    
+
         
-    return render_template('fishing_spots/user-spots.html',
-                            add_form=add_form,
-                            view_form=view_form,
-                            spots=spots,
+    ####################################################################
+    #######CANNOT DO WEATHER NOW.  GOOGLE WOULD NOT LETME SCAPE DATA
+    ######CAN USE PLACES API LATER FOR THIS
+    # weather = retrieve_weather('https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest')
+    
+    # tc_url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
+    tide_currents = retrieve_tide_currents(current_data_url, datetime.now())
+
+    # return render_template('fishing_spots/spot-view.html',
+    #                         spot_name=view_form.spot_name.data,
+    #                         weather=weather,
+    #                         tide_currents=tide_currents)
+
+    return render_template('fishing_spots/spot-view.html',
+                            spot_name=spot.name,
+                            tide_currents=tide_currents,
+                            angler_id=angler_id,
+                            map_url=google_maps_url2022(math.degrees(gp.latitude),
+                                                        math.degrees(gp.longitude)),
+                            form=form,
                             authenticated=True)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @bp.route('/<int:spot_id>', methods=['GET'])
-# @login_required
-# def spot(spot_id: int):
-#     spot = current_app.session.scalar(select(models.FishingSpot).where(
-#                                             models.FishingSpot.id == spot_id))
-    
-#     # 'https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest'
-#     # 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
-#     # 'Newburyport (Merrimack River), Massachusetts Current'
-#     if spot is None:
-#         flash('Error loading spot')
-#         return redirect(request.referrer)
-    
-#     #############################################################################
-#     ####### Unable to scrape data from google to map sea conditions to coordinates
-#     weather = []
-#     # try:
-#     #     weather = retrieve_weather(spot.weather_url)
-#     # except:
-#     #     pass
-    
-#     tide_currents = None
-#     try:
-#         tide_currents = retrieve_tide_currents(spot.current_url, datetime.now(),spot.current_ref_name)
-#     except:
-#         pass
-
-#     return render_template('fishing_spots/spot-view.html',
-#                                 spot_name=spot.name,
-#                                 weather=weather,
-#                                 tide_currents=tide_currents)
-    
-
-# @bp.route('/myspots', methods = ['GET', 'POST'])
-# @login_required
-# def my_spots():
-#     add_form = AddFishingSpotForm()
-#     view_form = ViewFishingSpotForm()
-    
-#     if view_form.spot_name.data:
-#         weather = retrieve_weather('https://www.tide-forecast.com/locations/Merrimack-River-Entrance-Massachusetts/forecasts/latest')
-        
-#         tc_url = 'http://tbone.biol.sc.edu/tide/tideshow.cgi?'
-#         tide_currents = retrieve_tide_currents(tc_url, datetime.now(),'Newburyport (Merrimack River), Massachusetts Current')
-#         # flash(weather)
-#         # flash(tide_currents.water)
-#         return render_template('fishing_spots/spot-view.html',
-#                                spot_name=view_form.spot_name.data,
-#                                weather=weather,
-#                                tide_currents=tide_currents)
-    
-#     if add_form.validate_on_submit():
-#         fishing_spot = models.FishingSpot(name=add_form.name.data,
-#                                           latitude=add_form.latitude.data,
-#                                           longitude=add_form.longitude.data,
-#                                           description=add_form.description.data)
-        
-#         try:
-#             current_app.session.add(fishing_spot)
-#             current_app.session.commit()
-#         except IntegrityError:
-#             flash('Duplicate Spot: latitude {}, longitude {} already exists'.
-#                   format(add_form.latitude, add_form.longitude))
-#             current_app.session.rollback()
-    
-#     spots = []
-#     try:
-#         spots = current_app.session.execute(select(models.FishingSpot))
-#         spots = [spot[0] for spot in spots]
-#     except PendingRollbackError as e:
-#         flash(e)
-        
-#     return render_template('fishing_spots/user-spots.html',
-#                            add_form=add_form,
-#                            view_form=view_form,
-#                            spots=spots,
-#                            authenticated=True)
-        
 
 @bp.route('/public-spots')
 @login_required
 def public_spots():
+    return abort(404)
     return render_template('fishing_spots/public-spots.html', authenticated=True)
 
 @bp.route('/group-spots')
 @login_required
 def group_spots():
+    return abort(404)
     flash('RESTRICTED')
     
     return render_template('fishing_spots/main.html', authenticated=True)

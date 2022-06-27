@@ -8,41 +8,93 @@ Created on Mon Jun 26 19:30:22 2022
 from flask import Blueprint
 from flask import current_app
 from flask import render_template
-from flask import redirect
 from flask import flash
-from flask import url_for
-from flask import request
-from flask import abort
 from flask_login import login_required
 
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.exc import OperationalError
 
-from datetime import datetime
-import math
+
+from dataclasses import dataclass
+from typing import List
+
 
 from src.db import models
-from .forms import SearchBasicForm
-from .forms import AddBaitForm
-from .forms import BaitForm
-from .forms import AddGearForm
-from .forms import AddFishingSpotForm
-from .forms import ViewFishingSpotForm
 
-from src.nature.retrieve_weather import retrieve_weather
-from src.nature.retrieve_tide_current import retrieve_tide_currents
-from src.nature.current_stations import google_maps_url2022
 
 
 
 
 bp = Blueprint('statistics', __name__)
 
+@dataclass
+class StatsBundle:
+    total_fish: int
+    catch_count_by_species: List[tuple]
+    species_avg_weight_length: List[tuple]
+    fish_at_spots: List[tuple]
+    best_spots: List[tuple]
+    percent_at_best_spot: float
 
 
-
-@bp.route('/<int:angler_id>/statistics/menu', methods=['GET'])
+@bp.route('/<int:angler_id>/statistics', methods=['GET'])
 @login_required
-def statistics_menu(angler_id: int):
-    return render_template('fishingstories/statistics/statistics-menu.html', angler_id=angler_id, authenticated=True)
+def statistics(angler_id: int):
+    
+
+    sb = StatsBundle(None, None, None, None, None, None)
+    
+    # Get total count of fish caught by this angler
+    stmt = f'SELECT COUNT(*) FROM fishes WHERE angler_id = {str(angler_id)};'
+    
+    sb.total_fish = list(current_app.session.execute(stmt).scalars())[0]
+    
+    # number of each species caught
+    stmt = f'''
+            SELECT species, COUNT(*) FROM fishes
+            WHERE angler_id = {angler_id}
+            GROUP BY species
+            ORDER BY COUNT(*) DESC;
+            '''
+           
+    sb.catch_count_by_species = list(current_app.session.execute(stmt))
+    
+    # Get Average Weight and Length of fish by species
+    stmt = f'''
+            SELECT species, AVG(weight), AVG(length) FROM fishes
+            WHERE angler_id = {angler_id}
+            GROUP BY species;
+            '''
+           
+    sb. species_avg_weight_length = list(current_app.session.execute(stmt))
+    
+    # number of fish caught at each spot
+    stmt = f'''
+            SELECT s.name, COUNT(f.id) FROM fishes f
+            INNER JOIN fishing_spots s
+            ON f.fishing_spot_id = s.id
+            WHERE angler_id = {angler_id}
+            GROUP BY s.name;
+            '''
+    
+    sb.fish_at_spots = list(current_app.session.execute(stmt))
+    
+    stmt = f'''
+            WITH fish_counts as (
+            SELECT s.name as spot_name, COUNT(f.id) as fish_count FROM fishes f
+            INNER JOIN fishing_spots s
+            ON f.fishing_spot_id = s.id
+            WHERE angler_id = {angler_id}
+            GROUP BY s.name
+            ) SELECT spot_name, MAX(fish_count) FROM fish_counts
+            GROUP BY spot_name;
+            '''
+            
+    sb.best_spots = list(current_app.session.execute(stmt))
+    
+    highest_catch_count = sb.best_spots[0][1]
+    
+    sb.percent_at_best_spot = 100 * highest_catch_count / sb.total_fish
+    
+    sb.percent_at_best_spot = f'{sb.percent_at_best_spot: .1f}%'
+    
+    return render_template('fishingstories/my_statistics.html', results=sb, angler_id=angler_id, authenticated=True)

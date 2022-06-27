@@ -219,8 +219,27 @@ class RankForm(FlaskForm):
         self.description.data = ''
 
 class ViewFishingSpotForm(FlaskForm):
-    spot_name = HiddenField('spot_name')
-    submit = SubmitField('Go')
+    name = StringField('Name', render_kw={'readonly': True})
+    latitude = StringField('Latitude', render_kw={'readonly': True})
+    longitude = StringField('Longitude', render_kw={'readonly': True})
+    is_public = BooleanField('Public', render_kw={'readonly': True})
+    nickname = StringField('Nickname', render_kw={'readonly': True})
+    description = StringField('Description', render_kw={'readonly': True})
+    
+    def __init__(self, name: str,
+                       latitude: float,
+                       longitude: float,
+                       is_public: bool,
+                       nickname: str,
+                       description: str,
+                       **kwargs) -> None:
+        super(ViewFishingSpotForm, self).__init__(**kwargs)
+        self.name.data = name
+        self.latitude.data = latitude
+        self.longitude.data = longitude
+        self.is_public.data = is_public
+        self.nickname.data = nickname
+        self.description.data = description
     
 class AddFishingSpotForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
