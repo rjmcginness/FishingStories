@@ -34,6 +34,10 @@ To start the application,
 ACCESSING THE APP:
 FishingStories may be accessed through web browser.  The URL is localhost:5000.  The application must be started to access the app.
 
+There is a default administrator login:  Username: Admin, Password: Admin.  The password should be changed.
+
+To access the Angler interface, Register to ceate an account.
+
 
 
 
