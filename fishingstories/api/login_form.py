@@ -85,8 +85,8 @@ class RegistrationForm(FlaskForm):
                                     validators=[DataRequired(),
                                                 passwords_match_check])
     account_types = SelectField('Account Type')
-    email = EmailField('Email')
-    email_repeat = EmailField('Email (retype)', validators=[emails_match])
+    email = EmailField('Email', validators=[DataRequired()])
+    email_repeat = EmailField('Email (retype)', validators=[DataRequired(), emails_match])
     submit = SubmitField('Register')
     
     def passwords_match_check(self) -> bool:

@@ -84,6 +84,7 @@ def user_password_edit(angler_id: int, account_id: int):
                                         models.UserAccount.id == account_id))
     
     if request.method == 'PATCH':
+        
         if form.validate():
             if not user_account.check_password(form.old_password.data):
                 flash('Invalid password')

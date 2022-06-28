@@ -281,6 +281,10 @@ class EditPasswordForm(FlaskForm):
                                                 passwords_match_check])
     submit = SubmitField('Edit Account')
     
+    def passwords_match_check(self) -> bool:
+        # make sure comparing data, not objects
+        return self.password.data == self.password_repeat.data
+    
 class EditEmailForm(FlaskForm):
     username = StringField('Username', render_kw={'readonly': True})
     email = EmailField('New Email', validators=[DataRequired()])

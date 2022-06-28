@@ -42,7 +42,7 @@ class StatsBundle:
 def statistics(angler_id: int):
     
 
-    sb = StatsBundle(None, None, None, None, None, None)
+    sb = StatsBundle(None, None, None, None, None, None) # beacuse it is a dataclass
     
     # Get total count of fish caught by this angler
     stmt = f'SELECT COUNT(*) FROM fishes WHERE angler_id = {str(angler_id)};'
