@@ -72,7 +72,10 @@ def valid_password_check(form, field):
             break
     else: # the "ubiquitous" for-else :) called if loop ends (not valid)
         ValidationError('Password must have letter, number, special')
-        
+
+def emails_match(form, field):
+    if form.email.data != form.email_repeat.data:
+        raise ValidationError('Emails do not match')        
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -83,6 +86,7 @@ class RegistrationForm(FlaskForm):
                                                 passwords_match_check])
     account_types = SelectField('Account Type')
     email = EmailField('Email')
+    email_repeat = EmailField('Email (retype)', validators=[emails_match])
     submit = SubmitField('Register')
     
     def passwords_match_check(self) -> bool:

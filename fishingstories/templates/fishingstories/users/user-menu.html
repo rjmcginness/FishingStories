@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>User Account Options</h1>
+    
+    <div>
+        <a href="{{ url_for('users.user_email_edit', angler_id=angler_id, account_id=account_id) }}">edit email</a>
+    </div>
+    <div>
+        <a href="{{ url_for('users.user_password_edit', angler_id=angler_id, account_id=account_id) }}">edit password</a>
+    </div>
+{% endblock %}

@@ -18,20 +18,21 @@ from wtforms import BooleanField
 from wtforms import SelectField
 from wtforms import SubmitField
 from wtforms import IntegerField
-from wtforms import HiddenField
 from wtforms import DecimalField
-from wtforms import FloatField
-from wtforms import FormField
 from wtforms import SelectMultipleField
 from wtforms import TextAreaField
 from wtforms.validators import DataRequired
 from wtforms.validators import ValidationError
 from wtforms.validators import Optional
-from wtforms.widgets import HiddenInput
 from wtforms.fields import DateField
 from wtforms.fields import TimeField
 from wtforms.fields import DateTimeField
-import datetime
+from wtforms.fields import EmailField
+
+
+from .login_form import valid_password_check
+from .login_form import passwords_match_check
+from .login_form import emails_match
 
 # class LoginForm(FlaskForm):
 #     username = StringField('Username', validators=[DataRequired()])
@@ -263,4 +264,27 @@ class CreateAccountTypeForm(FlaskForm):
 class CreatePriviledgeForm(FlaskForm):
     name = StringField('Priviledge Name', validators=[DataRequired()])
     submit = SubmitField('Add Priviledge')
+    
+class AccountViewOnlyForm(FlaskForm):
+    username = StringField('Username', render_kw={'readonly': True})
+    account_type = StringField('Account Type', render_kw={'readonly': True})
+    privileges = SelectMultipleField('Priviledges', render_kw={'readonly': True})
+    email = EmailField('Email', render_kw={'readonly': True})
+
+class EditPasswordForm(FlaskForm):
+    username = StringField('Username', render_kw={'readonly': True})
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    password = PasswordField('New Password', validators=[DataRequired(),
+                                                     valid_password_check])
+    password_repeat = PasswordField('New Password (retype)',
+                                    validators=[DataRequired(),
+                                                passwords_match_check])
+    submit = SubmitField('Edit Account')
+    
+class EditEmailForm(FlaskForm):
+    username = StringField('Username', render_kw={'readonly': True})
+    email = EmailField('New Email', validators=[DataRequired()])
+    email_repeat = EmailField('New Email (retype)', validators=[DataRequired(), emails_match])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Change Email')
     
