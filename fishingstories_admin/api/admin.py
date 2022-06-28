@@ -15,6 +15,7 @@ from flask import request
 from flask_login import login_required
 from flask_login import current_user
 from sqlalchemy import select
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import OperationalError
 
@@ -33,6 +34,7 @@ from .forms import AddBaitForm
 from .forms import AddGearForm
 from .forms import AnglerForm
 from .forms import AnglerEditForm
+from .forms import EditPasswordForm
 
 
 bp = Blueprint('admin', __name__)#, url_prefix='/admin')
@@ -365,24 +367,61 @@ def angler(angler_id: int):
                            form=form,
                            authenticated=True)
 
-# <div>
-#      <a href="{{ url_for('admin.angler_edit') }}">edit angler</a>
-#  </div>
-#  <div>
-#      <a href="{{ url_for('admin.angler_delete') }}">delete angler</a>
-#  </div> 
         
-@bp.route('/statistics', methods=['GET'])
+@bp.route('/admin/statistics', methods=['GET'])
 @login_required
 @admin_required(forbidden)
 def statistics():
-    return render_template('admin/statistics.html', authenticated=True)
+    # number of each species caught
+    stmt = text('''
+                SELECT species, COUNT(f.id) FROM fishes f
+                GROUP BY species
+                ORDER BY COUNT(f.id) DESC;
+                ''')
+                
+    fish_by_species = list(current_app.session.execute(stmt))
+    
+    stmt = text('''
+                SELECT a.name, COUNT(f.id) FROM fishes f
+                INNER JOIN anglers a
+                ON f.angler_id = a.id
+                GROUP BY a.name
+                ORDER BY COUNT(f.id) DESC;
+                ''')
+                
+    angler_fish_counts = list(current_app.session.execute(stmt))
+    
+    stmt = text('''
+                SELECT fs.name, COUNT(f.id) FROM fishes f
+                INNER JOIN fishing_spots fs
+                ON f.fishing_spot_id = fs.id
+                GROUP BY fs.name
+                ORDER BY COUNT(f.id) DESC;
+                ''')
+                
+    fish_by_spot = list(current_app.session.execute(stmt))
+    
+    stmt = text('''
+                SELECT b.name, b.size, b.color, COUNT(f.id) FROM fishes f
+                INNER JOIN baits b
+                ON f.bait_id = b.id
+                GROUP BY b.name, b.size, b.color
+                ORDER BY COUNT(f.id) DESC;
+                ''')
+    
+    fish_by_bait = list(current_app.session.execute(stmt))
+    
+    return render_template('admin/statistics.html',
+                           by_species=fish_by_species,
+                           by_angler=angler_fish_counts,
+                           by_spot=fish_by_spot,
+                           by_bait=fish_by_bait,
+                           top_species=fish_by_species[0],
+                           top_angler=angler_fish_counts[0],
+                           top_spot=fish_by_spot[0],
+                           top_bait=fish_by_bait[0],
+                           authenticated=True)
 
-# @bp.route('/manage-users', methods=['GET'])
-# @login_required
-# @admin_required(forbidden)
-# def manage_users():
-#     return render_template('admin/usermenu.html', authenticated=True)
 
 @bp.route('/users', methods=['GET'])
 @login_required
@@ -392,69 +431,6 @@ def users():
                                         order_by(models.UserAccount.account_type_id))
     
     return render_template('admin/users.html', users=users, authenticated=True)
-
-@bp.route('/users/<int:user_id>', methods=['GET'])
-@login_required
-@admin_required(forbidden)
-def user(user_id: int):
-    user = current_app.session.scalar(select(models.UserAccount).
-                                       where(models.UserAccount.id == user_id))
-    
-    # user = user[0][0]
-    
-    return render_template('admin/user.html', user=user, authenticated=True)
-
-@bp.route('/users/<int:user_id>/edit', methods=['GET'])
-@login_required
-@admin_required(forbidden)
-def user_edit(user_id: int):
-    user = current_app.session.execute(select(models.UserAccount).
-                                       where(models.UserAccount.id == user_id))
-    
-    user = user[0][0]
-    
-    return render_template('admin/edit_user.html', user=user, authenticated=True)
-
-
-@bp.route('/baitsmenu')
-@login_required
-def baits_menu():
-    return render_template('fishingstories_admin/baitsmenu.html', authenticated=True)
-
-@bp.route('/baits/create', methods=['GET', 'POST'])
-@login_required
-def add_bait():
-    form = AddBaitForm()
-    if form.validate_on_submit():
-        
-        ###### ADDRESS THE CONVERSION TO FLOAT (MAYBE ANOTHER TYPE OF FIELD)
-        bait = models.Bait(name=form.name.data,
-                           artificial=form.artificial.data,
-                           size=form.size.data,
-                           color=form.color.data,
-                           description=form.description.data)
-        
-        # add new bait to database
-        ######IT WOULD BE GREAT TO KEEP name+size+color unique
-        try:
-            current_app.session.add(bait)
-            current_app.session.commit()
-        except IntegrityError:
-            ###### HOW DO I CLEAR THIS????? session.pop('_flashes', None)????
-            flash('Bait {} size={} color={} already exists'.format(form.name.data,
-                                                          form.size.data,
-                                                          form.color.data))
-            
-            form.clear()
-            
-            return render_template('fishingstories/addbait.html', title='Add Bait', form=form, authenticated=True)
-        
-        flash('Added bait {}, size={}, color={}'.format(form.name.data,
-                                                      form.size.data,
-                                                      form.color.data))
-        return redirect('/baits')
-    
-    return render_template('fishingstories/addbait.html', title='Add Bait', form=form, authenticated=True)
 
 @bp.route('/baits')
 @login_required
@@ -466,30 +442,6 @@ def baits():
     
     return render_template('fishingstories/baits.html', baits=list(baits), authenticated=True)
 
-@bp.route('/gearmenu')
-@login_required
-def gear_menu():
-    return render_template('fishingstories/gearmenu.html', authenticated=True)
-
-@bp.route('/create-gear', methods=['GET', 'POST'])
-@login_required
-def add_gear():
-    form = AddGearForm()
-    
-    if form.validate_on_submit():
-        gear_combo = models.FishingGear(rod=form.rod.data,
-                                 reel=form.reel.data,
-                                 line=form.line.data,
-                                 leader=form.leader.data,
-                                 hook=form.hook.data)
-        current_app.session.add(gear_combo)
-        current_app.session.commit()
-        flash('Added Gear Combo')
-        
-        return redirect('/gear')
-
-    return render_template('fishingstories/addgear.html', title='Add Gear Combo', form=form, authenticated=True)
-
 @bp.route('/gear')
 @login_required
 def gear():
@@ -499,3 +451,33 @@ def gear():
     gear_combos = [gear[0] for gear in gear_combos]
     
     return render_template('fishingstories/gear.html', gear_list=gear_combos, authenticated=True)
+
+@bp.route('/admin/change_password', methods=['GET', 'PATCH'])
+@login_required
+@admin_required(forbidden)
+def change_password():
+    
+    
+    form = EditPasswordForm()
+    user_account = current_user
+    
+    if request.method == 'PATCH':
+        
+        if form.validate():
+            if not user_account.check_password(form.old_password.data):
+                flash('Invalid password')
+                return redirect(url_for('admin.change_password', account_id=user_account.id))
+            
+            user_account.set_password(form.password.data)
+            
+            try:
+                current_app.session.commit()
+            except (IntegrityError, OperationalError) as e:
+                current_app.logger.info(e)
+                current_app.session.rollback()
+        
+        return redirect('fishingstories_admin.index')
+    
+    form.username.data = user_account.username
+    
+    return render_template('admin/password-change.html', form=form, authenticated=True)

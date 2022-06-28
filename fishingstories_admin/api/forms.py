@@ -14,12 +14,12 @@ from wtforms import SubmitField
 from wtforms import IntegerField
 from wtforms import HiddenField
 from wtforms import DecimalField
-from wtforms import FormField
 from wtforms import SelectMultipleField
 from wtforms.validators import DataRequired
-from wtforms.widgets import HiddenInput
 
-from typing import List
+
+from .login_form import passwords_match_check
+from .login_form import valid_password_check
 
 # class LoginForm(FlaskForm):
 #     username = StringField('Username', validators=[DataRequired()])
@@ -105,4 +105,18 @@ class CreateAccountTypeForm(FlaskForm):
 class CreatePrivilegeForm(FlaskForm):
     name = StringField('Privilege Name', validators=[DataRequired()])
     submit = SubmitField('Add Privilege')
+
+class EditPasswordForm(FlaskForm):
+    username = StringField('Username', render_kw={'readonly': True})
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    password = PasswordField('New Password', validators=[DataRequired(),
+                                                     valid_password_check])
+    password_repeat = PasswordField('New Password (retype)',
+                                    validators=[DataRequired(),
+                                                passwords_match_check])
+    submit = SubmitField('Edit Account')
+    
+    def passwords_match_check(self) -> bool:
+        # make sure comparing data, not objects
+        return self.password.data == self.password_repeat.data
     
