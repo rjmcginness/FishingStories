@@ -15,7 +15,6 @@
             {% for user in users %}
             <tr>
                 <td>{{ user.id }}</td>
-                <td><a href="{{ url_for('admin.user', user_id=user.id) }}">{{ user.username }}</a></td>
                 <td>{{ user.account_type.name }}</td>
                 <td>{{ user.is_active }}</td>
                 <td>

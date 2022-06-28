@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Fishing Spots</h1>
+    <table class="data-display-table">
+        <thead>
+            <th>Name</th>
+            <th>Nickname</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Description</th>
+        </thead>
+        <tbody>
+            {% for spot in fishing_spots %}
+            <tr>
+                <td>{{ spot.name }}</td>
+                <td>{{ spot.nickname }}</td>
+                <td>{{ spot.global_position.latitude }}</td>
+                <td>{{ spot.global_position.longitude }}</td>
+                <td>{{ spot.description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

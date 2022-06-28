@@ -30,8 +30,6 @@ from src.nature.utilities import google_maps_url2022
 from .forms import RankForm
 from .forms import CreateAccountTypeForm
 from .forms import CreatePrivilegeForm
-from .forms import AddBaitForm
-from .forms import AddGearForm
 from .forms import AnglerForm
 from .forms import AnglerEditForm
 from .forms import EditPasswordForm
@@ -416,41 +414,43 @@ def statistics():
                            by_angler=angler_fish_counts,
                            by_spot=fish_by_spot,
                            by_bait=fish_by_bait,
-                           top_species=fish_by_species[0],
-                           top_angler=angler_fish_counts[0],
-                           top_spot=fish_by_spot[0],
-                           top_bait=fish_by_bait[0],
+                           top_species=fish_by_species[0] if fish_by_species else ('',''),
+                           top_angler=angler_fish_counts[0] if angler_fish_counts else ('',''),
+                           top_spot=fish_by_spot[0] if fish_by_spot else ('',''),
+                           top_bait=fish_by_bait[0] if fish_by_bait else ('','','',''),
                            authenticated=True)
 
 
-@bp.route('/users', methods=['GET'])
+@bp.route('/admin/users', methods=['GET'])
 @login_required
 @admin_required(forbidden)
 def users():
     users = current_app.session.scalars(select(models.UserAccount).
                                         order_by(models.UserAccount.account_type_id))
     
-    return render_template('admin/users.html', users=users, authenticated=True)
+    return render_template('admin/users.html', users=list(users), authenticated=True)
 
-@bp.route('/baits')
+@bp.route('/admin/baits', methods=['GET'])
 @login_required
 def baits():
     
-    baits = current_app.session.execute(select(models.Bait))
+    baits = current_app.session.scalars(select(models.Bait))
     
-    baits = [bait[0] for bait in baits]
-    
-    return render_template('fishingstories/baits.html', baits=list(baits), authenticated=True)
+    return render_template('fishingstories_admin/baits.html', baits=list(baits), authenticated=True)
 
-@bp.route('/gear')
+@bp.route('/admin/gear', methods=['GET'])
 @login_required
 def gear():
-    gear_combos = current_app.session.execute(select(models.FishingGear))
+    gear_combos = current_app.session.scalars(select(models.FishingGear))
     
-    # take the first element in the returned tuple
-    gear_combos = [gear[0] for gear in gear_combos]
+    return render_template('fishingstories_admin/gear.html', gear_list=list(gear_combos), authenticated=True)
+
+@bp.route('/admin/fishing_spots', methods=['GET'])
+@login_required
+def spots():
+    fishing_spots = current_app.session.scalars(select(models.FishingSpot))
     
-    return render_template('fishingstories/gear.html', gear_list=gear_combos, authenticated=True)
+    return render_template('fishingstories_admin/fishing-spots.html', fishing_spots=list(fishing_spots), authenticated=True)
 
 @bp.route('/admin/change_password', methods=['GET', 'PATCH'])
 @login_required
