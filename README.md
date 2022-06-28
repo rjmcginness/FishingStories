@@ -9,8 +9,17 @@ Python: https://www.python.org/downloads/
 Docker: (on Windows) https://hub.docker.com/editions/community/docker-ce-desktop-windows/
         or (on macOS) https://docs.docker.com/docker-for-mac/install/
         
-        
-INSTALLATION:
+
+PARTIALLY AUTOMATED INSTALLATION:
+1. Download fishingstories.zip
+2. Unzip fishingstories.zip
+3. Start Docker
+4. Open a terminal/console
+5. Change directory to the root directory of fishingstories.  This will be the outer most directory named "fishingstories_1_0_0" within the directory where the fishingstories.zip was unzipped
+6. In the terminal, type fishingstories_install_win.bat (on windos) or fishingstories_install.sh (on macOS), then press enter (return)
+7. After this step, if no error messages are received, skip to ACCESSING THE APP below.
+
+MANUAL INSTALLATION:
 1. Download fishingstories.zip
 2. Unzip fishingstories.zip
 3. Start Docker
@@ -18,10 +27,10 @@ INSTALLATION:
 5. Change directory to the root directory of fishingstories.  This will be the outer most directory named "fishingstories_1_0_0" within the directory where the fishingstories.zip was unzipped
 6. In the terminal, ensure docker is running with the command: docker compose ls
 7. Run the command: docker compose up -d (note you must be in the proper directory described in step 5).
-8. In the terminal/console, type the command: cat fishing_stories.sql | docker exec -i fishing_container psql, then press enter
+8. In the terminal/console, type the command: cat fishing_stories.sql | docker exec -i fishing_container psql, then press enter (note: in windows use type instead of cat in this command)
 
 
-CREATING APP ENVIRONMENT:
+MANUALLY CREATING APP ENVIRONMENT:
 To start the application,
 1. Open a terminal or console window.
 2. Change directories to the root directory of fishingstories.  This will be the outermost directory withing the directory, in which fishingstories.zip was unzipped
