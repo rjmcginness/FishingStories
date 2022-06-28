@@ -33,11 +33,13 @@ angler_fishing_spots = Table('angler_fishing_spots',
                              Base.metadata,
                              Column('angler_id',
                                     ForeignKey('anglers.id',
-                                               name='angler_fishing_Spots_angler_id_fkey'),
+                                               name='angler_fishing_Spots_angler_id_fkey',
+                                              ondelete='CASCADE'),
                                     primary_key=True),
                              Column('fishing_spot_id',
                                     ForeignKey('fishing_spots.id',
-                                               name='angler_fishing_spots_fishing_spot_id_fkey'),
+                                               name='angler_fishing_spots_fishing_spot_id_fkey',
+                                              ondelete='CASCADE'),
                                     primary_key=True)
                             )
 
@@ -45,11 +47,13 @@ angler_baits = Table('angler_baits',
                      Base.metadata,
                      Column('angler_id',
                             ForeignKey('anglers.id',
-                                       name='angler_baits_angler_id_fkey'),
+                                       name='angler_baits_angler_id_fkey',
+                                      ondelete='CASCADE'),
                             primary_key=True),
                      Column('bait_id',
                             ForeignKey('baits.id',
-                                       name='angler_baits_bait_id_fkey'),
+                                       name='angler_baits_bait_id_fkey',
+                                      ondelete='CASCADE'),
                             primary_key=True)
                      )
 
@@ -57,11 +61,13 @@ angler_gear = Table('angler_gear',
                     Base.metadata,
                     Column('angler_id',
                            ForeignKey('anglers.id',
-                                      name='angler_gear_angler_id_fkey'),
+                                      name='angler_gear_angler_id_fkey',
+                                     ondelete='CASCADE'),
                            primary_key=True),
                     Column('fishing_gear_id',
                            ForeignKey('fishing_gear.id',
-                                      name='angler_gear_fishing_gear_id_fkey'),
+                                      name='angler_gear_fishing_gear_id_fkey',
+                                     ondelete='CASCADE'),
                            primary_key=True)
                     )
 
@@ -69,11 +75,13 @@ angler_outings = Table('angler_outings',
                        Base.metadata,
                        Column('angler_id',
                               ForeignKey('anglers.id',
-                                         name='angler_outings_angler_id_fkey'),
+                                         name='angler_outings_angler_id_fkey',
+                                        ondelete='CASCADE'),
                               primary_key=True),
                        Column('fishing_outing_id',
                               ForeignKey('fishing_outings.id',
-                                         name='angler_outings_fishing_outing_id_fkey'),
+                                         name='angler_outings_fishing_outing_id_fkey',
+                                        ondelete='CASCADE'),
                               primary_key=True)
                       )
 

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h1>Edit Email</h1>
+    <a href="{{ url_for('angler.manage_account', angler_id=angler_id) }}">Return to Manage Account</a>
+    <div> </div>
+
+    <table>
+        <tr>
+            <td>{{ form.username.label }}</td>
+            <td>{{ form.username() }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.account_type.label }}</td>
+            <td>{{ form.account_type() }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.email.label }}</td>
+            <td>{{ form.email() }}</td>
+            <td>
+                <button><a class="button-anchor" href="{{ url_for('users.user_email_edit', angler_id=angler_id, account_id=account_id) }}">Edit</a></button>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>{{ form.privileges.label }}</td>
+            <td>{{ form.privileges() }}</td>
+        </tr>
+    </table>
+{% endblock %}

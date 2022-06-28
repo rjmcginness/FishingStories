@@ -61,26 +61,28 @@ def register():
     form = RegistrationForm()
     
     # get list of account types except Administrator (use separate app) for form
-    account_types = current_app.session.execute(select(models.AccountType).
+    account_types = current_app.session.scalars(select(models.AccountType).
                                                 where(models.AccountType.name != 'Admin').
                                                 order_by(models.AccountType.price))
-    form.account_types.choices=[acct_type[0].name + ' $' + 
-                                                str(acct_type[0].price)
+    
+    ######FIX THIS TO USE A TUPLE OF ID AND LABEL
+    
+    form.account_types.choices = [(acct_type.id, acct_type.name + ' $' + str(acct_type.price))
                                                 for acct_type in account_types]
+    
     if form.validate_on_submit():
-        
         # get account type selected on form
-        account_type = form.account_types.data
-        # remove $price, which was added above for display
-        account_type = account_type[:account_type.find(' $')]
+        account_type_id = form.account_types.data
         
         # get this account type from db again (reuse account_type variable)
-        account_type = current_app.session.execute(select(models.AccountType).
-                                                   where(models.AccountType.name == account_type)).first()[0]
+        account_type = current_app.session.scalar(select(
+                                models.AccountType).where(
+                                models.AccountType.id == account_type_id))
         
         # create new user account
         user_account = models.UserAccount(username=form.username.data)
         user_account.set_password(form.password.data)
+        user_account.email = form.email.data
         user_account.account_type = account_type
         
         # since not admin, create new angler
@@ -90,8 +92,8 @@ def register():
         angler.user_accounts = user_account
         
         #new accounts start with this rank.  Admin can change based on request
-        starting_rank = current_app.session.execute(select(models.Rank).
-                                                    where(models.Rank.name == 'Bait Fish')).first()[0]
+        starting_rank = current_app.session.scalar(select(models.Rank).where(
+                                            models.Rank.name == 'Bait Fish'))
         
         starting_rank.anglers.append(angler)
         

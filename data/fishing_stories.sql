@@ -1,3 +1,13 @@
+-- kill other connections
+SELECT pg_terminate_backend(pg_stat_activity.pid)
+FROM pg_stat_activity
+WHERE pg_stat_activity.datname = 'fishing_stories' AND pid <> pg_backend_pid();
+-- (re)create the database
+DROP DATABASE IF EXISTS fishing_stories;
+CREATE DATABASE fishing_stories;
+-- connect via psql
+\c fishing_stories
+
 --
 -- PostgreSQL database dump
 --
@@ -5,7 +15,7 @@
 -- Dumped from database version 14.1
 -- Dumped by pg_dump version 14.1
 
--- Started on 2022-06-24 04:27:05 UTC
+-- Started on 2022-06-28 05:25:01 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,7 +29,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 245 (class 1255 OID 27616)
+-- TOC entry 244 (class 1255 OID 27794)
 -- Name: curr_min_distance(numeric, numeric); Type: FUNCTION; Schema: public; Owner: fishing_stories
 --
 
@@ -41,7 +51,7 @@ $_$;
 ALTER FUNCTION public.curr_min_distance(lat numeric, lon numeric) OWNER TO fishing_stories;
 
 --
--- TOC entry 246 (class 1255 OID 27617)
+-- TOC entry 243 (class 1255 OID 27617)
 -- Name: find_nearest_curr(); Type: FUNCTION; Schema: public; Owner: fishing_stories
 --
 
@@ -112,7 +122,7 @@ CREATE SEQUENCE public.account_types_id_seq
 ALTER TABLE public.account_types_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3540 (class 0 OID 0)
+-- TOC entry 3529 (class 0 OID 0)
 -- Dependencies: 209
 -- Name: account_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -172,7 +182,7 @@ CREATE TABLE public.angler_gear (
 ALTER TABLE public.angler_gear OWNER TO fishing_stories;
 
 --
--- TOC entry 244 (class 1259 OID 27568)
+-- TOC entry 242 (class 1259 OID 27568)
 -- Name: angler_outings; Type: TABLE; Schema: public; Owner: fishing_stories
 --
 
@@ -215,7 +225,7 @@ CREATE SEQUENCE public.anglers_id_seq
 ALTER TABLE public.anglers_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3541 (class 0 OID 0)
+-- TOC entry 3530 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: anglers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -257,55 +267,12 @@ CREATE SEQUENCE public.baits_id_seq
 ALTER TABLE public.baits_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3542 (class 0 OID 0)
+-- TOC entry 3531 (class 0 OID 0)
 -- Dependencies: 211
 -- Name: baits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
 
 ALTER SEQUENCE public.baits_id_seq OWNED BY public.baits.id;
-
-
---
--- TOC entry 243 (class 1259 OID 27537)
--- Name: catches; Type: TABLE; Schema: public; Owner: fishing_stories
---
-
-CREATE TABLE public.catches (
-    id integer NOT NULL,
-    date_time_caught timestamp without time zone NOT NULL,
-    fish_id integer NOT NULL,
-    angler_id integer NOT NULL,
-    fishing_spot_id integer NOT NULL,
-    bait_id integer NOT NULL,
-    gear_id integer
-);
-
-
-ALTER TABLE public.catches OWNER TO fishing_stories;
-
---
--- TOC entry 242 (class 1259 OID 27536)
--- Name: catches_id_seq; Type: SEQUENCE; Schema: public; Owner: fishing_stories
---
-
-CREATE SEQUENCE public.catches_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.catches_id_seq OWNER TO fishing_stories;
-
---
--- TOC entry 3543 (class 0 OID 0)
--- Dependencies: 242
--- Name: catches_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
---
-
-ALTER SEQUENCE public.catches_id_seq OWNED BY public.catches.id;
 
 
 --
@@ -339,7 +306,7 @@ CREATE SEQUENCE public.current_stations_id_seq
 ALTER TABLE public.current_stations_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3544 (class 0 OID 0)
+-- TOC entry 3532 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: current_stations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -379,7 +346,7 @@ CREATE SEQUENCE public.data_urls_id_seq
 ALTER TABLE public.data_urls_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3545 (class 0 OID 0)
+-- TOC entry 3533 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: data_urls_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -398,7 +365,12 @@ CREATE TABLE public.fishes (
     weight numeric,
     length numeric,
     description character varying,
-    image bytea
+    image bytea,
+    date_time_caught timestamp without time zone NOT NULL,
+    angler_id integer NOT NULL,
+    fishing_spot_id integer NOT NULL,
+    bait_id integer NOT NULL,
+    gear_id integer
 );
 
 
@@ -421,7 +393,7 @@ CREATE SEQUENCE public.fishes_id_seq
 ALTER TABLE public.fishes_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3546 (class 0 OID 0)
+-- TOC entry 3534 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: fishes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -468,7 +440,7 @@ CREATE SEQUENCE public.fishing_conditions_id_seq
 ALTER TABLE public.fishing_conditions_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3547 (class 0 OID 0)
+-- TOC entry 3535 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: fishing_conditions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -510,7 +482,7 @@ CREATE SEQUENCE public.fishing_gear_id_seq
 ALTER TABLE public.fishing_gear_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3548 (class 0 OID 0)
+-- TOC entry 3536 (class 0 OID 0)
 -- Dependencies: 213
 -- Name: fishing_gear_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -551,7 +523,7 @@ CREATE SEQUENCE public.fishing_outings_id_seq
 ALTER TABLE public.fishing_outings_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3549 (class 0 OID 0)
+-- TOC entry 3537 (class 0 OID 0)
 -- Dependencies: 215
 -- Name: fishing_outings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -594,7 +566,7 @@ CREATE SEQUENCE public.fishing_spots_id_seq
 ALTER TABLE public.fishing_spots_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3550 (class 0 OID 0)
+-- TOC entry 3538 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: fishing_spots_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -633,7 +605,7 @@ CREATE SEQUENCE public.global_positions_id_seq
 ALTER TABLE public.global_positions_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3551 (class 0 OID 0)
+-- TOC entry 3539 (class 0 OID 0)
 -- Dependencies: 237
 -- Name: global_positions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -671,7 +643,7 @@ CREATE SEQUENCE public.privileges_id_seq
 ALTER TABLE public.privileges_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3552 (class 0 OID 0)
+-- TOC entry 3540 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: privileges_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -711,7 +683,7 @@ CREATE SEQUENCE public.ranks_id_seq
 ALTER TABLE public.ranks_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3553 (class 0 OID 0)
+-- TOC entry 3541 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: ranks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -753,7 +725,7 @@ CREATE SEQUENCE public.user_accounts_id_seq
 ALTER TABLE public.user_accounts_id_seq OWNER TO fishing_stories;
 
 --
--- TOC entry 3554 (class 0 OID 0)
+-- TOC entry 3542 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: user_accounts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: fishing_stories
 --
@@ -762,7 +734,7 @@ ALTER SEQUENCE public.user_accounts_id_seq OWNED BY public.user_accounts.id;
 
 
 --
--- TOC entry 3262 (class 2604 OID 26470)
+-- TOC entry 3257 (class 2604 OID 27870)
 -- Name: account_types id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -770,7 +742,7 @@ ALTER TABLE ONLY public.account_types ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3268 (class 2604 OID 26560)
+-- TOC entry 3263 (class 2604 OID 27871)
 -- Name: anglers id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -778,7 +750,7 @@ ALTER TABLE ONLY public.anglers ALTER COLUMN id SET DEFAULT nextval('public.angl
 
 
 --
--- TOC entry 3263 (class 2604 OID 26481)
+-- TOC entry 3258 (class 2604 OID 27872)
 -- Name: baits id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -786,15 +758,7 @@ ALTER TABLE ONLY public.baits ALTER COLUMN id SET DEFAULT nextval('public.baits_
 
 
 --
--- TOC entry 3276 (class 2604 OID 27540)
--- Name: catches id; Type: DEFAULT; Schema: public; Owner: fishing_stories
---
-
-ALTER TABLE ONLY public.catches ALTER COLUMN id SET DEFAULT nextval('public.catches_id_seq'::regclass);
-
-
---
--- TOC entry 3274 (class 2604 OID 26912)
+-- TOC entry 3269 (class 2604 OID 27873)
 -- Name: current_stations id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -802,7 +766,7 @@ ALTER TABLE ONLY public.current_stations ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3273 (class 2604 OID 26839)
+-- TOC entry 3268 (class 2604 OID 27874)
 -- Name: data_urls id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -810,7 +774,7 @@ ALTER TABLE ONLY public.data_urls ALTER COLUMN id SET DEFAULT nextval('public.da
 
 
 --
--- TOC entry 3269 (class 2604 OID 26589)
+-- TOC entry 3264 (class 2604 OID 27875)
 -- Name: fishes id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -818,7 +782,7 @@ ALTER TABLE ONLY public.fishes ALTER COLUMN id SET DEFAULT nextval('public.fishe
 
 
 --
--- TOC entry 3270 (class 2604 OID 26613)
+-- TOC entry 3265 (class 2604 OID 27876)
 -- Name: fishing_conditions id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -826,7 +790,7 @@ ALTER TABLE ONLY public.fishing_conditions ALTER COLUMN id SET DEFAULT nextval('
 
 
 --
--- TOC entry 3264 (class 2604 OID 26492)
+-- TOC entry 3259 (class 2604 OID 27877)
 -- Name: fishing_gear id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -834,7 +798,7 @@ ALTER TABLE ONLY public.fishing_gear ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3265 (class 2604 OID 26501)
+-- TOC entry 3260 (class 2604 OID 27878)
 -- Name: fishing_outings id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -842,7 +806,7 @@ ALTER TABLE ONLY public.fishing_outings ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 3272 (class 2604 OID 26827)
+-- TOC entry 3267 (class 2604 OID 27879)
 -- Name: fishing_spots id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -850,7 +814,7 @@ ALTER TABLE ONLY public.fishing_spots ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3275 (class 2604 OID 26973)
+-- TOC entry 3270 (class 2604 OID 27880)
 -- Name: global_positions id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -858,7 +822,7 @@ ALTER TABLE ONLY public.global_positions ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3266 (class 2604 OID 26521)
+-- TOC entry 3261 (class 2604 OID 27881)
 -- Name: privileges id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -866,7 +830,7 @@ ALTER TABLE ONLY public.privileges ALTER COLUMN id SET DEFAULT nextval('public.p
 
 
 --
--- TOC entry 3267 (class 2604 OID 26532)
+-- TOC entry 3262 (class 2604 OID 27882)
 -- Name: ranks id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -874,7 +838,7 @@ ALTER TABLE ONLY public.ranks ALTER COLUMN id SET DEFAULT nextval('public.ranks_
 
 
 --
--- TOC entry 3271 (class 2604 OID 26657)
+-- TOC entry 3266 (class 2604 OID 27883)
 -- Name: user_accounts id; Type: DEFAULT; Schema: public; Owner: fishing_stories
 --
 
@@ -882,7 +846,7 @@ ALTER TABLE ONLY public.user_accounts ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3511 (class 0 OID 26541)
+-- TOC entry 3502 (class 0 OID 26541)
 -- Dependencies: 221
 -- Data for Name: account_privileges; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -909,7 +873,7 @@ COPY public.account_privileges (account_type_id, privilege_id) FROM stdin;
 
 
 --
--- TOC entry 3500 (class 0 OID 26467)
+-- TOC entry 3491 (class 0 OID 26467)
 -- Dependencies: 210
 -- Data for Name: account_types; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -923,18 +887,18 @@ COPY public.account_types (id, name, price) FROM stdin;
 
 
 --
--- TOC entry 3520 (class 0 OID 26673)
+-- TOC entry 3511 (class 0 OID 26673)
 -- Dependencies: 230
 -- Data for Name: alembic_version; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-0fe4d91dd7e6
+8fe8c0101ec3
 \.
 
 
 --
--- TOC entry 3529 (class 0 OID 27491)
+-- TOC entry 3520 (class 0 OID 27491)
 -- Dependencies: 239
 -- Data for Name: angler_baits; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -944,7 +908,7 @@ COPY public.angler_baits (angler_id, bait_id) FROM stdin;
 
 
 --
--- TOC entry 3530 (class 0 OID 27506)
+-- TOC entry 3521 (class 0 OID 27506)
 -- Dependencies: 240
 -- Data for Name: angler_fishing_spots; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -954,7 +918,7 @@ COPY public.angler_fishing_spots (angler_id, fishing_spot_id) FROM stdin;
 
 
 --
--- TOC entry 3531 (class 0 OID 27521)
+-- TOC entry 3522 (class 0 OID 27521)
 -- Dependencies: 241
 -- Data for Name: angler_gear; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -964,8 +928,8 @@ COPY public.angler_gear (angler_id, fishing_gear_id) FROM stdin;
 
 
 --
--- TOC entry 3534 (class 0 OID 27568)
--- Dependencies: 244
+-- TOC entry 3523 (class 0 OID 27568)
+-- Dependencies: 242
 -- Data for Name: angler_outings; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
 
@@ -974,39 +938,30 @@ COPY public.angler_outings (angler_id, fishing_outing_id) FROM stdin;
 
 
 --
--- TOC entry 3513 (class 0 OID 26557)
+-- TOC entry 3504 (class 0 OID 26557)
 -- Dependencies: 223
 -- Data for Name: anglers; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
 
 COPY public.anglers (id, name, rank_id) FROM stdin;
-1	Bronwyn	4
 \.
 
 
 --
--- TOC entry 3502 (class 0 OID 26478)
+-- TOC entry 3493 (class 0 OID 26478)
 -- Dependencies: 212
 -- Data for Name: baits; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
 
 COPY public.baits (id, name, artificial, size, color, description) FROM stdin;
 1	Tsunami Swimshad	t	7	black back	soft plastic
+2	Cotton Coredell Pencil Popper	t	7	silver/black	plastic pencil popper
+3	Skinner V2 Bucktail	t	1.25	pearl	Hefty, full bucktail
 \.
 
 
 --
--- TOC entry 3533 (class 0 OID 27537)
--- Dependencies: 243
--- Data for Name: catches; Type: TABLE DATA; Schema: public; Owner: fishing_stories
---
-
-COPY public.catches (id, date_time_caught, fish_id, angler_id, fishing_spot_id, bait_id, gear_id) FROM stdin;
-\.
-
-
---
--- TOC entry 3526 (class 0 OID 26909)
+-- TOC entry 3517 (class 0 OID 26909)
 -- Dependencies: 236
 -- Data for Name: current_stations; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -2573,7 +2528,7 @@ COPY public.current_stations (id, name, global_position_id) FROM stdin;
 
 
 --
--- TOC entry 3524 (class 0 OID 26836)
+-- TOC entry 3515 (class 0 OID 26836)
 -- Dependencies: 234
 -- Data for Name: data_urls; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -5693,21 +5648,22 @@ COPY public.data_urls (id, url, global_position_id, data_type) FROM stdin;
 15602	https://www.google.com/maps/place/46°10'40.0"N+123°52'5.0"W/@46.1778,-123.8683	14047	map
 15603	http://tbone.biol.sc.edu/tide/tideshow.cgi?site=Youngs+Bay+Entrance%2C+Oregon+Current+%2817d%29	14048	current
 15604	https://www.google.com/maps/place/46°11'10.0"N+123°53'16.0"W/@46.1863,-123.8878	14048	map
+15606	https://www.google.com/maps/place/0°44'49.0"N+1°14'9.0"W/@0.7471149596668983,-1.2358575378808156	14050	map
 \.
 
 
 --
--- TOC entry 3515 (class 0 OID 26586)
+-- TOC entry 3506 (class 0 OID 26586)
 -- Dependencies: 225
 -- Data for Name: fishes; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
 
-COPY public.fishes (id, species, weight, length, description, image) FROM stdin;
+COPY public.fishes (id, species, weight, length, description, image, date_time_caught, angler_id, fishing_spot_id, bait_id, gear_id) FROM stdin;
 \.
 
 
 --
--- TOC entry 3517 (class 0 OID 26610)
+-- TOC entry 3508 (class 0 OID 26610)
 -- Dependencies: 227
 -- Data for Name: fishing_conditions; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -5717,17 +5673,19 @@ COPY public.fishing_conditions (id, weather, tide_phase, time_stamp, current_flo
 
 
 --
--- TOC entry 3504 (class 0 OID 26489)
+-- TOC entry 3495 (class 0 OID 26489)
 -- Dependencies: 214
 -- Data for Name: fishing_gear; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
 
 COPY public.fishing_gear (id, rod, reel, line, hook, leader) FROM stdin;
+2	Dark Matter John Skinner 2 9'2"	Van Staal VR 151	PowerPro braid 30 lb		Seaguar 50 lb
+1	Penn Carnage II 10'	Penn Battle III 6000	PowerPro braid 30lb		Seaquar Gold 50lb
 \.
 
 
 --
--- TOC entry 3506 (class 0 OID 26498)
+-- TOC entry 3497 (class 0 OID 26498)
 -- Dependencies: 216
 -- Data for Name: fishing_outings; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -5737,19 +5695,18 @@ COPY public.fishing_outings (id, name, outing_date, fishing_spot_id, fishing_con
 
 
 --
--- TOC entry 3522 (class 0 OID 26824)
+-- TOC entry 3513 (class 0 OID 26824)
 -- Dependencies: 232
 -- Data for Name: fishing_spots; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
 
 COPY public.fishing_spots (id, name, description, nickname, is_public, global_position_id, current_url_id) FROM stdin;
-3	The Toothpick	Up river near the flats, Salisbury side	Old pointy	f	53	14143
-6	Some Place	Somewhere	Lalalala	f	53	12525
+7	Plum Island Beach North	Next to the jetty on the beach front	Plum Island Beach Shallows	f	14050	14225
 \.
 
 
 --
--- TOC entry 3528 (class 0 OID 26970)
+-- TOC entry 3519 (class 0 OID 26970)
 -- Dependencies: 238
 -- Data for Name: global_positions; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -13540,11 +13497,12 @@ COPY public.global_positions (id, latitude, longitude) FROM stdin;
 14046	0.8449627601095108	-2.1400127730525713
 14047	0.8059546513274375	-2.161909673848092
 14048	0.8061030043138571	-2.162250013052231
+14050	0.7471149596668983	-1.2358575378808156
 \.
 
 
 --
--- TOC entry 3508 (class 0 OID 26518)
+-- TOC entry 3499 (class 0 OID 26518)
 -- Dependencies: 218
 -- Data for Name: privileges; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -13564,7 +13522,7 @@ COPY public.privileges (id, name) FROM stdin;
 
 
 --
--- TOC entry 3510 (class 0 OID 26529)
+-- TOC entry 3501 (class 0 OID 26529)
 -- Dependencies: 220
 -- Data for Name: ranks; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
@@ -13578,19 +13536,18 @@ COPY public.ranks (id, name, rank_number, description) FROM stdin;
 
 
 --
--- TOC entry 3519 (class 0 OID 26654)
+-- TOC entry 3510 (class 0 OID 26654)
 -- Dependencies: 229
 -- Data for Name: user_accounts; Type: TABLE DATA; Schema: public; Owner: fishing_stories
 --
 
 COPY public.user_accounts (id, username, password, account_type_id, angler_id, email) FROM stdin;
-1	admin	pbkdf2:sha256:260000$oVSrFHUZKnY3a4DX$79c5a4f186329632c1be88565e15f019e7cfaf1bdb8e5e41ea7002a6d92abc43	1	\N	\N
-2	Bronwyn	pbkdf2:sha256:260000$2CPmKZGh7Y2x8yJG$167224289953836c5cc17d2954a90866ed3535b807f9c50ea485cf4d59096792	5	1	\N
+4	admin	pbkdf2:sha256:260000$G3yOuBZ2Z4xRVGeX$381e8a5e59a2902a29e1756f50b1cb72142d2c6b5c966d3517462846954b321d	1	\N	\N
 \.
 
 
 --
--- TOC entry 3555 (class 0 OID 0)
+-- TOC entry 3543 (class 0 OID 0)
 -- Dependencies: 209
 -- Name: account_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
@@ -13599,34 +13556,25 @@ SELECT pg_catalog.setval('public.account_types_id_seq', 5, true);
 
 
 --
--- TOC entry 3556 (class 0 OID 0)
+-- TOC entry 3544 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: anglers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
 
-SELECT pg_catalog.setval('public.anglers_id_seq', 1, true);
+SELECT pg_catalog.setval('public.anglers_id_seq', 2, true);
 
 
 --
--- TOC entry 3557 (class 0 OID 0)
+-- TOC entry 3545 (class 0 OID 0)
 -- Dependencies: 211
 -- Name: baits_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
 
-SELECT pg_catalog.setval('public.baits_id_seq', 1, true);
+SELECT pg_catalog.setval('public.baits_id_seq', 3, true);
 
 
 --
--- TOC entry 3558 (class 0 OID 0)
--- Dependencies: 242
--- Name: catches_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
---
-
-SELECT pg_catalog.setval('public.catches_id_seq', 1, false);
-
-
---
--- TOC entry 3559 (class 0 OID 0)
+-- TOC entry 3546 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: current_stations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
@@ -13635,25 +13583,25 @@ SELECT pg_catalog.setval('public.current_stations_id_seq', 12457, true);
 
 
 --
--- TOC entry 3560 (class 0 OID 0)
+-- TOC entry 3547 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: data_urls_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
 
-SELECT pg_catalog.setval('public.data_urls_id_seq', 15604, true);
+SELECT pg_catalog.setval('public.data_urls_id_seq', 15606, true);
 
 
 --
--- TOC entry 3561 (class 0 OID 0)
+-- TOC entry 3548 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: fishes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
 
-SELECT pg_catalog.setval('public.fishes_id_seq', 1, false);
+SELECT pg_catalog.setval('public.fishes_id_seq', 5, true);
 
 
 --
--- TOC entry 3562 (class 0 OID 0)
+-- TOC entry 3549 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: fishing_conditions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
@@ -13662,16 +13610,16 @@ SELECT pg_catalog.setval('public.fishing_conditions_id_seq', 1, false);
 
 
 --
--- TOC entry 3563 (class 0 OID 0)
+-- TOC entry 3550 (class 0 OID 0)
 -- Dependencies: 213
 -- Name: fishing_gear_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
 
-SELECT pg_catalog.setval('public.fishing_gear_id_seq', 1, false);
+SELECT pg_catalog.setval('public.fishing_gear_id_seq', 2, true);
 
 
 --
--- TOC entry 3564 (class 0 OID 0)
+-- TOC entry 3551 (class 0 OID 0)
 -- Dependencies: 215
 -- Name: fishing_outings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
@@ -13680,25 +13628,25 @@ SELECT pg_catalog.setval('public.fishing_outings_id_seq', 1, false);
 
 
 --
--- TOC entry 3565 (class 0 OID 0)
+-- TOC entry 3552 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: fishing_spots_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
 
-SELECT pg_catalog.setval('public.fishing_spots_id_seq', 6, true);
+SELECT pg_catalog.setval('public.fishing_spots_id_seq', 7, true);
 
 
 --
--- TOC entry 3566 (class 0 OID 0)
+-- TOC entry 3553 (class 0 OID 0)
 -- Dependencies: 237
 -- Name: global_positions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
 
-SELECT pg_catalog.setval('public.global_positions_id_seq', 14048, true);
+SELECT pg_catalog.setval('public.global_positions_id_seq', 14050, true);
 
 
 --
--- TOC entry 3567 (class 0 OID 0)
+-- TOC entry 3554 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: privileges_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
@@ -13707,7 +13655,7 @@ SELECT pg_catalog.setval('public.privileges_id_seq', 12, true);
 
 
 --
--- TOC entry 3568 (class 0 OID 0)
+-- TOC entry 3555 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: ranks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
@@ -13716,16 +13664,16 @@ SELECT pg_catalog.setval('public.ranks_id_seq', 4, true);
 
 
 --
--- TOC entry 3569 (class 0 OID 0)
+-- TOC entry 3556 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: user_accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: fishing_stories
 --
 
-SELECT pg_catalog.setval('public.user_accounts_id_seq', 2, true);
+SELECT pg_catalog.setval('public.user_accounts_id_seq', 4, true);
 
 
 --
--- TOC entry 3300 (class 2606 OID 26545)
+-- TOC entry 3294 (class 2606 OID 26545)
 -- Name: account_privileges account_privileges_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13734,7 +13682,7 @@ ALTER TABLE ONLY public.account_privileges
 
 
 --
--- TOC entry 3278 (class 2606 OID 26476)
+-- TOC entry 3272 (class 2606 OID 26476)
 -- Name: account_types account_types_name_key; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13743,7 +13691,7 @@ ALTER TABLE ONLY public.account_types
 
 
 --
--- TOC entry 3280 (class 2606 OID 26474)
+-- TOC entry 3274 (class 2606 OID 26474)
 -- Name: account_types account_types_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13752,7 +13700,7 @@ ALTER TABLE ONLY public.account_types
 
 
 --
--- TOC entry 3314 (class 2606 OID 26677)
+-- TOC entry 3308 (class 2606 OID 26677)
 -- Name: alembic_version alembic_version_pkc; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13761,7 +13709,7 @@ ALTER TABLE ONLY public.alembic_version
 
 
 --
--- TOC entry 3326 (class 2606 OID 27495)
+-- TOC entry 3320 (class 2606 OID 27495)
 -- Name: angler_baits angler_baits_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13770,7 +13718,7 @@ ALTER TABLE ONLY public.angler_baits
 
 
 --
--- TOC entry 3328 (class 2606 OID 27510)
+-- TOC entry 3322 (class 2606 OID 27510)
 -- Name: angler_fishing_spots angler_fishing_spots_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13779,7 +13727,7 @@ ALTER TABLE ONLY public.angler_fishing_spots
 
 
 --
--- TOC entry 3330 (class 2606 OID 27525)
+-- TOC entry 3324 (class 2606 OID 27525)
 -- Name: angler_gear angler_gear_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13788,7 +13736,7 @@ ALTER TABLE ONLY public.angler_gear
 
 
 --
--- TOC entry 3334 (class 2606 OID 27572)
+-- TOC entry 3326 (class 2606 OID 27572)
 -- Name: angler_outings angler_outings_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13797,7 +13745,7 @@ ALTER TABLE ONLY public.angler_outings
 
 
 --
--- TOC entry 3302 (class 2606 OID 26564)
+-- TOC entry 3296 (class 2606 OID 26564)
 -- Name: anglers anglers_name_key; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13806,7 +13754,7 @@ ALTER TABLE ONLY public.anglers
 
 
 --
--- TOC entry 3304 (class 2606 OID 26562)
+-- TOC entry 3298 (class 2606 OID 26562)
 -- Name: anglers anglers_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13815,7 +13763,7 @@ ALTER TABLE ONLY public.anglers
 
 
 --
--- TOC entry 3282 (class 2606 OID 26487)
+-- TOC entry 3276 (class 2606 OID 26487)
 -- Name: baits baits_name_size_color_key; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13824,7 +13772,7 @@ ALTER TABLE ONLY public.baits
 
 
 --
--- TOC entry 3284 (class 2606 OID 26485)
+-- TOC entry 3278 (class 2606 OID 26485)
 -- Name: baits baits_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13833,16 +13781,7 @@ ALTER TABLE ONLY public.baits
 
 
 --
--- TOC entry 3332 (class 2606 OID 27542)
--- Name: catches catches_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
---
-
-ALTER TABLE ONLY public.catches
-    ADD CONSTRAINT catches_pkey PRIMARY KEY (id);
-
-
---
--- TOC entry 3320 (class 2606 OID 26918)
+-- TOC entry 3314 (class 2606 OID 26918)
 -- Name: current_stations current_stations_name_key; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13851,7 +13790,7 @@ ALTER TABLE ONLY public.current_stations
 
 
 --
--- TOC entry 3322 (class 2606 OID 26916)
+-- TOC entry 3316 (class 2606 OID 26916)
 -- Name: current_stations current_stations_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13860,7 +13799,7 @@ ALTER TABLE ONLY public.current_stations
 
 
 --
--- TOC entry 3318 (class 2606 OID 26843)
+-- TOC entry 3312 (class 2606 OID 26843)
 -- Name: data_urls data_urls_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13869,7 +13808,7 @@ ALTER TABLE ONLY public.data_urls
 
 
 --
--- TOC entry 3306 (class 2606 OID 26593)
+-- TOC entry 3300 (class 2606 OID 26593)
 -- Name: fishes fishes_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13878,7 +13817,7 @@ ALTER TABLE ONLY public.fishes
 
 
 --
--- TOC entry 3308 (class 2606 OID 26617)
+-- TOC entry 3302 (class 2606 OID 26617)
 -- Name: fishing_conditions fishing_conditions_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13887,7 +13826,7 @@ ALTER TABLE ONLY public.fishing_conditions
 
 
 --
--- TOC entry 3286 (class 2606 OID 26496)
+-- TOC entry 3280 (class 2606 OID 26496)
 -- Name: fishing_gear fishing_gear_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13896,7 +13835,7 @@ ALTER TABLE ONLY public.fishing_gear
 
 
 --
--- TOC entry 3288 (class 2606 OID 26505)
+-- TOC entry 3282 (class 2606 OID 26505)
 -- Name: fishing_outings fishing_outings_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13905,7 +13844,7 @@ ALTER TABLE ONLY public.fishing_outings
 
 
 --
--- TOC entry 3316 (class 2606 OID 26831)
+-- TOC entry 3310 (class 2606 OID 26831)
 -- Name: fishing_spots fishing_spots_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13914,7 +13853,7 @@ ALTER TABLE ONLY public.fishing_spots
 
 
 --
--- TOC entry 3324 (class 2606 OID 26977)
+-- TOC entry 3318 (class 2606 OID 26977)
 -- Name: global_positions global_positions_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13923,7 +13862,7 @@ ALTER TABLE ONLY public.global_positions
 
 
 --
--- TOC entry 3290 (class 2606 OID 26527)
+-- TOC entry 3284 (class 2606 OID 26527)
 -- Name: privileges privileges_name_key; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13932,7 +13871,7 @@ ALTER TABLE ONLY public.privileges
 
 
 --
--- TOC entry 3292 (class 2606 OID 26525)
+-- TOC entry 3286 (class 2606 OID 26525)
 -- Name: privileges privileges_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13941,7 +13880,7 @@ ALTER TABLE ONLY public.privileges
 
 
 --
--- TOC entry 3294 (class 2606 OID 26538)
+-- TOC entry 3288 (class 2606 OID 26538)
 -- Name: ranks ranks_name_key; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13950,7 +13889,7 @@ ALTER TABLE ONLY public.ranks
 
 
 --
--- TOC entry 3296 (class 2606 OID 26536)
+-- TOC entry 3290 (class 2606 OID 26536)
 -- Name: ranks ranks_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13959,7 +13898,7 @@ ALTER TABLE ONLY public.ranks
 
 
 --
--- TOC entry 3298 (class 2606 OID 26540)
+-- TOC entry 3292 (class 2606 OID 26540)
 -- Name: ranks ranks_rank_number_key; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13968,7 +13907,7 @@ ALTER TABLE ONLY public.ranks
 
 
 --
--- TOC entry 3310 (class 2606 OID 26659)
+-- TOC entry 3304 (class 2606 OID 26659)
 -- Name: user_accounts user_accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13977,7 +13916,7 @@ ALTER TABLE ONLY public.user_accounts
 
 
 --
--- TOC entry 3312 (class 2606 OID 26661)
+-- TOC entry 3306 (class 2606 OID 26661)
 -- Name: user_accounts user_accounts_username_key; Type: CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -13986,7 +13925,7 @@ ALTER TABLE ONLY public.user_accounts
 
 
 --
--- TOC entry 3359 (class 2620 OID 27618)
+-- TOC entry 3350 (class 2620 OID 27618)
 -- Name: fishing_spots set_nearest_curr; Type: TRIGGER; Schema: public; Owner: fishing_stories
 --
 
@@ -13994,7 +13933,7 @@ CREATE TRIGGER set_nearest_curr BEFORE INSERT ON public.fishing_spots FOR EACH R
 
 
 --
--- TOC entry 3337 (class 2606 OID 26546)
+-- TOC entry 3329 (class 2606 OID 26546)
 -- Name: account_privileges account_privileges_account_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14003,7 +13942,7 @@ ALTER TABLE ONLY public.account_privileges
 
 
 --
--- TOC entry 3338 (class 2606 OID 26551)
+-- TOC entry 3330 (class 2606 OID 26551)
 -- Name: account_privileges account_privileges_privilege_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14012,79 +13951,79 @@ ALTER TABLE ONLY public.account_privileges
 
 
 --
--- TOC entry 3346 (class 2606 OID 27496)
+-- TOC entry 3342 (class 2606 OID 27795)
 -- Name: angler_baits angler_baits_angler_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
 ALTER TABLE ONLY public.angler_baits
-    ADD CONSTRAINT angler_baits_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id);
+    ADD CONSTRAINT angler_baits_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3347 (class 2606 OID 27501)
+-- TOC entry 3343 (class 2606 OID 27800)
 -- Name: angler_baits angler_baits_bait_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
 ALTER TABLE ONLY public.angler_baits
-    ADD CONSTRAINT angler_baits_bait_id_fkey FOREIGN KEY (bait_id) REFERENCES public.baits(id);
+    ADD CONSTRAINT angler_baits_bait_id_fkey FOREIGN KEY (bait_id) REFERENCES public.baits(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3348 (class 2606 OID 27511)
--- Name: angler_fishing_spots angler_fishing_spots_angler_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
+-- TOC entry 3344 (class 2606 OID 27805)
+-- Name: angler_fishing_spots angler_fishing_Spots_angler_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
 ALTER TABLE ONLY public.angler_fishing_spots
-    ADD CONSTRAINT angler_fishing_spots_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id);
+    ADD CONSTRAINT "angler_fishing_Spots_angler_id_fkey" FOREIGN KEY (angler_id) REFERENCES public.anglers(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3349 (class 2606 OID 27516)
+-- TOC entry 3345 (class 2606 OID 27810)
 -- Name: angler_fishing_spots angler_fishing_spots_fishing_spot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
 ALTER TABLE ONLY public.angler_fishing_spots
-    ADD CONSTRAINT angler_fishing_spots_fishing_spot_id_fkey FOREIGN KEY (fishing_spot_id) REFERENCES public.fishing_spots(id);
+    ADD CONSTRAINT angler_fishing_spots_fishing_spot_id_fkey FOREIGN KEY (fishing_spot_id) REFERENCES public.fishing_spots(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3350 (class 2606 OID 27526)
+-- TOC entry 3346 (class 2606 OID 27815)
 -- Name: angler_gear angler_gear_angler_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
 ALTER TABLE ONLY public.angler_gear
-    ADD CONSTRAINT angler_gear_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id);
+    ADD CONSTRAINT angler_gear_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3351 (class 2606 OID 27531)
+-- TOC entry 3347 (class 2606 OID 27820)
 -- Name: angler_gear angler_gear_fishing_gear_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
 ALTER TABLE ONLY public.angler_gear
-    ADD CONSTRAINT angler_gear_fishing_gear_id_fkey FOREIGN KEY (fishing_gear_id) REFERENCES public.fishing_gear(id);
+    ADD CONSTRAINT angler_gear_fishing_gear_id_fkey FOREIGN KEY (fishing_gear_id) REFERENCES public.fishing_gear(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3357 (class 2606 OID 27573)
+-- TOC entry 3349 (class 2606 OID 27830)
 -- Name: angler_outings angler_outings_angler_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
 ALTER TABLE ONLY public.angler_outings
-    ADD CONSTRAINT angler_outings_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id);
+    ADD CONSTRAINT angler_outings_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3358 (class 2606 OID 27578)
+-- TOC entry 3348 (class 2606 OID 27825)
 -- Name: angler_outings angler_outings_fishing_outing_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
 ALTER TABLE ONLY public.angler_outings
-    ADD CONSTRAINT angler_outings_fishing_outing_id_fkey FOREIGN KEY (fishing_outing_id) REFERENCES public.fishing_outings(id);
+    ADD CONSTRAINT angler_outings_fishing_outing_id_fkey FOREIGN KEY (fishing_outing_id) REFERENCES public.fishing_outings(id) ON DELETE CASCADE;
 
 
 --
--- TOC entry 3339 (class 2606 OID 26565)
+-- TOC entry 3331 (class 2606 OID 26565)
 -- Name: anglers anglers_rank_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14093,52 +14032,7 @@ ALTER TABLE ONLY public.anglers
 
 
 --
--- TOC entry 3352 (class 2606 OID 27543)
--- Name: catches catches_angler_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
---
-
-ALTER TABLE ONLY public.catches
-    ADD CONSTRAINT catches_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id);
-
-
---
--- TOC entry 3353 (class 2606 OID 27548)
--- Name: catches catches_bait_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
---
-
-ALTER TABLE ONLY public.catches
-    ADD CONSTRAINT catches_bait_id_fkey FOREIGN KEY (bait_id) REFERENCES public.baits(id);
-
-
---
--- TOC entry 3354 (class 2606 OID 27553)
--- Name: catches catches_fish_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
---
-
-ALTER TABLE ONLY public.catches
-    ADD CONSTRAINT catches_fish_id_fkey FOREIGN KEY (fish_id) REFERENCES public.fishes(id);
-
-
---
--- TOC entry 3355 (class 2606 OID 27558)
--- Name: catches catches_fishing_spot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
---
-
-ALTER TABLE ONLY public.catches
-    ADD CONSTRAINT catches_fishing_spot_id_fkey FOREIGN KEY (fishing_spot_id) REFERENCES public.fishing_spots(id);
-
-
---
--- TOC entry 3356 (class 2606 OID 27563)
--- Name: catches catches_gear_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
---
-
-ALTER TABLE ONLY public.catches
-    ADD CONSTRAINT catches_gear_id_fkey FOREIGN KEY (gear_id) REFERENCES public.fishing_gear(id);
-
-
---
--- TOC entry 3345 (class 2606 OID 26980)
+-- TOC entry 3341 (class 2606 OID 26980)
 -- Name: current_stations current_stations_global_position_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14147,7 +14041,7 @@ ALTER TABLE ONLY public.current_stations
 
 
 --
--- TOC entry 3344 (class 2606 OID 26985)
+-- TOC entry 3340 (class 2606 OID 26985)
 -- Name: data_urls data_urls_global_position_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14156,7 +14050,43 @@ ALTER TABLE ONLY public.data_urls
 
 
 --
--- TOC entry 3335 (class 2606 OID 27583)
+-- TOC entry 3332 (class 2606 OID 27774)
+-- Name: fishes fishes_angler_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
+--
+
+ALTER TABLE ONLY public.fishes
+    ADD CONSTRAINT fishes_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id);
+
+
+--
+-- TOC entry 3335 (class 2606 OID 27789)
+-- Name: fishes fishes_bait_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
+--
+
+ALTER TABLE ONLY public.fishes
+    ADD CONSTRAINT fishes_bait_id_fkey FOREIGN KEY (bait_id) REFERENCES public.baits(id);
+
+
+--
+-- TOC entry 3334 (class 2606 OID 27784)
+-- Name: fishes fishes_fishing_spot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
+--
+
+ALTER TABLE ONLY public.fishes
+    ADD CONSTRAINT fishes_fishing_spot_id_fkey FOREIGN KEY (fishing_spot_id) REFERENCES public.fishing_spots(id);
+
+
+--
+-- TOC entry 3333 (class 2606 OID 27779)
+-- Name: fishes fishes_gear_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
+--
+
+ALTER TABLE ONLY public.fishes
+    ADD CONSTRAINT fishes_gear_id_fkey FOREIGN KEY (gear_id) REFERENCES public.fishing_gear(id);
+
+
+--
+-- TOC entry 3327 (class 2606 OID 27583)
 -- Name: fishing_outings fishing_outings_fishing_conditions_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14165,7 +14095,7 @@ ALTER TABLE ONLY public.fishing_outings
 
 
 --
--- TOC entry 3336 (class 2606 OID 27588)
+-- TOC entry 3328 (class 2606 OID 27588)
 -- Name: fishing_outings fishing_outings_fishing_spot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14174,7 +14104,7 @@ ALTER TABLE ONLY public.fishing_outings
 
 
 --
--- TOC entry 3343 (class 2606 OID 27603)
+-- TOC entry 3339 (class 2606 OID 27603)
 -- Name: fishing_spots fishing_spots_current_url_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14183,7 +14113,7 @@ ALTER TABLE ONLY public.fishing_spots
 
 
 --
--- TOC entry 3342 (class 2606 OID 26990)
+-- TOC entry 3338 (class 2606 OID 26990)
 -- Name: fishing_spots fishing_spots_global_position_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14192,7 +14122,7 @@ ALTER TABLE ONLY public.fishing_spots
 
 
 --
--- TOC entry 3340 (class 2606 OID 26662)
+-- TOC entry 3336 (class 2606 OID 26662)
 -- Name: user_accounts user_accounts_account_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14201,7 +14131,7 @@ ALTER TABLE ONLY public.user_accounts
 
 
 --
--- TOC entry 3341 (class 2606 OID 26667)
+-- TOC entry 3337 (class 2606 OID 26667)
 -- Name: user_accounts user_accounts_angler_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: fishing_stories
 --
 
@@ -14209,7 +14139,7 @@ ALTER TABLE ONLY public.user_accounts
     ADD CONSTRAINT user_accounts_angler_id_fkey FOREIGN KEY (angler_id) REFERENCES public.anglers(id) ON DELETE CASCADE;
 
 
--- Completed on 2022-06-24 04:27:05 UTC
+-- Completed on 2022-06-28 05:25:01 UTC
 
 --
 -- PostgreSQL database dump complete

@@ -14,3 +14,6 @@ print(hash_)
 
 print('CHECK PASSWORD:', check_password_hash(hash_, 'bronwyn'))
 print('CHECK PASSWORD:', check_password_hash(hash_, 'Bronwyn'))
+
+
+print("USE THIS", generate_password_hash('admin'))

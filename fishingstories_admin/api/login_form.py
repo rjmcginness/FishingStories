@@ -11,6 +11,7 @@ from wtforms import PasswordField
 from wtforms import BooleanField
 from wtforms import SubmitField
 from wtforms import SelectField
+from wtforms.fields import EmailField
 from wtforms.validators import DataRequired
 from wtforms.validators import ValidationError
 
@@ -72,6 +73,9 @@ def valid_password_check(form, field):
     else: # the "ubiquitous" for-else :) called if loop ends (not valid)
         ValidationError('Password must have letter, number, special')
         
+def emails_match(form, field):
+    if form.email.data != form.email_repeat.data:
+        raise ValidationError('Emails do not match')        
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -81,6 +85,8 @@ class RegistrationForm(FlaskForm):
                                     validators=[DataRequired(),
                                                 passwords_match_check])
     account_types = SelectField('Account Type')
+    email = EmailField('Email', validators=[DataRequired()])
+    email_repeat = EmailField('Email (retype)', validators=[DataRequired(), emails_match])
     submit = SubmitField('Register')
     
     def passwords_match_check(self) -> bool:

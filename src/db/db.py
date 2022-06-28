@@ -53,7 +53,7 @@ def init_admin():
     
     
     user_account = UserAccount(username='admin',
-                               password=generate_password_hash('bron-girl9'))
+                               password=generate_password_hash('admin'))
     
     user_account.account_type = account_type
     

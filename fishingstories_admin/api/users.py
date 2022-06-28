@@ -25,13 +25,13 @@ from .forms import EditEmailForm
 from .forms import EditPasswordForm
 
 
-bp = Blueprint('users', __name__)
+bp = Blueprint('user_interface', __name__)
 
 
 
-@bp.route('/anglers/<int:angler_id>/user_account/<int:account_id>', methods=['GET'])
+@bp.route('/admin/user_account/<int:account_id>', methods=['GET'])
 @login_required
-def user_account(angler_id: int, account_id: int):
+def admin_account(angler_id: int, account_id: int):
     form = AccountViewOnlyForm()
     
     user_account = current_app.session.scalar(select(models.UserAccount).where(
@@ -39,21 +39,20 @@ def user_account(angler_id: int, account_id: int):
     
     form.username.data = user_account.username
     form.account_type.data = user_account.account_type.name
-    privileges = user_account.account_type.privileges
-    form.privileges.choices = [privilege.name for privilege in privileges]
+    form.privileges.data = user_account.privileges
     form.email.data = user_account.email
     
     return render_template('fishingstories/users/user.html', angler_id=angler_id, account_id=account_id, form=form, authenticated=True)
 
 
-@bp.route('/anglers/<int:angler_id>/user_account/<int:account_id>/email/edit', methods=['GET', 'PATCH'])
+
+
+@bp.route('/admin/user_account/<int:account_id>/amail/edit', methods=['GET', 'PATCH'])
 @login_required
-def user_email_edit(angler_id: int, account_id: int):
+def admin_email_edit(angler_id: int, account_id: int):
     form = EditEmailForm()
     user_account = current_app.session.scalar(select(models.UserAccount).where(
                                         models.UserAccount.id == account_id))
-    
-    
     
     if request.method == 'PATCH':
         if form.validate():
@@ -76,15 +75,14 @@ def user_email_edit(angler_id: int, account_id: int):
     return render_template('fishingstories/users/email-edit.html', angler_id=angler_id, account_id=account_id, form=form, authenticated=True)
 
 
-@bp.route('/anglers/<int:angler_id>/user_account/<int:account_id>/password/edit', methods=['GET', 'PATCH'])
+@bp.route('/admin/user_account/<int:account_id>/password/edit', methods=['GET', 'PATCH'])
 @login_required
-def user_password_edit(angler_id: int, account_id: int):
+def admin_password_edit(angler_id: int, account_id: int):
     form = EditPasswordForm()
     user_account = current_app.session.scalar(select(models.UserAccount).where(
                                         models.UserAccount.id == account_id))
     
     if request.method == 'PATCH':
-        
         if form.validate():
             if not user_account.check_password(form.old_password.data):
                 flash('Invalid password')

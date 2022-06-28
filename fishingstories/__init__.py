@@ -86,6 +86,9 @@ def create_app(test_config=None):
     from .api import statistics
     app.register_blueprint(statistics.bp)
     
+    from .api import users
+    app.register_blueprint(users.bp)
+    
 
     return app
 

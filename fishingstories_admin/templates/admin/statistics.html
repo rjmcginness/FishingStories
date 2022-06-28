@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+
+<!--@dataclass
+class StatsBundle:
+    total_fish: int
+    catch_count_by_species: List(tuple)
+    species_avg_weight_length: List[tuple]
+    fish_at_spots: List[tuple]
+    best_spots: List[tuple]
+    percent_at_best_spot: float -->
+
+
+
+{% block content %}
+    <h1>My Statistics</h1>
+    <table class="data-display-table">
+        <tr>
+            <td>Top Angler</td>
+            <td>{{ top_angler[0] }}</td>
+            <td>{{ top_angler[1] }} Fish Caught</td>
+        </tr>
+        <tr>
+            <td>Top Fishing Spot</td>
+            <td>{{ top_spot[0] }}</td>
+            <td>{{ top_spot[1] }} Fish Caught</td>
+        </tr>
+        <tr>
+            <td>Top Bait</td>
+            <td>{{ top_bait[0] ~ ' ' ~ top_bait[1] ~ ' ' ~ top_bait[2]}}</td>
+            <td>{{ top_bait[3] }} Fish Caught</td>
+        </tr>
+        <tr>
+            <td>Top Species</td>
+            <td>{{ top_species[0] }}</td>
+            <td>{{ top_species[1] }} Caught</td>
+        </tr>
+    </table>
+    <div> </div>
+    <table class="data-display-table">
+        <thead>
+            <tr>Number of Fish by Angler</tr>
+        </thead>
+        <tbody>
+            {% for angler in by_angler %}
+            <tr>
+                <td>{{ angler[0] }}</td>
+                <td> </td>
+                <td>{{ angler[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div> </div>
+    <table class="data-display-table">
+        <thead>
+            <tr>Number of Fish by Spot</tr>
+        </thead>
+        <tbody>
+            {% for spot in by_spot %}
+            <tr>
+                <td>{{ spot[0] }}</td>
+                <td> </td>
+                <td>{{ spot[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div> </div>
+    <table class="data-display-table">
+        <thead>
+            <tr>Number of Fish by Bait</tr>
+        </thead>
+        <tbody>
+            {% for bait in by_bait %}
+            <tr>
+                <td>{{ bait[0] ~ ' ' ~ bait[1] ~ ' ' ~ bait[2]}}</td>
+                <td> </td>
+                <td>{{ bait[3] }} Fish Caught</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div> </div>
+    <table class="data-display-table">
+        <thead>
+            <tr>Number of Fish by Species</tr>
+        </thead>
+        <tbody>
+            {% for s in by_species %}
+            <tr>
+                <td>{{ s[0] }}</td>
+                <td> </td>
+                <td>{{ s[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

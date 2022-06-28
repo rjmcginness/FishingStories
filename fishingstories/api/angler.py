@@ -58,30 +58,34 @@ def angler_home(angler_id: int):
 
 @bp.route('/<int:angler_id>/manage_account', methods=['GET'])
 @login_required
-def manager_account(angler_id: int):
+def manage_account(angler_id: int):
     
-    # get user_account id and redirect to user_account end point
-    return abort(404)
+    angler = current_app.session.scalar(select(models.Angler).where(
+                                                models.Angler.id == angler_id))
+    
+    account_id = angler.user_accounts.id
+    
+    return render_template('fishingstories/users/user-menu.html', angler_id=angler_id, account_id=account_id, authenticated=True)
 
 
-@bp.route('/<int:angler_id>/user_account/<int:account_id>', methods=['GET'])
-@login_required
-def user_account(angler_id: int, account_id: int):
-    # render user account view
-    return abort(404)
+# @bp.route('/<int:angler_id>/user_account/<int:account_id>', methods=['GET'])
+# @login_required
+# def user_account(angler_id: int, account_id: int):
+#     # render user account view
+#     return abort(404)
 
-@bp.route('/<int:angler_id>/user_account/<int:account_id>/edit', methods=['GET', 'PATCH'])
-@login_required
-def user_account_edit(angler_id: int, account_id: int):
-    # handle patch
-    return abort(404)
+# @bp.route('/<int:angler_id>/user_account/<int:account_id>/edit', methods=['GET', 'PATCH'])
+# @login_required
+# def user_account_edit(angler_id: int, account_id: int):
+#     # handle patch
+#     return abort(404)
 
 
-@bp.route('/<int:angler_id>/user_account/<int:account_id>/cancel', methods=['GET', 'PATCH'])
-@login_required
-def user_account_cancel(angler_id: int, account_id: int):
-    # handle patch to inactivate account
-    return abort(404)
+# @bp.route('/<int:angler_id>/user_account/<int:account_id>/cancel', methods=['GET', 'PATCH'])
+# @login_required
+# def user_account_cancel(angler_id: int, account_id: int):
+#     # handle patch to inactivate account
+#     return abort(404)
 
 # @bp.route('/<int:angler_id>/fishing_spots/menu', methods=['GET'])
 # @login_required
