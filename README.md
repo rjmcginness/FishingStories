@@ -1,4 +1,4 @@
-# FishingStories 1.0.0
+# FishingStories 0.9.0 BETA
 Fishing Diary and Predictor
 
 REQUIREMENTS:
